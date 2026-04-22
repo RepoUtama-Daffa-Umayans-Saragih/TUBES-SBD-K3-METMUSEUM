@@ -1,0 +1,163 @@
+@extends('layouts.app')
+
+@section('content')
+@push('styles')
+@vite('resources/css/app.css')
+@vite('resources/css/ordinary/admission/select.css')
+@endpush
+<div class="booking-page">
+    <div class="booking-header">
+        <h1 class="booking-title">Select Tickets</h1>
+        <p class="booking-subtitle">{{ $schedule->location->name ?? 'Museum Location' }} · {{ optional($schedule->visit_date)->format('F j, Y') }}</p>
+    </div>
+
+    <div class="booking-stepper" aria-label="Booking steps">
+        <div class="booking-step">Step 1: Select Date</div>
+        <div class="booking-step is-active">Step 2: Select Tickets</div>
+        <div class="booking-step">Step 3: Add to Cart</div>
+        <div class="booking-step">Step 4: View Cart</div>
+        <div class="booking-step">Step 5: Checkout</div>
+        <div class="booking-step">Step 6: Confirmation</div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert-banner success">{{ session('success') }}</div>
+    @endif
+
+    <div class="booking-grid two-col">
+        <div class="ticket-grid">
+            @forelse($ticketAvailabilities as $availability)
+                <div class="ticket-option">
+                    <div class="ticket-option-title">{{ $availability->ticketType->name ?? 'Ticket Type' }}</div>
+                    <div class="ticket-option-body">{{ $availability->visitSchedule->location->name ?? $schedule->location->name ?? 'Museum Location' }}</div>
+                    <div class="price-badge">${{ number_format((float) ($availability->ticketType->base_price ?? 0), 2) }}</div>
+
+                    <form action="{{ route('ticket.add') }}" method="POST" class="ticket-form">
+                        @csrf
+                        <input type="hidden" name="ticket_availability_id" value="{{ $availability->id }}">
+
+                        <div>
+                            <label for="quantity_{{ $availability->id }}" class="field-label">Quantity</label>
+                            <input
+                                type="number"
+                                id="quantity_{{ $availability->id }}"
+                                name="quantity"
+                                class="field-input qty-input"
+                                value="1"
+                                min="1"
+                                required>
+                        </div>
+
+                        <button type="submit" class="booking-btn">Add to cart</button>
+                    </form>
+                </div>
+            @empty
+                <div class="booking-card">
+                    <p>No ticket types available for this schedule.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <aside class="booking-card booking-summary">
+            <div class="booking-card-title">Booking summary</div>
+            <div class="booking-card-meta">Review your schedule before adding tickets to cart.</div>
+            <div class="summary-list">
+                <div class="summary-row">
+                    <div class="summary-title-line">Location</div>
+                    <div class="summary-subline">{{ $schedule->location->name ?? '-' }}</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-title-line">Visit date</div>
+                    <div class="summary-subline">{{ optional($schedule->visit_date)->format('F j, Y') }}</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-title-line">Capacity</div>
+                    <div class="summary-subline">{{ $schedule->capacity_limit }}</div>
+                </div>
+            </div>
+            <div class="booking-actions">
+                <a href="{{ route('ticket.index') }}" class="booking-btn-outline">Back to dates</a>
+            </div>
+        </aside>
+    </div>
+</div>
+@endsection@extends('layouts.app')
+
+@section('content')
+<div class="booking-page">
+    <div class="booking-header">
+        <h1 class="booking-title">Select Tickets</h1>
+        <p class="booking-subtitle">{{ $schedule->location->name ?? 'Museum Location' }} · {{ optional($schedule->visit_date)->format('F j, Y') }}</p>
+    </div>
+
+    <div class="booking-stepper" aria-label="Booking steps">
+        <div class="booking-step">Step 1: Select Date</div>
+        <div class="booking-step is-active">Step 2: Select Tickets</div>
+        <div class="booking-step">Step 3: Add to Cart</div>
+        <div class="booking-step">Step 4: View Cart</div>
+        <div class="booking-step">Step 5: Checkout</div>
+        <div class="booking-step">Step 6: Confirmation</div>
+    </div>
+
+    @if(session('success'))
+        <div class="alert-banner success">{{ session('success') }}</div>
+    @endif
+
+    <div class="booking-grid two-col">
+        <div class="ticket-grid">
+            @forelse($ticketAvailabilities as $availability)
+                <div class="ticket-option">
+                    <div class="ticket-option-title">{{ $availability->ticketType->name ?? 'Ticket Type' }}</div>
+                    <div class="ticket-option-body">{{ $availability->visitSchedule->location->name ?? $schedule->location->name ?? 'Museum Location' }}</div>
+                    <div class="price-badge">${{ number_format((float) ($availability->ticketType->base_price ?? 0), 2) }}</div>
+
+                    <form action="{{ route('ticket.add') }}" method="POST" class="ticket-form">
+                        @csrf
+                        <input type="hidden" name="ticket_availability_id" value="{{ $availability->id }}">
+
+                        <div>
+                            <label for="quantity_{{ $availability->id }}" class="field-label">Quantity</label>
+                            <input
+                                type="number"
+                                id="quantity_{{ $availability->id }}"
+                                name="quantity"
+                                class="field-input qty-input"
+                                value="1"
+                                min="1"
+                                required>
+                        </div>
+
+                        <button type="submit" class="booking-btn">Add to cart</button>
+                    </form>
+                </div>
+            @empty
+                <div class="booking-card">
+                    <p>No ticket types available for this schedule.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <aside class="booking-card booking-summary">
+            <div class="booking-card-title">Booking summary</div>
+            <div class="booking-card-meta">Review your schedule before adding tickets to cart.</div>
+            <div class="summary-list" style="margin-top: 1rem;">
+                <div class="summary-row">
+                    <div class="summary-title-line">Location</div>
+                    <div class="summary-subline">{{ $schedule->location->name ?? '-' }}</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-title-line">Visit date</div>
+                    <div class="summary-subline">{{ optional($schedule->visit_date)->format('F j, Y') }}</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-title-line">Capacity</div>
+                    <div class="summary-subline">{{ $schedule->capacity_limit }}</div>
+                </div>
+            </div>
+            <div class="booking-actions" style="margin-top: 1rem;">
+                <a href="{{ route('ticket.index') }}" class="booking-btn-outline">Back to dates</a>
+            </div>
+        </aside>
+    </div>
+</div>
+@endsection

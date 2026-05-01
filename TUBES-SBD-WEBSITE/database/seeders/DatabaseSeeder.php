@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\PostalCode;
 use App\Models\User;
 use App\Models\UserProfile;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -20,34 +21,41 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        $postalCode = PostalCode::firstOrCreate([
+            'postal_code' => '10028',
+            'city'        => 'New York',
+            'state'       => 'NY',
+            'country'     => 'United States',
+        ]);
+
         // Create corresponding user profile
         UserProfile::create([
-            'user_id'      => $user->id,
-            'first_name'   => 'Test',
-            'last_name'    => 'User',
-            'phone_number' => '+1 (555) 123-4567',
-            'address1'     => '1000 5th Avenue',
-            'address2'     => null,
-            'city'         => 'New York',
-            'state'        => 'NY',
-            'country'      => 'United States',
-            'postal_code'  => '10028',
+            'user_id'        => $user->user_id,
+            'first_name'     => 'Test',
+            'last_name'      => 'User',
+            'phone_number'   => '+1 (555) 123-4567',
+            'address1'       => '1000 5th Avenue',
+            'address2'       => null,
+            'postal_code_id' => $postalCode->postal_code_id,
         ]);
 
         // Uncomment to seed multiple users with profiles
         // User::factory(10)->create()->each(function (User $user) {
         //     UserProfile::create([
-        //         'user_id' => $user->id,
+        //         'user_id' => $user->user_id,
         //         'first_name' => fake()->firstName(),
         //         'last_name' => fake()->lastName(),
         //         'phone_number' => fake()->phoneNumber(),
         //         'address1' => fake()->streetAddress(),
         //         'address2' => fake()->secondaryAddress(),
-        //         'city' => fake()->city(),
-        //         'state' => fake()->state(),
-        //         'country' => 'United States',
-        //         'postal_code' => fake()->postcode(),
+        //         'postal_code_id' => PostalCode::firstOrCreate([
+        //             'postal_code' => fake()->postcode(),
+        //             'city' => fake()->city(),
+        //             'state' => fake()->state(),
+        //             'country' => 'United States',
+        //         ])->postal_code_id,
         //     ]);
         // });
+        $this->call(TicketSystemSeeder::class);
     }
 }

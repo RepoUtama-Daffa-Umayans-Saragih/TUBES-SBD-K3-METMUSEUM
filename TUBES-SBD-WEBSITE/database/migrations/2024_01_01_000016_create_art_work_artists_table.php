@@ -16,10 +16,13 @@ return new class extends Migration
             $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->foreignId('art_work_id')->constrained('art_works')->cascadeOnDelete();
-            $table->foreignId('artist_id')->constrained('artists')->cascadeOnDelete();
+            $table->unsignedInteger('art_work_id');
+            $table->unsignedInteger('artist_id');
 
-            $table->primary(['art_work_id', 'artist_id']);
+            $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
+            $table->foreign('artist_id')->references('artist_id')->on('artists');
+
+            $table->unique(['art_work_id', 'artist_id'], 'uq_art_work_artists_art_work_artist');
         });
     }
 

@@ -12,7 +12,7 @@
 <div class="admin-container">
     <div class="admin-header">
         <h1>{{ $artwork->title }}</h1>
-        <div class="subtitle">Accession: {{ $artwork->accession_number }}</div>
+        <div class="subtitle">Object Number: {{ $artwork->object_number }}</div>
     </div>
 
     <div class="artwork-content">
@@ -117,8 +117,8 @@
 
         <table class="metadata-table">
             <tr>
-                <td class="metadata-label">Accession Number</td>
-                <td>{{ $artwork->accession_number }}</td>
+                <td class="metadata-label">Object Number</td>
+                <td>{{ $artwork->object_number }}</td>
             </tr>
             <tr>
                 <td class="metadata-label">Slug</td>

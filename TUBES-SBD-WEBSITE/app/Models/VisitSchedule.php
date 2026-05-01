@@ -10,6 +10,10 @@ class VisitSchedule extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'visit_schedule_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'location_id',
         'visit_date',
@@ -24,11 +28,10 @@ class VisitSchedule extends Model
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Location::class, 'location_id');
+        return $this->belongsTo(Location::class, 'location_id', 'location_id');
     }
-
     public function ticketAvailabilities(): HasMany
     {
-        return $this->hasMany(TicketAvailability::class, 'visit_schedule_id');
+        return $this->hasMany(TicketAvailability::class, 'visit_schedule_id', 'visit_schedule_id');
     }
 }

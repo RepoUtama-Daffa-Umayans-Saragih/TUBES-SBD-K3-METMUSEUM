@@ -16,10 +16,10 @@ class ArtController extends Controller
     private function getFilterData()
     {
         return [
-            'departments'  => Department::orderBy('name')->get(['id', 'name']),
-            'artists'      => Artist::orderBy('name')->get(['id', 'name']),
-            'types'        => ObjectType::orderBy('name')->get(['id', 'name']),
-            'geolocations' => GeoLocation::orderBy('name')->get(['id', 'name']),
+            'departments'  => Department::orderBy('name')->get(['department_id', 'name']),
+            'artists'      => Artist::orderBy('name')->get(['artist_id', 'name']),
+            'types'        => ObjectType::orderBy('name')->get(['type_id', 'name']),
+            'geolocations' => GeoLocation::orderBy('name')->get(['geo_id', 'name']),
         ];
     }
 
@@ -47,7 +47,8 @@ class ArtController extends Controller
     public function show($id)
     {
         $artwork = ArtWork::with(['artists', 'department', 'objectType', 'geoLocation', 'location', 'images'])
-            ->findOrFail($id);
+            ->where('art_work_id', $id)
+            ->firstOrFail();
 
         return view('ordinary.art.show.show', [
             'artwork' => $artwork,
@@ -76,7 +77,7 @@ class ArtController extends Controller
         $artistId = $request->input('artist_id');
         if ($artistId) {
             $query->whereHas('artists', function ($q) use ($artistId) {
-                $q->where('artists.id', $artistId);
+                $q->where('artists.artist_id', $artistId);
             });
         }
 

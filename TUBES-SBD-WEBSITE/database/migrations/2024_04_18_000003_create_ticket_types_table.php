@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->increments('ticket_type_id');
+            $table->string('name', 100);
             $table->decimal('base_price', 15, 2);
         });
     }

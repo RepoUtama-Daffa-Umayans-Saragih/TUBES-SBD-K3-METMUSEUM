@@ -9,8 +9,12 @@ class CartItem extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'cart_item_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
-        'cart_id',
+        'cart_group_id',
         'ticket_availability_id',
         'quantity',
     ];
@@ -19,11 +23,11 @@ class CartItem extends Model
 
     public function cart(): BelongsTo
     {
-        return $this->belongsTo(Cart::class, 'cart_id');
+        return $this->belongsTo(CartGroup::class, 'cart_group_id', 'cart_group_id');
     }
 
     public function ticketAvailability(): BelongsTo
     {
-        return $this->belongsTo(TicketAvailability::class, 'ticket_availability_id');
+        return $this->belongsTo(TicketAvailability::class, 'ticket_availability_id', 'ticket_availability_id');
     }
 }

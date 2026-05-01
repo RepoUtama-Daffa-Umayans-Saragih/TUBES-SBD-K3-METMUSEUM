@@ -9,6 +9,10 @@ class Ticket extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'ticket_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'order_id',
         'ticket_availability_id',
@@ -25,11 +29,11 @@ class Ticket extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id');
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
     }
 
     public function ticketAvailability(): BelongsTo
     {
-        return $this->belongsTo(TicketAvailability::class, 'ticket_availability_id');
+        return $this->belongsTo(TicketAvailability::class, 'ticket_availability_id', 'ticket_availability_id');
     }
 }

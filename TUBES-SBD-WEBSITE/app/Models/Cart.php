@@ -10,26 +10,36 @@ class Cart extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'cart_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'user_id',
         'guest_id',
+        'expires_at',
     ];
 
     public $timestamps      = true;
     public const UPDATED_AT = null;
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'expires_at' => 'datetime',
+    ];
+
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function guest(): BelongsTo
     {
-        return $this->belongsTo(Guest::class, 'guest_id');
+        return $this->belongsTo(Guest::class, 'guest_id', 'guest_id');
     }
 
-    public function cartItems(): HasMany
+    public function cartGroups(): HasMany
     {
-        return $this->hasMany(CartItem::class, 'cart_id');
+        return $this->hasMany(CartGroup::class, 'cart_id', 'cart_id');
     }
 }

@@ -9,6 +9,10 @@ class UserProfile extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'user_profile_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'user_id',
         'first_name',
@@ -16,16 +20,18 @@ class UserProfile extends Model
         'phone_number',
         'address1',
         'address2',
-        'city',
-        'state',
-        'country',
-        'postal_code',
+        'postal_code_id',
     ];
 
     public $timestamps = false;
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function postalCode(): BelongsTo
+    {
+        return $this->belongsTo(PostalCode::class, 'postal_code_id', 'postal_code_id');
     }
 }

@@ -9,6 +9,10 @@ class TicketType extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'ticket_type_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'name',
         'base_price',
@@ -22,6 +26,6 @@ class TicketType extends Model
 
     public function ticketAvailabilities(): HasMany
     {
-        return $this->hasMany(TicketAvailability::class, 'ticket_type_id');
+        return $this->hasMany(TicketAvailability::class, 'ticket_type_id', 'ticket_type_id');
     }
 }

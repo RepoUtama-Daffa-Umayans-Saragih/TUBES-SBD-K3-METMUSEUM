@@ -42,7 +42,7 @@
             <div class="admin-nav-section-title">System</div>
         </li>
         <li class="admin-nav-item">
-            <a href="{{ route('welcome') }}" class="admin-nav-link">
+            <a href="{{ route('home') }}" class="admin-nav-link">
                 <span class="admin-nav-icon">←</span>
                 <span>Back to Site</span>
             </a>

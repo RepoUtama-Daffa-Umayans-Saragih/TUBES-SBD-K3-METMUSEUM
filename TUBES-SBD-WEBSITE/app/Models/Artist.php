@@ -9,6 +9,10 @@ class Artist extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'artist_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'name',
         'nationality',

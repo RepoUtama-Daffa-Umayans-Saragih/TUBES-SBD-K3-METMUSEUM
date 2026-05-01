@@ -11,6 +11,10 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $primaryKey = 'user_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'email',
         'password',
@@ -28,16 +32,16 @@ class User extends Authenticatable
 
     public function profile(): HasOne
     {
-        return $this->hasOne(UserProfile::class, 'user_id');
+        return $this->hasOne(UserProfile::class, 'user_id', 'user_id');
     }
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class, 'user_id');
+        return $this->hasMany(Order::class, 'user_id', 'user_id');
     }
 
     public function carts(): HasMany
     {
-        return $this->hasMany(Cart::class, 'user_id');
+        return $this->hasMany(Cart::class, 'user_id', 'user_id');
     }
 }

@@ -32,7 +32,7 @@
                 <div class="admin-nav-section-title">System</div>
             </li>
             <li class="admin-nav-item">
-                <a href="{{ route('welcome') }}" class="admin-nav-link">
+                <a href="{{ route('home') }}" class="admin-nav-link">
                     ← Back to Site
                 </a>
             </li>
@@ -46,10 +46,10 @@
             <h1 style="margin: 0; font-size: 1.5rem;">@yield('admin-title', 'Admin Dashboard')</h1>
             <div class="admin-topbar-user">
                 <div class="admin-topbar-user-info">
-                    <div class="admin-topbar-user-name">{{ Auth::user()->name }}</div>
-                    <div class="admin-topbar-user-role">{{ Auth::user()->role }}</div>
+                    <div class="admin-topbar-user-name">{{ optional(Auth::user()->profile)->first_name ?? 'Admin' }} {{ optional(Auth::user()->profile)->last_name ?? '' }}</div>
+                    <div class="admin-topbar-user-role">Administrator</div>
                 </div>
-                <form action="{{ route('logout') }}" method="POST" style="margin: 0;">
+                <form action="{{ route('account.logout') }}" method="POST" style="margin: 0;">
                     @csrf
                     <button type="submit" class="btn-logout">Logout</button>
                 </form>

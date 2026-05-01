@@ -73,7 +73,8 @@ Route::post('/register', [RegisterController::class, 'store'])
     ->middleware('guest')
     ->name('register.store');
 
-Route::get('/login', [LoginController::class, 'show'])->name('login');
+// Canonical login route (required by Laravel auth middleware - redirects here when unauthenticated)
+Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/guest-login', [GuestLoginController::class, 'store'])->name('guest.login');
 Route::post('/guest-checkout', [GuestCheckoutController::class, 'store'])->name('guest.checkout');
 
@@ -83,17 +84,24 @@ Route::post('/guest-checkout', [GuestCheckoutController::class, 'store'])->name(
 Route::prefix('tickets')->group(function () {
     Route::get('/', [TicketController::class, 'index'])->name('ticket.index');
     Route::get('/{schedule}', [TicketController::class, 'show'])->name('ticket.select');
+    Route::post('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
 });
 
 Route::get('/admission', [TicketController::class, 'index'])
     ->middleware('user.or.guest')
     ->name('ticket.admission');
 
-Route::match(['get', 'post'], '/cart', [CartController::class, 'index'])->name('ticket.cart');
+Route::match(['get', 'post'], '/cart', [CartController::class, 'index'])->name('ticket.cart')->middleware('no.cache');
+Route::delete('/cart/group/{id}', [CartController::class, 'removeGroup'])->name('cart.group.remove');
+Route::get('/cart/group/{id}/modify', [CartController::class, 'modifyGroup'])->name('cart.group.modify');
+Route::get('/cart/modify/cancel', [CartController::class, 'cancelModify'])->name('cart.modify.cancel');
 Route::post('/cart/add', [CartController::class, 'add'])->name('ticket.add');
-Route::get('/checkout', [CheckoutController::class, 'show'])->name('ticket.checkout');
+Route::post('/admission/cart/store', [CartController::class, 'storeAdmission'])->name('admission.cart.store');
+
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('ticket.checkout.process');
-Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('ticket.checkout.success');
+Route::get('/checkout/payments/{order}', [CheckoutController::class, 'paymentPage'])->name('checkout.payments')->middleware('no.cache');
+Route::post('/checkout/pay/{order}', [CheckoutController::class, 'pay'])->name('ticket.checkout.pay');
+Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('ticket.checkout.success')->middleware('no.cache');
 
 // ========================================
 // MEMBERSHIP ROUTES (Protected - Requires Authentication)
@@ -111,7 +119,8 @@ Route::get('/art/{slug}', [ArtWorkController::class, 'show']);
 
 Route::get('/order/create', [OrderController::class, 'create'])->name('order.create');
 Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
-Route::get('/order/{order_id}', [OrderController::class, 'show'])->name('order.show');
+Route::get('/order/show', [OrderController::class, 'index'])->name('order.show');
+Route::get('/order/show/{order}', [OrderController::class, 'show'])->name('order.show.detail');
 
 // ========================================
 // ADMIN ROUTES (Protected - Admin Only)

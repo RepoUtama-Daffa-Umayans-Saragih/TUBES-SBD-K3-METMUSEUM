@@ -96,7 +96,7 @@
             @endphp
 
             @if($primaryImage)
-                <img src="{{ $primaryImage->url }}" alt="{{ $artwork->title }}" class="main-image" id="mainImage">
+                <img src="{{ asset('storage/' . $primaryImage->url) }}" alt="{{ $artwork->title }}" class="main-image" id="mainImage">
             @else
                 <div class="main-image" style="background-color: #e8e8e8;"></div>
             @endif
@@ -105,10 +105,10 @@
                 <div class="image-gallery">
                     @foreach($allImages as $image)
                         <img
-                            src="{{ $image->url }}"
+                            src="{{ asset('storage/' . $image->url) }}"
                             alt="{{ $artwork->title }}"
                             class="gallery-thumbnail {{ $image->is_primary ? 'active' : '' }}"
-                            data-src="{{ $image->url }}"
+                            data-src="{{ asset('storage/' . $image->url) }}"
                             onclick="document.getElementById('mainImage').src = this.dataset.src; document.querySelectorAll('.gallery-thumbnail').forEach(el => el.classList.remove('active')); this.classList.add('active');"
                         >
                     @endforeach

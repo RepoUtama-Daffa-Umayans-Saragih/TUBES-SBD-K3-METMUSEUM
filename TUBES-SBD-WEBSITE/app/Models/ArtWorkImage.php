@@ -9,6 +9,10 @@ class ArtWorkImage extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'image_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'art_work_id',
         'url',

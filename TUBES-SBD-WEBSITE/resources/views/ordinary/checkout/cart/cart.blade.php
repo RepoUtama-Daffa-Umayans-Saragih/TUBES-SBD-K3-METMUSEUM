@@ -1,81 +1,17 @@
 @extends('layouts.app')
 
-@section('content')
 @push('styles')
 @vite('resources/css/app.css')
 @vite('resources/css/ordinary/checkout/cart/cart.css')
 @endpush
-<div class="booking-page">
-    <div class="booking-header">
-        <h1 class="booking-title">Cart</h1>
-        <p class="booking-subtitle">Review your selected tickets before continuing to checkout.</p>
-    </div>
-
-    <div class="booking-stepper" aria-label="Booking steps">
-        <div class="booking-step">Step 1: Select Date</div>
-        <div class="booking-step">Step 2: Select Tickets</div>
-        <div class="booking-step">Step 3: Add to Cart</div>
-        <div class="booking-step is-active">Step 4: View Cart</div>
-        <div class="booking-step">Step 5: Checkout</div>
-        <div class="booking-step">Step 6: Confirmation</div>
-    </div>
-
-    @if(session('success'))
-        <div class="alert-banner success">{{ session('success') }}</div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert-banner error">{{ session('error') }}</div>
-    @endif
-
-    <div class="booking-grid two-col">
-        <div class="booking-card">
-            <div class="booking-card-title">Cart items</div>
-
-            @forelse($cartItems as $item)
-                <div class="summary-row">
-                    <div class="summary-title-line">
-                        <span>{{ $item['ticket_type'] }}</span>
-                        <span>${{ number_format($item['total'], 2) }}</span>
-                    </div>
-                    <div class="summary-subline">{{ $item['location'] }} · {{ $item['schedule'] }}</div>
-                    <div class="summary-subline">Quantity: {{ $item['quantity'] }} · Unit price: ${{ number_format($item['price'], 2) }}</div>
-                </div>
-            @empty
-                <p>Your cart is empty.</p>
-            @endforelse
-        </div>
-
-        <aside class="booking-card booking-summary">
-            <div class="booking-card-title">Order summary</div>
-            <div class="summary-total">
-                <span>Total</span>
-                <span>${{ number_format($subtotal, 2) }}</span>
-            </div>
-            <div class="booking-actions">
-                <a href="{{ route('ticket.checkout') }}" class="booking-btn">Proceed to checkout</a>
-                <a href="{{ route('ticket.index') }}" class="booking-btn-outline">Continue browsing</a>
-            </div>
-        </aside>
-    </div>
-</div>
-@endsection@extends('layouts.app')
 
 @section('content')
-<div class="booking-page">
-    <div class="booking-header">
-        <h1 class="booking-title">Cart</h1>
-        <p class="booking-subtitle">Review your selected tickets before continuing to checkout.</p>
+<div class="cart-container">
+    <div class="cart-progress">
+        Select <span class="arrow">&gt;</span> Add <span class="arrow">&gt;</span> Review <span class="arrow">&gt;</span> Pay
     </div>
 
-    <div class="booking-stepper" aria-label="Booking steps">
-        <div class="booking-step">Step 1: Select Date</div>
-        <div class="booking-step">Step 2: Select Tickets</div>
-        <div class="booking-step">Step 3: Add to Cart</div>
-        <div class="booking-step is-active">Step 4: View Cart</div>
-        <div class="booking-step">Step 5: Checkout</div>
-        <div class="booking-step">Step 6: Confirmation</div>
-    </div>
+    <h1 class="cart-page-title">Cart</h1>
 
     @if(session('success'))
         <div class="alert-banner success">{{ session('success') }}</div>
@@ -85,35 +21,115 @@
         <div class="alert-banner error">{{ session('error') }}</div>
     @endif
 
-    <div class="booking-grid two-col">
-        <div class="booking-card">
-            <div class="booking-card-title">Cart items</div>
-
-            @forelse($cartItems as $item)
-                <div class="summary-row">
-                    <div class="summary-title-line">
-                        <span>{{ $item['ticket_type'] }}</span>
-                        <span>${{ number_format($item['total'], 2) }}</span>
-                    </div>
-                    <div class="summary-subline">{{ $item['location'] }} · {{ $item['schedule'] }}</div>
-                    <div class="summary-subline">Quantity: {{ $item['quantity'] }} · Unit price: ${{ number_format($item['price'], 2) }}</div>
-                </div>
-            @empty
-                <p>Your cart is empty.</p>
-            @endforelse
+    @if(empty($cartGroups) || count($cartGroups) == 0)
+        <div class="empty-cart-state">
+            <p>There is no cart</p>
+            <a href="{{ route('ticket.index') }}" class="btn-continue-shopping-empty">Continue Shopping</a>
         </div>
+    @else
+        <div class="cart-layout">
+            <div class="cart-left">
+                <h2 class="cart-section-title">Visit Information</h2>
+                
+                @foreach($cartGroups as $group)
+                    <div class="cart-group-card" id="cart-group-{{ $group['group_id'] }}">
+                        <div class="cart-group-header">
+                            <span class="cart-group-title">Admission Tickets</span>
+                            <div>
+                                <a href="{{ route('cart.group.modify', $group['group_id']) }}" class="btn-remove" style="margin-right: 15px; text-decoration: none;">Modify</a>
+                                <button type="button" class="btn-remove" onclick="removeCartGroup({{ $group['group_id'] }})">Remove</button>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-group-body">
+                            <div class="cart-col-left">
+                                <div class="cart-visit-date">{{ $group['visit_date'] }}</div>
+                            </div>
+                            <div class="cart-col-middle">
+                                <div class="cart-ticket-label">General Admission</div>
+                                @foreach($group['items'] as $item)
+                                    <div class="cart-ticket-type">
+                                        {{ $item['ticket_type'] }} Admission @if($item['quantity'] > 1) &times;{{ $item['quantity'] }} @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="cart-col-right">
+                                <div class="cart-ticket-label">&nbsp;</div>
+                                @foreach($group['items'] as $item)
+                                    <div class="cart-ticket-price">${{ number_format($item['item_total'], 2) }}</div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
 
-        <aside class="booking-card booking-summary">
-            <div class="booking-card-title">Order summary</div>
-            <div class="summary-total">
-                <span>Total</span>
-                <span>${{ number_format($subtotal, 2) }}</span>
+            <div class="cart-right">
+                <div class="cart-summary-box">
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span>${{ number_format($globalSubtotal, 2) }}</span>
+                    </div>
+                    <div class="summary-line total-line">
+                        <span>Amount Due</span>
+                        <span>${{ number_format($globalSubtotal, 2) }}</span>
+                    </div>
+                    
+                    @if($globalSubtotal > 0)
+                        <form action="{{ route('ticket.checkout.process') }}" method="POST">
+                            @csrf
+                            
+                            @guest
+                                <div style="margin-bottom: 20px;">
+                                    <h3 style="font-size: 1rem; margin-bottom: 10px; color: #1a1a1a;">Visitor Details</h3>
+                                    <div style="margin-bottom: 10px;">
+                                        <input type="text" name="name" placeholder="Full Name" required style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                    </div>
+                                    <div>
+                                        <input type="email" name="email" placeholder="Email Address" required style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                    </div>
+                                </div>
+                            @endguest
+
+                            <button type="submit" class="btn-next">Next</button>
+                        </form>
+                    @else
+                        <button disabled class="btn-next disabled">Next</button>
+                    @endif
+                    
+                    <a href="{{ route('ticket.index') }}" class="btn-continue-shopping">Continue Shopping</a>
+                </div>
             </div>
-            <div class="booking-actions">
-                <a href="{{ route('ticket.checkout') }}" class="booking-btn">Proceed to checkout</a>
-                <a href="{{ route('ticket.index') }}" class="booking-btn-outline">Continue browsing</a>
-            </div>
-        </aside>
-    </div>
+        </div>
+    @endif
 </div>
+
+@push('scripts')
+<script>
+    function removeCartGroup(groupId) {
+        var csrf = document.querySelector('meta[name="csrf-token"]');
+        var token = csrf ? csrf.getAttribute('content') : '';
+        
+        fetch('/cart/group/' + groupId, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json'
+            }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if(data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error removing group.');
+            }
+        })
+        .catch(function(err) {
+            console.error(err);
+            alert('Network error.');
+        });
+    }
+</script>
+@endpush
 @endsection

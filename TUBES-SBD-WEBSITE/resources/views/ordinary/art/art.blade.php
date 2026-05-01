@@ -94,13 +94,13 @@
                     @endif
                     @if(request('department_id'))
                         <span class="filter-tag">
-                            Department: <strong>{{ optional($departments->find(request('department_id'), 'department_id'))->name ?? 'Unknown' }}</strong>
+                            Department: <strong>{{ optional($departments->firstWhere('department_id', request('department_id')))->name ?? 'Unknown' }}</strong>
                             <a href="{{ url()->current() }}?{{ http_build_query(array_filter(array_merge(request()->query(), ['department_id' => null]))) }}" class="remove-filter">×</a>
                         </span>
                     @endif
                     @if(request('artist_id'))
                         <span class="filter-tag">
-                            Artist: <strong>{{ optional($artists->find(request('artist_id'), 'artist_id'))->name ?? 'Unknown' }}</strong>
+                            Artist: <strong>{{ optional($artists->firstWhere('artist_id', request('artist_id')))->name ?? 'Unknown' }}</strong>
                             <a href="{{ url()->current() }}?{{ http_build_query(array_filter(array_merge(request()->query(), ['artist_id' => null]))) }}" class="remove-filter">×</a>
                         </span>
                     @endif
@@ -124,8 +124,11 @@
                 <div class="artwork-item">
                     <a href="{{ route('art.show', $artwork->art_work_id) }}" class="artwork-card">
                         <div class="artwork-image">
+                            @php
+                                $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
+                            @endphp
                             <img
-                                src="{{ $artwork->images->firstWhere('is_primary', true)->url ?? 'https://via.placeholder.com/280x320?text=No+Image' }}"
+                                src="{{ $primaryImage ? asset('storage/' . $primaryImage->url) : 'https://via.placeholder.com/280x320?text=No+Image' }}"
                                 alt="{{ $artwork->title }}"
                                 loading="lazy"
                             >
@@ -169,7 +172,5 @@
         </div>
     @endif
 </div>
-
-@endsection
 
 @endsection

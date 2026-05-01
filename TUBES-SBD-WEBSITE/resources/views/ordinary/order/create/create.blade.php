@@ -6,60 +6,6 @@
 @endpush
 
 @section('title', 'Checkout - MET Museum')
-        transition: background-color 0.3s;
-    }
-
-    .submit-button:hover {
-        background-color: #222;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-top: 1rem;
-        color: #333;
-        text-decoration: none;
-        border-bottom: 1px solid #ddd;
-        font-size: 0.9rem;
-    }
-
-    .back-link:hover {
-        border-bottom-color: #000;
-    }
-
-    .error-message {
-        background-color: #fee;
-        border: 1px solid #fcc;
-        border-left: 4px solid #c33;
-        color: #c33;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 2px;
-    }
-
-    .error-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .error-list li {
-        margin-bottom: 0.5rem;
-    }
-
-    .error-list li:before {
-        content: "✕ ";
-        margin-right: 0.5rem;
-        font-weight: bold;
-    }
-
-    .form-error-inline {
-        color: #c33;
-        font-size: 0.85rem;
-        margin-top: 0.3rem;
-        display: block;
-    }
-</style>
-@endsection
 
 @section('content')
 <div class="order-form-container">
@@ -91,19 +37,19 @@
             <div class="form-section-title">Select Ticket</div>
 
             <div class="form-group">
-                <label for="ticket_id">Ticket Type *</label>
-                <select name="ticket_id" id="ticket_id" required onchange="updateTotal()">
+                <label for="ticket_availability_id">Ticket Type *</label>
+                <select name="ticket_availability_id" id="ticket_availability_id" required onchange="updateTotal()">
                     <option value="">-- Choose a ticket --</option>
                     @forelse($groupedTickets as $locationId => $locationData)
                         <optgroup label="{{ $locationData['location']->name }}">
                             @foreach($locationData['categories'] as $category => $categoryTickets)
-                                @foreach($categoryTickets as $ticket)
+                                @foreach($categoryTickets as $availability)
                                     <option
-                                        value="{{ $ticket->ticket_id }}"
-                                        data-price="{{ $ticket->price }}"
-                                        {{ old('ticket_id') == $ticket->ticket_id ? 'selected' : '' }}
+                                        value="{{ $availability->ticket_availability_id }}"
+                                        data-price="{{ $availability->ticketType->base_price }}"
+                                        {{ old('ticket_availability_id') == $availability->ticket_availability_id ? 'selected' : '' }}
                                     >
-                                        {{ $ticket->category }} - ${{ number_format($ticket->price, 2) }}
+                                        {{ $availability->ticketType->name }} - ${{ number_format($availability->ticketType->base_price, 2) }}
                                     </option>
                                 @endforeach
                             @endforeach
@@ -167,7 +113,7 @@
 
 <script>
     function updateTotal() {
-        const ticketSelect = document.getElementById('ticket_id');
+        const ticketSelect = document.getElementById('ticket_availability_id');
         const quantityInput = document.getElementById('quantity');
         const ticketOption = ticketSelect.options[ticketSelect.selectedIndex];
 
@@ -180,7 +126,6 @@
         document.getElementById('totalAmount').textContent = '$' + total.toFixed(2);
     }
 
-    // Initialize on page load
     updateTotal();
 </script>
 @endsection

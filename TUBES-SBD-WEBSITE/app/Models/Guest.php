@@ -9,6 +9,10 @@ class Guest extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'guest_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -20,11 +24,11 @@ class Guest extends Model
 
     public function carts(): HasMany
     {
-        return $this->hasMany(Cart::class, 'guest_id');
+        return $this->hasMany(Cart::class, 'guest_id', 'guest_id');
     }
 
     public function orders(): HasMany
     {
-        return $this->hasMany(Order::class, 'guest_id');
+        return $this->hasMany(Order::class, 'guest_id', 'guest_id');
     }
 }

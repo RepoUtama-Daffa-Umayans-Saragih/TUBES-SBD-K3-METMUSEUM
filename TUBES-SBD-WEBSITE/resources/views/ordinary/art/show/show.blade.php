@@ -10,13 +10,16 @@
         <a href="{{ route('art.index') }}" class="back-link">← Back to Collections</a>
 
         <div class="artwork-detail-content">
+            @php
+                $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
+            @endphp
             <!-- Artwork Gallery -->
             <div class="artwork-gallery-section">
                 <div class="artwork-gallery">
-                    @if(isset($artwork) && isset($artwork['image_url']))
+                    @if($primaryImage)
                         <img
-                            src="{{ $artwork['image_url'] }}"
-                            alt="{{ $artwork['title'] ?? 'Artwork' }}"
+                            src="{{ asset('storage/' . $primaryImage->url) }}"
+                            alt="{{ $artwork->title }}"
                             class="artwork-main-image"
                         >
                     @else
@@ -28,8 +31,8 @@
             <!-- Artwork Details -->
             <div class="artwork-details-section">
                 <div class="artwork-header">
-                    <h1>{{ $artwork['title'] ?? 'Artwork Title' }}</h1>
-                    <p class="artist-name">by {{ $artwork['artist_name'] ?? 'Unknown Artist' }}</p>
+                    <h1>{{ $artwork->title }}</h1>
+                    <p class="artist-name">by {{ $artwork->artists->pluck('name')->join(', ') ?: 'Unknown Artist' }}</p>
                 </div>
 
                 <!-- Metadata -->
@@ -37,19 +40,29 @@
                     <div class="meta-grid">
                         <div class="meta-item">
                             <span class="meta-label">Artist</span>
-                            <span class="meta-value">{{ $artwork['artist_name'] ?? 'Unknown' }}</span>
+                            <span class="meta-value">{{ $artwork->artists->pluck('name')->join(', ') ?: 'Unknown' }}</span>
                         </div>
                         <div class="meta-item">
                             <span class="meta-label">Date</span>
-                            <span class="meta-value">{{ $artwork['date'] ?? 'Unknown' }}</span>
+                            <span class="meta-value">
+                                @if($artwork->year_start && $artwork->year_end)
+                                    {{ $artwork->year_start }} - {{ $artwork->year_end }}
+                                @elseif($artwork->year_start)
+                                    {{ $artwork->year_start }}
+                                @elseif($artwork->year_end)
+                                    {{ $artwork->year_end }}
+                                @else
+                                    Unknown
+                                @endif
+                            </span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-label">Medium</span>
-                            <span class="meta-value">{{ $artwork['medium'] ?? 'Unknown' }}</span>
+                            <span class="meta-label">Object Type</span>
+                            <span class="meta-value">{{ $artwork->objectType?->name ?? 'Unknown' }}</span>
                         </div>
                         <div class="meta-item">
                             <span class="meta-label">Department</span>
-                            <span class="meta-value">{{ $artwork['department'] ?? 'Unknown' }}</span>
+                            <span class="meta-value">{{ $artwork->department?->name ?? 'Unknown' }}</span>
                         </div>
                     </div>
                 </div>
@@ -57,7 +70,7 @@
                 <!-- Description -->
                 <div class="artwork-description-section">
                     <h3>About This Artwork</h3>
-                    <p>{{ $artwork['description'] ?? 'Description not available.' }}</p>
+                    <p>{{ $artwork->description ?? 'Description not available.' }}</p>
                 </div>
 
                 <!-- Actions -->

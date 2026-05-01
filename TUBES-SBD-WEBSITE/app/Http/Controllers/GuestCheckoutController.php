@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GuestCheckoutRequest;
@@ -12,26 +11,25 @@ class GuestCheckoutController extends Controller
      */
     public function store(GuestCheckoutRequest $request)
     {
-        $validated = $request->validated();
+        $validated    = $request->validated();
         $sessionToken = $request->session()->getId();
 
         $guest = Guest::updateOrCreate(
             ['session_token' => $sessionToken],
             [
-                'email' => strtolower($validated['email']),
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
+                'email'         => strtolower($validated['email']),
+                'first_name'    => $validated['first_name'],
+                'last_name'     => $validated['last_name'],
                 'session_token' => $sessionToken,
-                'created_at' => now(),
             ]
         );
 
         session([
             'guest_user' => [
-                'id' => $guest->id,
-                'name' => trim($guest->first_name.' '.$guest->last_name),
+                'id'   => $guest->guest_id,
+                'name' => trim($guest->first_name . ' ' . $guest->last_name),
             ],
-            'guest_id' => $guest->id,
+            'guest_id'   => $guest->guest_id,
             'guest_name' => $guest->first_name,
         ]);
 

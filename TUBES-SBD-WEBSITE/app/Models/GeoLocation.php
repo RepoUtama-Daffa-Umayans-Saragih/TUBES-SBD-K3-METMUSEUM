@@ -9,6 +9,10 @@ class GeoLocation extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'geo_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'name',
     ];

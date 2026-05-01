@@ -12,7 +12,7 @@
 <div class="admin-container">
     <div class="admin-header">
         <h1>Edit Artwork</h1>
-        <div class="subtitle">Modified: {{ $artwork->updated_at->format('M d, Y H:i') }}</div>
+        <div class="subtitle">Modified: {{ optional($artwork->updated_at)->format('M d, Y H:i') }}</div>
     </div>
 
     @if($errors->any())
@@ -32,9 +32,9 @@
             @method('PUT')
 
             <div class="info-box">
-                <strong>Accession Number:</strong> {{ $artwork->accession_number }}
+                <strong>Object Number:</strong> {{ $artwork->object_number }}
                 <br><strong>Slug:</strong> {{ $artwork->slug }}
-                <br><strong>Created:</strong> {{ $artwork->created_at->format('M d, Y H:i') }}
+                <br><strong>Created:</strong> {{ optional($artwork->created_at)->format('M d, Y H:i') }}
             </div>
 
             <!-- Basic Information -->
@@ -74,7 +74,7 @@
                     <select id="object_type_id" name="object_type_id" required>
                         <option value="">Select Type</option>
                         @foreach($types as $type)
-                            <option value="{{ $type->object_type_id }}" @selected(old('object_type_id', $artwork->object_type_id) == $type->object_type_id)>
+                            <option value="{{ $type->type_id }}" @selected(old('object_type_id', $artwork->type_id) == $type->type_id)>
                                 {{ $type->name }}
                             </option>
                         @endforeach
@@ -92,7 +92,7 @@
                     <select id="geo_location_id" name="geo_location_id">
                         <option value="">Select Geographic Location</option>
                         @foreach($geoLocations as $geo)
-                            <option value="{{ $geo->geo_location_id }}" @selected(old('geo_location_id', $artwork->geo_location_id) == $geo->geo_location_id)>
+                            <option value="{{ $geo->geo_id }}" @selected(old('geo_location_id', $artwork->geo_id) == $geo->geo_id)>
                                 {{ $geo->name }}
                             </option>
                         @endforeach
@@ -131,14 +131,14 @@
                 </div>
             </div>
 
-            <!-- Accession -->
+            <!-- Object Number -->
             <div class="section-title">Accession Information</div>
 
-            <div class="form-group @error('accession_number') error @enderror">
-                <label for="accession_number">Accession Number *</label>
-                <input type="text" id="accession_number" name="accession_number" value="{{ old('accession_number', $artwork->accession_number) }}" required>
+            <div class="form-group @error('object_number') error @enderror">
+                <label for="object_number">Object Number *</label>
+                <input type="text" id="object_number" name="object_number" value="{{ old('object_number', $artwork->object_number) }}" required>
                 <small class="form-helper-text">Must be unique. Example: 1998.242</small>
-                @error('accession_number') <span class="error-message">{{ $message }}</span> @enderror
+                @error('object_number') <span class="error-message">{{ $message }}</span> @enderror
             </div>
 
             <!-- Images -->

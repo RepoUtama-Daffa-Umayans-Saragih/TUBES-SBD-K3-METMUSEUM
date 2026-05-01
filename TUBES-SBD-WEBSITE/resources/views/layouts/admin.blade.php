@@ -22,10 +22,10 @@
                 <h1 class="admin-topbar-title">@yield('page_title', 'Admin')</h1>
                 <div class="admin-topbar-user">
                     <div>
-                        <div class="admin-topbar-user-name">{{ Auth::user()->name }}</div>
-                        <div class="admin-topbar-user-role">{{ Auth::user()->role }}</div>
+                        <div class="admin-topbar-user-name">{{ optional(Auth::user()->profile)->first_name ?? 'Admin' }} {{ optional(Auth::user()->profile)->last_name ?? '' }}</div>
+                        <div class="admin-topbar-user-role">Administrator</div>
                     </div>
-                    <form action="{{ route('logout') }}" method="POST" class="form-no-margin">
+                    <form action="{{ route('account.logout') }}" method="POST" class="form-no-margin">
                         @csrf
                         <button type="submit" class="btn-logout">Logout</button>
                     </form>

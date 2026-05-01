@@ -9,11 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tickets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->foreignId('ticket_availability_id')->constrained('ticket_availability')->restrictOnDelete();
+            $table->increments('ticket_id');
+            $table->unsignedInteger('order_id');
+            $table->unsignedInteger('ticket_availability_id');
             $table->string('qr_code')->unique();
-            $table->enum('status', ['valid', 'used', 'cancelled'])->default('valid');
+
+            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
+            $table->foreign('ticket_availability_id')->references('ticket_availability_id')->on('ticket_availability');
+            $table->enum('status', ['valid', 'used', 'cancelled']);
             $table->dateTime('used_at')->nullable();
         });
     }

@@ -9,6 +9,10 @@ class ObjectType extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'type_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'name',
     ];

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,13 +13,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('carts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('guest_id')->nullable()->constrained('guests')->nullOnDelete();
+            $table->increments('cart_id');
+            $table->unsignedInteger('user_id')->nullable();
+            $table->unsignedInteger('guest_id')->nullable();
             $table->timestamp('created_at')->useCurrent();
+            $table->dateTime('expires_at');
 
-            // Business rule: one cart belongs to either a user or a guest (XOR), enforced at application layer.
+            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('guest_id')->references('guest_id')->on('guests');
         });
+
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE carts ADD CONSTRAINT chk_carts_xor_owner CHECK ((user_id IS NULL) <> (guest_id IS NULL))');
+        }
     }
 
     /**

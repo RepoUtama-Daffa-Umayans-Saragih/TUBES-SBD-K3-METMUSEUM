@@ -12,10 +12,6 @@ class LoginController extends Controller
      */
     public function show()
     {
-        if (Auth::check()) {
-            return redirect()->route('account.index');
-        }
-
         return view('ordinary.account.login.login', [
             'title' => 'Login',
         ]);

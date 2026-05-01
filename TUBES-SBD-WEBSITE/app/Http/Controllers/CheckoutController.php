@@ -11,264 +11,268 @@ use App\Models\VisitSchedule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderSuccessMail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
-    public function show(Request $request): View | RedirectResponse | JsonResponse
+
+
+    public function checkout(Request $request): RedirectResponse
     {
-        $context = $this->resolveCartContext($request);
+        // dd('checkout reached');
 
-        if (! $context['cart'] || $context['cart']->cartItems->isEmpty()) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Cart is empty.'], 422);
-            }
+        $userId  = Auth::id();
+        $guestId = session('guest_id');
 
-            return redirect()->route('ticket.cart')->with('error', 'Your cart is empty.');
+        if (! $userId && ! $guestId) {
+            abort(403, 'User or guest identity not found. Please add items to cart first.');
         }
 
-        $customer = $this->resolveCustomerDefaults($context['userId'], $context['guestId']);
+        $context   = $this->resolveCartContext($request);
+        $cart      = $context['cart'];
 
-        return view('ordinary.checkout.form', [
-            'cart'      => $context['cart'],
-            'cartItems' => $context['cart']->cartItems,
-            'customer'  => $customer,
-            'title'     => 'Checkout',
-        ]);
-    }
+        if (! $cart || $cart->cartGroups->isEmpty()) {
+            return redirect()->route('ticket.cart')->with('error', 'Cart is empty');
+        }
 
-    public function checkout(Request $request): JsonResponse | RedirectResponse
-    {
-        $validated = $request->validate([
-            'name'  => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-        ]);
-
-        $context = $this->resolveCartContext($request);
-        $userId  = $context['userId'];
-        $guestId = $context['guestId'];
-        $cart    = $context['cart'];
-
-        if (! $cart || $cart->cartItems->isEmpty()) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Cart is empty.',
-                ], 422);
+        // Validate that all groups have items
+        foreach ($cart->cartGroups as $group) {
+            if ($group->cartItems->isEmpty()) {
+                 return redirect()->route('ticket.cart')->with('error', 'One or more cart groups are empty.');
             }
+        }
 
-            return redirect()->route('ticket.cart')->with('error', 'Cart is empty.');
+        // --- IDEMPOTENCY: Reuse existing pending order ---
+        $existingOrder = Order::query()
+            ->where(function ($query) use ($userId, $guestId) {
+                if ($userId) $query->where('user_id', $userId);
+                else $query->where('guest_id', $guestId);
+            })
+            ->where('expired_at', '>', now())
+            ->whereHas('payment', fn($q) => $q->where('payment_status', 'Pending'))
+            ->latest('order_date')
+            ->first();
+
+        if ($existingOrder) {
+            return redirect()->route('checkout.payments', $existingOrder->order_id);
         }
 
         try {
-            $result = DB::transaction(function () use ($userId, $guestId, $validated) {
-                $cart = Cart::query()
-                    ->when($userId, fn($q) => $q->where('user_id', $userId))
-                    ->when(! $userId && $guestId, fn($q) => $q->where('guest_id', $guestId))
-                    ->when(! $userId && ! $guestId, fn($q) => $q->whereKey(session('cart_id')))
-                    ->lockForUpdate()
-                    ->with([
-                        'cartItems.ticketAvailability.ticketType',
-                        'cartItems.ticketAvailability.visitSchedule.location',
-                    ])
-                    ->first();
+            $order = DB::transaction(function () use ($userId, $guestId, $cart) {
+                $cart->lockForUpdate();
+                $cartItems = $cart->cartGroups->flatMap->cartItems;
 
-                if (! $cart || $cart->cartItems->isEmpty()) {
-                    return null;
-                }
-
-                $checkoutGuest = null;
-
-                if (! $userId) {
-                    $nameParts = preg_split('/\s+/', trim($validated['name'])) ?: [];
-                    $firstName = array_shift($nameParts) ?: $validated['name'];
-                    $lastName  = trim(implode(' ', $nameParts));
-
-                    if ($guestId) {
-                        $checkoutGuest = Guest::query()->lockForUpdate()->find($guestId);
-
-                        if (! $checkoutGuest) {
-                            throw new \RuntimeException('Guest session not found.');
-                        }
-
-                        $checkoutGuest->update([
-                            'email'         => $validated['email'],
-                            'first_name'    => $firstName,
-                            'last_name'     => $lastName !== '' ? $lastName : $firstName,
-                            'session_token' => session()->getId(),
-                        ]);
-                    } else {
-                        $checkoutGuest = Guest::create([
-                            'email'         => $validated['email'],
-                            'first_name'    => $firstName,
-                            'last_name'     => $lastName !== '' ? $lastName : $firstName,
-                            'session_token' => session()->getId(),
-                        ]);
-
-                        $cart->update([
-                            'guest_id' => $checkoutGuest->id,
-                        ]);
-                    }
-                }
-
-                $availabilityIds = $cart->cartItems
-                    ->pluck('ticket_availability_id')
-                    ->unique()
-                    ->values();
-
-                $availabilities = TicketAvailability::with('visitSchedule')
-                    ->whereIn('id', $availabilityIds)
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('id');
-
-                $scheduleIds = $availabilities
-                    ->pluck('visit_schedule_id')
-                    ->filter()
-                    ->unique()
-                    ->values();
-
-                $visitSchedules = VisitSchedule::whereIn('id', $scheduleIds)
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('id');
-
-                $requestedPerSchedule = [];
-
-                foreach ($cart->cartItems as $item) {
-                    $availability = $availabilities->get($item->ticket_availability_id);
-
-                    if (! $availability || ! $availability->visit_schedule_id) {
-                        throw new \RuntimeException('Invalid ticket availability found in cart.');
-                    }
-
-                    $scheduleId                        = $availability->visit_schedule_id;
-                    $requestedPerSchedule[$scheduleId] = ($requestedPerSchedule[$scheduleId] ?? 0) + $item->quantity;
-                }
-
-                foreach ($requestedPerSchedule as $scheduleId => $requestedQty) {
-                    $schedule = $visitSchedules->get($scheduleId);
-
-                    if (! $schedule) {
-                        throw new \RuntimeException('Visit schedule not found for one or more cart items.');
-                    }
-
-                    $existingTicketsCount = Ticket::whereHas('ticketAvailability', function ($query) use ($scheduleId) {
-                        $query->where('visit_schedule_id', $scheduleId);
-                    })->lockForUpdate()->count();
-
-                    if (($existingTicketsCount + $requestedQty) > $schedule->capacity_limit) {
-                        throw new \RuntimeException('Overbooking detected for selected visit schedule.');
-                    }
+                $orderTotalAmount = 0.0;
+                foreach ($cartItems as $item) {
+                    $availability = TicketAvailability::with('ticketType')->find($item->ticket_availability_id);
+                    $orderTotalAmount += ((float) ($availability->ticketType->base_price ?? 0)) * (int) $item->quantity;
                 }
 
                 $order = Order::create([
-                    'order_code'     => (string) Str::uuid(),
-                    'user_id'        => $userId,
-                    'guest_id'       => $guestId,
-                    'order_date'     => now(),
-                    'payment_status' => 'pending',
-                    'expired_at'     => now()->addMinutes(30),
+                    'order_code'   => (string) Str::uuid(),
+                    'user_id'      => $userId,
+                    'guest_id'     => $guestId,
+                    'order_date'   => now(),
+                    'expired_at'   => now()->addMinutes(30),
+                    'total_amount' => $orderTotalAmount,
                 ]);
 
-                $createdTickets = collect();
+                Payment::create([
+                    'order_id'       => $order->order_id,
+                    'payment_method' => 'Credit Card',
+                    'amount'         => $orderTotalAmount,
+                    'payment_status' => 'Pending',
+                ]);
 
-                foreach ($cart->cartItems as $item) {
-                    for ($i = 0; $i < $item->quantity; $i++) {
-                        $ticket = Ticket::create([
-                            'order_id'               => $order->id,
-                            'ticket_availability_id' => $item->ticket_availability_id,
-                            'qr_code'                => $this->generateUniqueQrCode(),
-                            'status'                 => 'valid',
-                            'used_at'                => null,
-                        ]);
+                // STRICT: DO NOT create tickets here
+                // STRICT: DO NOT delete cart here
 
-                        $createdTickets->push($ticket);
-                    }
+                return $order;
+            });
+        } catch (\Throwable $e) {
+            dd($e->getMessage());
+        }
+
+        return redirect()->route('checkout.payments', $order->order_id);
+    }
+
+    public function paymentPage(Order $order): View
+    {
+        // Ownership validation
+        $userId = Auth::id();
+        $guestId = session('guest_id');
+
+        $isOwner = ($order->user_id && $order->user_id == $userId) || 
+                   ($order->guest_id && $order->guest_id == $guestId);
+
+        if (!$isOwner) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        $order->load([
+            'payment',
+            'tickets.ticketAvailability.visitSchedule.location',
+            'tickets.ticketAvailability.ticketType',
+            'user',
+            'guest',
+        ]);
+
+        if ($order->payment && $order->payment->payment_status === 'Paid') {
+            return redirect()->route('order.show.detail', $order->order_id)
+                ->with('info', 'This order has already been paid.');
+        }
+
+        return view('ordinary.checkout.payments.payments', [
+            'order' => $order,
+            'title' => 'Payment Confirmation',
+        ]);
+    }
+
+    public function pay(Request $request, Order $order)
+    {
+        // Ownership validation
+        $userId = Auth::id();
+        $guestId = session('guest_id');
+        $isOwner = ($order->user_id && $order->user_id == $userId) || 
+                   ($order->guest_id && $order->guest_id == $guestId);
+
+        if (!$isOwner) abort(403);
+
+        if ($order->payment && $order->payment->payment_status === 'Paid') {
+            return redirect()->route('ticket.checkout.success', $order->order_id)
+                ->with('info', 'This order has already been paid.');
+        }
+
+        $billing = null;
+        if (!auth()->check()) {
+            $request->validate([
+                'first_name'  => 'required',
+                'last_name'   => 'required',
+                'address'     => 'required',
+                'city'        => 'required',
+                'state'       => 'required',
+                'postal_code' => 'required',
+                'country'     => 'required',
+            ]);
+
+            $billing = [
+                'first_name'  => $request->first_name,
+                'last_name'   => $request->last_name,
+                'address'     => $request->address,
+                'city'        => $request->city,
+                'state'       => $request->state,
+                'postal_code' => $request->postal_code,
+                'country'     => $request->country,
+            ];
+        }
+
+        try {
+            DB::transaction(function () use ($order, $userId, $guestId) {
+                $payment = Payment::where('order_id', $order->order_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$payment || $payment->payment_status !== 'Pending') {
+                    return;
                 }
 
-                $payment = Payment::create([
-                    'order_id'       => $order->id,
-                    'payment_method' => 'simulation',
-                    'payment_status' => 'paid',
+                $payment->update([
+                    'payment_status' => 'Paid',
                     'paid_at'        => now(),
                 ]);
 
-                $order->update([
-                    'payment_status' => 'paid',
-                ]);
+                // Idempotency: DO NOT create again if tickets already exist
+                if ($order->tickets()->exists()) {
+                    return;
+                }
 
-                $cart->cartItems()->delete();
+                // Load Cart
+                // Cart must act as temporary snapshot.
+                $cartQuery = Cart::with('cartGroups.cartItems');
+                if ($userId) {
+                    $cart = $cartQuery->where('user_id', $userId)->first();
+                } elseif ($guestId) {
+                    $cart = $cartQuery->where('guest_id', $guestId)->first();
+                } else {
+                    $cart = $cartQuery->whereKey(session('cart_id'))->first();
+                }
 
-                $order->load([
-                    'tickets.ticketAvailability.ticketType',
-                    'tickets.ticketAvailability.visitSchedule.location',
-                    'payment',
-                ]);
+                if (!$cart) {
+                    throw new \Exception('Cart not found. Cannot generate tickets.');
+                }
 
-                return [
-                    'order'   => $order,
-                    'tickets' => $createdTickets,
-                    'payment' => $payment,
-                ];
+                $cartItems = $cart->cartGroups->flatMap->cartItems;
+
+                // Generate Tickets
+                foreach ($cartItems as $item) {
+                    for ($i = 0; $i < $item->quantity; $i++) {
+                        Ticket::create([
+                            'order_id'               => $order->order_id,
+                            'ticket_availability_id' => $item->ticket_availability_id,
+                            'qr_code'                => (string) Str::uuid(),
+                            'status'                 => 'valid',
+                        ]);
+                    }
+                }
+
+                // Delete cart AFTER ticket creation
+                $cart->cartGroups()->delete();
+                $cart->delete();
             });
-        } catch (\Throwable $e) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => $e->getMessage(),
-                ], 422);
-            }
-
-            return redirect()->route('ticket.checkout')->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Payment settlement failed', ['order_id' => $order->order_id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Payment failed to process: ' . $e->getMessage());
         }
 
-        if (! $result) {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Cart is empty.',
-                ], 422);
+        // STEP 1: Load Order Relations
+        $order->load([
+            'tickets.ticketAvailability.ticketType',
+            'guest'
+        ]);
+
+        // STEP 2: Determine Email Target
+        $email = auth()->user()->email ?? optional($order->guest)->email;
+
+        if ($email) {
+            // STEP 3: Send Email Fail-Safe
+            try {
+                Mail::to($email)->send(new OrderSuccessMail($order, $billing));
+            } catch (\Exception $e) {
+                Log::error('Email sending failed', [
+                    'order_id' => $order->order_id,
+                    'error'    => $e->getMessage()
+                ]);
             }
-
-            return redirect()->route('ticket.cart')->with('error', 'Cart is empty.');
-        }
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Checkout completed successfully.',
-                'data'    => $result,
+        } else {
+            Log::error('Email sending failed: No email found for order', [
+                'order_id' => $order->order_id
             ]);
         }
 
-        session()->forget('cart_id');
-
-        return redirect()->route('ticket.checkout.success', $result['order'])
-            ->with('success', 'Checkout completed successfully.');
-    }
-
-    private function generateUniqueQrCode(): string
-    {
-        do {
-            $qrCode = (string) Str::uuid();
-        } while (Ticket::where('qr_code', $qrCode)->exists());
-
-        return $qrCode;
+        return redirect()->route('ticket.checkout.success', $order->order_id)
+            ->with('success', 'Payment successful! Your tickets have been generated.');
     }
 
     public function success(Order $order): View
     {
         $order->load([
-            'tickets.ticketAvailability.ticketType',
-            'tickets.ticketAvailability.visitSchedule.location',
             'payment',
+            'tickets.ticketAvailability.visitSchedule.location',
+            'tickets.ticketAvailability.ticketType',
             'user',
             'guest',
         ]);
 
-        return view('ordinary.checkout.success', [
+        return view('ordinary.checkout.payments.success', [
             'order' => $order,
-            'title' => 'Booking Success',
+            'title' => 'Booking Confirmed',
         ]);
     }
 
@@ -278,16 +282,16 @@ class CheckoutController extends Controller
         $guestId = $userId ? null : ($request->integer('guest_id') ?: session('guest_id'));
 
         $cartQuery = Cart::query()->with([
-            'cartItems.ticketAvailability.ticketType',
-            'cartItems.ticketAvailability.visitSchedule.location',
+            'cartGroups.cartItems.ticketAvailability.ticketType',
+            'cartGroups.cartItems.ticketAvailability.visitSchedule.location',
         ]);
 
         if ($userId) {
-            $cart = $cartQuery->where('user_id', $userId)->first();
+            $cart = $cartQuery->where('user_id', $userId)->where('expires_at', '>', now())->first();
         } elseif ($guestId) {
-            $cart = $cartQuery->where('guest_id', $guestId)->first();
+            $cart = $cartQuery->where('guest_id', $guestId)->where('expires_at', '>', now())->first();
         } elseif (session()->has('cart_id')) {
-            $cart = $cartQuery->whereKey(session('cart_id'))->first();
+            $cart = $cartQuery->whereKey(session('cart_id'))->where('expires_at', '>', now())->first();
         } else {
             $cart = null;
         }
@@ -303,9 +307,14 @@ class CheckoutController extends Controller
     {
         $name  = '';
         $email = '';
+        $user  = Auth::user();
 
-        if ($userId && Auth::user()) {
-            $email = Auth::user()->email;
+        if ($userId && $user) {
+            $email   = (string) $user->email;
+            $profile = $user->profile;
+            if ($profile) {
+                $name = trim($profile->first_name . ' ' . $profile->last_name);
+            }
         }
 
         if ($guestId) {
@@ -321,5 +330,33 @@ class CheckoutController extends Controller
             'name'  => $name,
             'email' => $email,
         ];
+    }
+
+    private function flattenCartItems(?Cart $cart): Collection
+    {
+        if (! $cart) {
+            return collect();
+        }
+
+        return $cart->cartGroups
+            ->flatMap(fn($group) => $group->cartItems)
+            ->values();
+    }
+
+    private function resolveCheckoutErrorMessage(\Throwable $e): string
+    {
+        $knownMessages = [
+            'Cart is empty.',
+            'Guest session not found.',
+            'Invalid ticket availability found in cart.',
+            'Visit schedule not found for one or more cart items.',
+            'Overbooking detected for selected visit schedule.',
+        ];
+
+        if (in_array($e->getMessage(), $knownMessages, true)) {
+            return $e->getMessage();
+        }
+
+        return 'We could not complete checkout right now. Please try again.';
     }
 }

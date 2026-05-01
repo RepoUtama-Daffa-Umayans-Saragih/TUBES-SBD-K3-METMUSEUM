@@ -23,18 +23,30 @@
         <div class="navbar-auth">
             @if(auth()->check() || session('guest_id'))
                 <div class="user-menu">
+
+                    {{-- USER --}}
                     @if(auth()->check())
                         <span class="user-name">{{ auth()->user()->email }}</span>
+
+                        {{-- ✅ ORDER (HANYA USER) --}}
+                        <a href="{{ route('order.show') }}" class="nav-link">Order</a>
                     @else
+                        {{-- GUEST --}}
                         <span class="user-name">Guest</span>
                     @endif
+
+                    {{-- CART (USER + GUEST) --}}
                     <a href="{{ route('ticket.cart') }}" class="nav-link">Cart</a>
+
+                    {{-- LOGOUT --}}
                     <form action="{{ route('account.logout') }}" method="POST" class="logout-form">
                         @csrf
                         <button type="submit" class="nav-link logout-btn">Logout</button>
                     </form>
+
                 </div>
             @else
+                {{-- BELUM LOGIN --}}
                 <a href="{{ route('account.login') }}" class="nav-link btn-login">Login</a>
                 <a href="{{ route('account.register') }}" class="nav-link btn-register">Register</a>
             @endif

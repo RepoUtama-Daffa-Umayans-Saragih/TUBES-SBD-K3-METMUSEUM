@@ -13,23 +13,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('art_works', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->charset = 'utf8mb4';
+            $table->engine    = 'InnoDB';
+            $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->id();
+            $table->increments('art_work_id');
             $table->string('object_number');
             $table->string('title');
             $table->string('slug');
             $table->text('description')->nullable();
-            $table->string('gallery_number')->nullable();
+            $table->string('gallery_number', 100)->nullable();
             $table->integer('year_start')->nullable();
             $table->integer('year_end')->nullable();
 
-            $table->foreignId('department_id')->constrained('departments')->restrictOnDelete();
-            $table->foreignId('type_id')->constrained('object_types')->restrictOnDelete();
-            $table->foreignId('geo_id')->constrained('geo_locations')->restrictOnDelete();
-            $table->foreignId('location_id')->constrained('locations')->restrictOnDelete();
+            $table->unsignedInteger('department_id');
+            $table->unsignedInteger('type_id');
+            $table->unsignedInteger('geo_id');
+            $table->unsignedInteger('location_id');
+
+            $table->foreign('department_id')->references('department_id')->on('departments');
+            $table->foreign('type_id')->references('object_type_id')->on('object_types');
+            $table->foreign('geo_id')->references('geo_location_id')->on('geo_locations');
+            $table->foreign('location_id')->references('location_id')->on('locations');
 
             $table->unique('object_number', 'uq_art_works_object_number');
             $table->unique('slug', 'uq_art_works_slug');

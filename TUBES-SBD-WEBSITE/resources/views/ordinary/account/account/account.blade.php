@@ -16,7 +16,7 @@
 
             <div class="form-group">
                 <label>Name</label>
-                <div class="form-control" style="background:#f8f9fa;">{{ $user->name }}</div>
+                <div class="form-control" style="background:#f8f9fa;">{{ $user->profile?->first_name ?? '' }} {{ $user->profile?->last_name ?? '' }}</div>
             </div>
 
             <div class="form-group">
@@ -25,8 +25,8 @@
             </div>
 
             <div class="form-group">
-                <label>Role</label>
-                <div class="form-control" style="background:#f8f9fa;">{{ $user->role }}</div>
+                <label>Address</label>
+                <div class="form-control" style="background:#f8f9fa;">{{ $user->profile?->address1 ?? '-' }}</div>
             </div>
 
             <form action="{{ route('account.logout') }}" method="POST">

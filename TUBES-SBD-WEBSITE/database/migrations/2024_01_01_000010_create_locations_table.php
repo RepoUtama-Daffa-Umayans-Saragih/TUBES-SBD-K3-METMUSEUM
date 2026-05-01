@@ -16,7 +16,7 @@ return new class extends Migration
             $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->id();
+            $table->increments('location_id');
             $table->string('name');
             $table->text('address');
             $table->integer('capacity_limit');

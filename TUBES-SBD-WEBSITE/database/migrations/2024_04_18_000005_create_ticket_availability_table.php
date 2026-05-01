@@ -9,10 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket_availability', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('ticket_type_id')->constrained('ticket_types')->restrictOnDelete();
-            $table->foreignId('visit_schedule_id')->constrained('visit_schedules')->restrictOnDelete();
+            $table->increments('ticket_availability_id');
+            $table->unsignedInteger('ticket_type_id');
+            $table->unsignedInteger('visit_schedule_id');
 
+            $table->foreign('ticket_type_id')->references('ticket_type_id')->on('ticket_types');
+            $table->foreign('visit_schedule_id')->references('visit_schedule_id')->on('visit_schedules');
             $table->unique(['ticket_type_id', 'visit_schedule_id'], 'uq_ticket_availability_type_schedule');
         });
     }

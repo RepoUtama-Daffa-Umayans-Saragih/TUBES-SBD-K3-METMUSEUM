@@ -1,1 +1,9 @@
-/* Mirror stylesheet for layouts/app.blade.php */
+@import '../components/navbar.css';
+@import '../components/footer.css';
+@import '../components/admin-sidebar.css';
+
+/* MAIN LAYOUT */
+.main-content {
+    min-height: 70vh;
+    padding: 60px 50px;
+}

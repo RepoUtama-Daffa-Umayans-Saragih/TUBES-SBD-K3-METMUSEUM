@@ -12,18 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_profiles', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->increments('user_profile_id');
+            $table->unsignedInteger('user_id');
 
             $table->string('first_name', 100);
             $table->string('last_name', 100);
             $table->string('phone_number', 20)->nullable();
-            $table->text('address1');
-            $table->text('address2')->nullable();
-            $table->string('city', 100)->nullable();
-            $table->string('state', 100)->nullable();
-            $table->string('country', 100)->nullable();
-            $table->string('postal_code', 20)->nullable();
+            $table->string('address1', 255);
+            $table->string('address2', 255)->nullable();
+            $table->unsignedInteger('postal_code_id');
+
+            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('postal_code_id')->references('postal_code_id')->on('postal_codes');
 
             $table->unique('user_id', 'uq_user_profiles_user_id');
         });

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketAvailability;
 use Illuminate\Support\Facades\Auth;
@@ -35,43 +36,54 @@ class OrderController extends Controller
             $validated = $request->validated();
 
             $quantity = (int) $validated['quantity'];
+            $userId   = Auth::id();
+            $guestId  = $userId ? null : session('guest_id');
 
-            $ticketAvailability = null;
-            if (! empty($validated['ticket_availability_id'])) {
-                $ticketAvailability = TicketAvailability::with('ticketType')->findOrFail($validated['ticket_availability_id']);
-            } elseif (! empty($validated['ticket_id'])) {
-                $existingTicket     = Ticket::findOrFail($validated['ticket_id']);
-                $ticketAvailability = TicketAvailability::with('ticketType')->findOrFail($existingTicket->ticket_availability_id);
+            if (! $userId && ! $guestId) {
+                return back()->with('error', 'Guest or authenticated user context is required.')->withInput();
             }
+
+            $ticketAvailability = TicketAvailability::with('ticketType')
+                ->findOrFail($validated['ticket_availability_id']);
 
             if (! $ticketAvailability) {
                 return back()->with('error', 'Ticket availability is required.')->withInput();
             }
 
-            $order = DB::transaction(function () use ($ticketAvailability, $quantity) {
+            $order = DB::transaction(function () use ($ticketAvailability, $quantity, $userId, $guestId) {
+                $totalAmount = ((float) ($ticketAvailability->ticketType?->base_price ?? 0)) * $quantity;
+
                 $order = Order::create([
-                    'order_code'     => (string) Str::uuid(),
-                    'user_id'        => Auth::id() ?? null,
-                    'guest_id'       => null,
-                    'order_date'     => now(),
-                    'payment_status' => 'pending',
-                    'expired_at'     => now()->addMinutes(30),
+                    'order_code'   => (string) Str::uuid(),
+                    'user_id'      => $userId,
+                    'guest_id'     => $guestId,
+                    'order_date'   => now(),
+                    'expired_at'   => now()->addMinutes(30),
+                    'total_amount' => $totalAmount,
                 ]);
 
                 for ($i = 0; $i < $quantity; $i++) {
                     Ticket::create([
-                        'order_id'               => $order->id,
-                        'ticket_availability_id' => $ticketAvailability->id,
+                        'order_id'               => $order->order_id,
+                        'ticket_availability_id' => $ticketAvailability->ticket_availability_id,
                         'qr_code'                => (string) Str::uuid(),
                         'status'                 => 'valid',
                         'used_at'                => null,
                     ]);
                 }
 
+                Payment::create([
+                    'order_id'       => $order->order_id,
+                    'payment_method' => 'manual',
+                    'amount'         => $totalAmount,
+                    'payment_status' => 'Pending',
+                    'paid_at'        => null,
+                ]);
+
                 return $order;
             });
 
-            return redirect()->route('order.show', $order->id)
+            return redirect()->route('order.show.detail', $order->order_id)
                 ->with('success', 'Order created successfully. Please proceed to payment.');
         } catch (\Exception $e) {
             return back()
@@ -80,14 +92,56 @@ class OrderController extends Controller
         }
     }
 
-    public function show($id)
+    public function index()
     {
-        try {
-            $order = Order::with('tickets.ticketAvailability.visitSchedule.location')->findOrFail($id);
+        $userId = Auth::id();
+        $guestId = session('guest_id');
 
-            return view('ordinary.order.show.show', compact('order'));
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            abort(404, 'Order not found');
+        if (! $userId && ! $guestId) {
+            return redirect()->route('ticket.admission')->with('error', 'Authentication required to view orders.');
         }
+
+        $query = Order::with('payment');
+
+        if ($userId && $guestId) {
+            $query->where(function ($q) use ($userId, $guestId) {
+                $q->where('user_id', $userId)->orWhere('guest_id', $guestId);
+            });
+        } elseif ($userId) {
+            $query->where('user_id', $userId);
+        } else {
+            $query->where('guest_id', $guestId);
+        }
+
+        $orders = $query->orderBy('order_date', 'desc')->get();
+
+        return view('ordinary.order.show.show', [
+            'orders' => $orders,
+            'mode' => 'list'
+        ]);
+    }
+
+    public function show(Order $order)
+    {
+        $userId = Auth::id();
+        $guestId = session('guest_id');
+
+        $isOwner = ($order->user_id && $order->user_id === $userId) || 
+                   ($order->guest_id && $order->guest_id === $guestId);
+
+        if (!$isOwner && !($order->user_id === null && $order->guest_id === null)) {
+            abort(403, 'Unauthorized access to this order.');
+        }
+
+        $order->load([
+            'payment',
+            'tickets.ticketAvailability.ticketType',
+            'tickets.ticketAvailability.visitSchedule.location',
+        ]);
+
+        return view('ordinary.order.show.show', [
+            'order' => $order,
+            'mode' => 'detail'
+        ]);
     }
 }

@@ -24,7 +24,7 @@ class ArtController extends Controller
         $totalArtworks  = ArtWork::count();
         $totalUsers     = User::count();
         $totalOrders    = Order::count();
-        $recentArtworks = ArtWork::latest('id')->take(5)->get();
+        $recentArtworks = ArtWork::latest('art_work_id')->take(5)->get();
 
         return view('admin.dashboard.dashboard', [
             'totalArtworks'  => $totalArtworks,
@@ -73,10 +73,10 @@ class ArtController extends Controller
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'description'      => 'nullable|string',
-            'department_id'    => 'required|exists:departments,id',
-            'object_type_id'   => 'required|exists:object_types,id',
-            'geo_location_id'  => 'required|exists:geo_locations,id',
-            'location_id'      => 'required|exists:locations,id',
+            'department_id'    => 'required|exists:departments,department_id',
+            'object_type_id'   => 'required|exists:object_types,type_id',
+            'geo_location_id'  => 'required|exists:geo_locations,geo_id',
+            'location_id'      => 'required|exists:locations,location_id',
             'year_start'       => 'nullable|integer|min:1000|max:' . date('Y'),
             'year_end'         => 'nullable|integer|min:1000|max:' . date('Y'),
             'object_number'    => 'nullable|string|max:255|unique:art_works,object_number',
@@ -106,14 +106,14 @@ class ArtController extends Controller
                 $path = $image->store('artworks', 'public');
 
                 ArtWorkImage::create([
-                    'art_work_id' => $artwork->id,
+                    'art_work_id' => $artwork->art_work_id,
                     'url'         => $path,
                     'is_primary'  => $index === 0 ? 1 : 0,
                 ]);
             }
         }
 
-        return redirect()->route('admin.art.show', $artwork->id)
+        return redirect()->route('admin.art.show', $artwork->art_work_id)
             ->with('success', 'Artwork created successfully!');
     }
 
@@ -122,7 +122,7 @@ class ArtController extends Controller
      */
     public function edit($id)
     {
-        $artwork      = ArtWork::findOrFail($id);
+        $artwork      = ArtWork::where('art_work_id', $id)->firstOrFail();
         $departments  = Department::orderBy('name')->get();
         $types        = ObjectType::orderBy('name')->get();
         $geoLocations = GeoLocation::orderBy('name')->get();
@@ -142,18 +142,18 @@ class ArtController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $artwork = ArtWork::findOrFail($id);
+        $artwork = ArtWork::where('art_work_id', $id)->firstOrFail();
 
         $validated = $request->validate([
             'title'            => 'required|string|max:255',
             'description'      => 'nullable|string',
-            'department_id'    => 'required|exists:departments,id',
-            'object_type_id'   => 'required|exists:object_types,id',
-            'geo_location_id'  => 'required|exists:geo_locations,id',
-            'location_id'      => 'required|exists:locations,id',
+            'department_id'    => 'required|exists:departments,department_id',
+            'object_type_id'   => 'required|exists:object_types,type_id',
+            'geo_location_id'  => 'required|exists:geo_locations,geo_id',
+            'location_id'      => 'required|exists:locations,location_id',
             'year_start'       => 'nullable|integer|min:1000|max:' . date('Y'),
             'year_end'         => 'nullable|integer|min:1000|max:' . date('Y'),
-            'object_number'    => 'nullable|string|max:255|unique:art_works,object_number,' . $id,
+            'object_number'    => 'nullable|string|max:255|unique:art_works,object_number,' . $id . ',art_work_id',
             'accession_number' => 'nullable|string|max:255',
             'images'           => 'nullable|array',
             'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -180,7 +180,7 @@ class ArtController extends Controller
                 $path = $image->store('artworks', 'public');
 
                 ArtWorkImage::create([
-                    'art_work_id' => $artwork->id,
+                    'art_work_id' => $artwork->art_work_id,
                     'url'         => $path,
                     'is_primary'  => 0,
                 ]);
@@ -196,7 +196,9 @@ class ArtController extends Controller
      */
     public function show($id)
     {
-        $artwork = ArtWork::with('department', 'objectType', 'geoLocation', 'location', 'artists', 'images')->findOrFail($id);
+        $artwork = ArtWork::with('department', 'objectType', 'geoLocation', 'location', 'artists', 'images')
+            ->where('art_work_id', $id)
+            ->firstOrFail();
 
         return view('admin.art.show.show', [
             'artwork' => $artwork,
@@ -208,7 +210,7 @@ class ArtController extends Controller
      */
     public function destroy($id)
     {
-        $artwork = ArtWork::findOrFail($id);
+        $artwork = ArtWork::where('art_work_id', $id)->firstOrFail();
         $title   = $artwork->title;
 
         // Delete all images
@@ -228,7 +230,7 @@ class ArtController extends Controller
      */
     public function deleteImage($imageId)
     {
-        $image     = ArtWorkImage::findOrFail($imageId);
+        $image     = ArtWorkImage::where('image_id', $imageId)->firstOrFail();
         $artworkId = $image->art_work_id;
 
         // Delete file from storage

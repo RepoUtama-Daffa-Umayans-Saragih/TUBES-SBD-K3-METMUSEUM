@@ -11,6 +11,10 @@ class ArtWork extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'art_work_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
     protected $fillable = [
         'object_number',
         'title',

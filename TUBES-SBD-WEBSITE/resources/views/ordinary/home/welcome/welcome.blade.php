@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('layouts.app')
 
 @push('styles')
 @vite('resources/css/app.css')
@@ -110,7 +110,7 @@
                 Jalani pengalaman seni yang tak terlupakan. Museum kami buka setiap hari untuk memberikan akses terbaik
                 ke koleksi seni dunia.
             </p>
-            <a href="{{ route('visit.index') }}" class="btn-primary">Rencana Kunjungan Anda</a>
+            <a href="{{ route('plan-your-visit.index') }}" class="btn-primary">Rencana Kunjungan Anda</a>
         </div>
     </section>
 

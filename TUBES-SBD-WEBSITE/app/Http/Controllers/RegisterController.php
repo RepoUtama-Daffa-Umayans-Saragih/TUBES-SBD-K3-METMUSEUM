@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\PostalCode;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class RegisterController extends Controller
             'city'         => ['required', 'string'],
             'state'        => ['required', 'string'],
             'country'      => ['required', 'string'],
-            'postal_code'  => ['required', 'string'],
+            'postal_code'  => ['required', 'string', 'max:20'],
         ]);
 
         // Basic sanitization to avoid storing accidental whitespace.
@@ -33,21 +34,25 @@ class RegisterController extends Controller
         );
 
         $user = DB::transaction(function () use ($validated): User {
+            $postalCode = PostalCode::firstOrCreate([
+                'postal_code' => $validated['postal_code'],
+                'city'        => $validated['city'],
+                'state'       => $validated['state'],
+                'country'     => $validated['country'],
+            ]);
+
             $user = User::create([
                 'email'    => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
 
             $user->profile()->create([
-                'first_name'   => $validated['first_name'],
-                'last_name'    => $validated['last_name'],
-                'phone_number' => $validated['phone_number'],
-                'address1'     => $validated['address1'],
-                'address2'     => $validated['address2'] ?? null,
-                'city'         => $validated['city'],
-                'state'        => $validated['state'],
-                'country'      => $validated['country'],
-                'postal_code'  => $validated['postal_code'],
+                'first_name'     => $validated['first_name'],
+                'last_name'      => $validated['last_name'],
+                'phone_number'   => $validated['phone_number'],
+                'address1'       => $validated['address1'],
+                'address2'       => $validated['address2'] ?? null,
+                'postal_code_id' => $postalCode->postal_code_id,
             ]);
 
             return $user;

@@ -66,7 +66,7 @@
                     <select id="object_type_id" name="object_type_id" required>
                         <option value="">Select Type</option>
                         @foreach($types as $type)
-                            <option value="{{ $type->object_type_id }}" @selected(old('object_type_id') == $type->object_type_id)>
+                            <option value="{{ $type->type_id }}" @selected(old('object_type_id') == $type->type_id)>
                                 {{ $type->name }}
                             </option>
                         @endforeach
@@ -84,7 +84,7 @@
                     <select id="geo_location_id" name="geo_location_id">
                         <option value="">Select Geographic Location</option>
                         @foreach($geoLocations as $geo)
-                            <option value="{{ $geo->geo_location_id }}" @selected(old('geo_location_id') == $geo->geo_location_id)>
+                            <option value="{{ $geo->geo_id }}" @selected(old('geo_location_id') == $geo->geo_id)>
                                 {{ $geo->name }}
                             </option>
                         @endforeach
@@ -126,11 +126,11 @@
             <!-- Accession -->
             <div class="section-title">Accession Information</div>
 
-            <div class="form-group @error('accession_number') error @enderror">
-                <label for="accession_number">Accession Number *</label>
-                <input type="text" id="accession_number" name="accession_number" value="{{ old('accession_number') }}" required>
+            <div class="form-group @error('object_number') error @enderror">
+                <label for="object_number">Object Number *</label>
+                <input type="text" id="object_number" name="object_number" value="{{ old('object_number') }}" required>
                 <small class="form-helper-text">Must be unique. Example: 1998.242</small>
-                @error('accession_number') <span class="error-message">{{ $message }}</span> @enderror
+                @error('object_number') <span class="error-message">{{ $message }}</span> @enderror
             </div>
 
             <!-- Images -->

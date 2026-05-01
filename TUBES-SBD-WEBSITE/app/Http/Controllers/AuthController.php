@@ -13,10 +13,6 @@ class AuthController extends Controller
      */
     public function register()
     {
-        if (Auth::check()) {
-            return redirect()->route('account.index');
-        }
-
         return view('ordinary.account.register.register', [
             'title' => 'Register',
         ]);
@@ -27,12 +23,8 @@ class AuthController extends Controller
      */
     public function account()
     {
-        if (! Auth::check()) {
-            return redirect()->route('account.login');
-        }
-
         return view('ordinary.account.account.account', [
-            'user' => Auth::user(),
+            'user'  => Auth::user(),
             'title' => 'My Account',
         ]);
     }
@@ -42,10 +34,6 @@ class AuthController extends Controller
      */
     public function login()
     {
-        if (Auth::check()) {
-            return redirect()->route('account.index');
-        }
-
         return view('ordinary.account.login.login', [
             'title' => 'Login',
         ]);

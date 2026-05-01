@@ -39,7 +39,7 @@ class ArtWorkController extends Controller
                 })
                 ->when($request->filled('artist_id'), function ($q) use ($request) {
                     return $q->whereHas('artists', function ($query) use ($request) {
-                        $query->where('artists.id', $request->input('artist_id'));
+                        $query->where('artists.artist_id', $request->input('artist_id'));
                     });
                 })
                 ->when($request->filled('year_start') && $request->filled('year_end'), function ($q) use ($request) {
@@ -55,7 +55,7 @@ class ArtWorkController extends Controller
                             ->orWhere('description', 'LIKE', $searchTerm);
                     });
                 })
-                ->orderBy('id', 'DESC');
+                ->orderBy('art_work_id', 'DESC');
 
             $total    = $query->count();
             $artworks = $query->paginate($perPage);

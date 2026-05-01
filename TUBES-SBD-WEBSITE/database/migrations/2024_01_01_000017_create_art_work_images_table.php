@@ -16,8 +16,9 @@ return new class extends Migration
             $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->id();
-            $table->foreignId('art_work_id')->constrained('art_works')->cascadeOnDelete();
+            $table->increments('image_id');
+            $table->unsignedInteger('art_work_id');
+            $table->foreign('art_work_id')->references('art_work_id')->on('art_works')->onDelete('cascade');
             $table->text('url');
             $table->boolean('is_primary')->default(false);
         });

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->id();
+            $table->increments('geo_location_id');
             $table->string('name');
         });
     }

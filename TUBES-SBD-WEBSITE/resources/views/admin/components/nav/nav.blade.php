@@ -11,6 +11,6 @@
     </a>
     <a href="{{ route('home') }}">← Back to Site</a>
     <div class="admin-user-info user-info-spacer">
-        {{ Auth::user()->name }} ({{ Auth::user()->role }})
+        {{ optional(Auth::user()->profile)->first_name ?? 'Admin' }} {{ optional(Auth::user()->profile)->last_name ?? '' }} (Administrator)
     </div>
 </div>

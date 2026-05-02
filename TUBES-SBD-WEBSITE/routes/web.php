@@ -146,3 +146,6 @@ Route::get('/force-logout', function () {
 
     return 'logged out';
 });
+Route::get('/visit-guides/accessibility', function () {
+    return view('ordinary.plan-your-visit.accessibility.accessibility');
+});

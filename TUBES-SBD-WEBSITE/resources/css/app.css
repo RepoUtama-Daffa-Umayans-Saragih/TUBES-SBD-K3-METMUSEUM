@@ -1,12 +1,10 @@
 /* CUSTOM CORE (FITYA - DO NOT TOUCH ABOVE) */
 /* ============================= */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @import 'tailwindcss';
 @import './ordinary/plan-your-visit/visit/visit.css';
-@import './ordinary/member/membership.css';
+@import './ordinary/member/membership/membership.css';
+@import './ordinary/plan-your-visit/accessibility/accessibility.css';
 
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';

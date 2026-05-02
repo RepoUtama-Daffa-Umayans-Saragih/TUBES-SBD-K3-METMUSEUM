@@ -1,4 +1,10 @@
-@imprt 'tailwindcss';
+@layer base {
+    /* Ini rahasia supaya pas klik link, jalannya mulus/smooth */
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
 @layer components {
 
     /* Section pembungkus utama agar konten tetap di tengah */
@@ -14,14 +20,6 @@
     /* Styling untuk Subtitle/Deskripsi di bawahnya */
     .page-subtitle {
         @apply text-2xl md:text-2xl font-semibold text-gray-800 leading-tight max-w-4xl;
-    }
-
-    @layer base {
-
-        /* Ini rahasia supaya pas klik link, jalannya mulus/smooth */
-        html {
-            scroll-behavior: smooth;
-        }
     }
 
     .jump-to-wrapper {

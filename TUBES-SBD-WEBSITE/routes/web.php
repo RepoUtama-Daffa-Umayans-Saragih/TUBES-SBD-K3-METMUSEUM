@@ -149,3 +149,7 @@ Route::get('/force-logout', function () {
 Route::get('/visit-guides/accessibility', function () {
     return view('ordinary.plan-your-visit.accessibility.accessibility');
 });
+
+Route::get('/member/membership', function () {
+    return view('ordinary.member.membership.membership');
+})->name('member.membership');

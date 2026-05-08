@@ -58,14 +58,48 @@ class ArtController extends Controller
     public function search(Request $request)
     {
         $query = ArtWork::query()
-            ->with(['department', 'objectType', 'location', 'images']);
+            ->with(['department', 'objectType', 'location', 'images', 'constituents', 'cultures']);
 
-        // Search keyword in title and description
+        // Canonical Field Mapping
+        $fieldMap = [
+            'all' => 'All Fields',
+            'artist' => 'Artist / Culture',
+            'title' => 'Title',
+            'description' => 'Description',
+            'gallery' => 'Gallery',
+            'object_number' => 'Object Number',
+            'credit_line' => 'Credit Line'
+        ];
+
+        // Read Search State
         $keyword = $request->input('q');
+        $currentField = $request->input('field', 'all');
+        $currentFieldLabel = $fieldMap[$currentField] ?? 'All Fields';
+        
         if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', "%{$keyword}%")
-                    ->orWhere('description', 'like', "%{$keyword}%");
+            $query->where(function ($q) use ($keyword, $currentField) {
+                if ($currentField === 'title' || $currentField === 'all') {
+                    $q->orWhere('title', 'like', "%{$keyword}%");
+                }
+                if ($currentField === 'description' || $currentField === 'all') {
+                    $q->orWhere('description', 'like', "%{$keyword}%");
+                }
+                if ($currentField === 'credit_line' || $currentField === 'all') {
+                    $q->orWhere('credit_line', 'like', "%{$keyword}%");
+                }
+                if ($currentField === 'gallery' || $currentField === 'all') {
+                    $q->orWhere('gallery_number', 'like', "%{$keyword}%");
+                }
+                if ($currentField === 'object_number' || $currentField === 'all') {
+                    $q->orWhere('accession_number', 'like', "%{$keyword}%");
+                }
+                if ($currentField === 'artist' || $currentField === 'all') {
+                    $q->orWhereHas('constituents', function ($sub) use ($keyword) {
+                        $sub->where('display_name', 'like', "%{$keyword}%");
+                    })->orWhereHas('cultures', function ($sub) use ($keyword) {
+                        $sub->where('culture_name', 'like', "%{$keyword}%");
+                    });
+                }
             });
         }
 
@@ -98,10 +132,14 @@ class ArtController extends Controller
 
         $filterData = $this->getFilterData();
 
-        return view('ordinary.art.art', array_merge([
+        return view('ordinary.art.search.search', array_merge([
             'artworks'            => $artworks,
+            'totalResults'        => $artworks->total(),
             'title'               => 'Search Results',
             'search_query'        => $keyword ?? '',
+            'currentField'        => $currentField,
+            'currentFieldLabel'   => $currentFieldLabel,
+            'currentSort'         => $request->input('sort', 'relevance'),
             'selected_department' => $departmentId,
             'selected_type'       => $typeId,
         ], $filterData));

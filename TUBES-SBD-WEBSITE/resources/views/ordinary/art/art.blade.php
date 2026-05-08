@@ -108,7 +108,7 @@
     <div class="flex items-center gap-10 mt-12 flex-wrap">
       
       <a
-        href="#"
+        href="{{ route('art.search') }}"
         class="flex items-center gap-4 text-[20px] text-[#111] font-medium hover:underline"
       >
         Advanced Collection Search

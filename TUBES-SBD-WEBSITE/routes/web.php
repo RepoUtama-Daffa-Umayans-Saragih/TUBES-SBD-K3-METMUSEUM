@@ -127,7 +127,7 @@ Route::post('/members/membership/purchase', [MembershipController::class, 'purch
 // ========================================
 // LEGACY ROUTES (Keeping for compatibility)
 // ========================================
-Route::get('/art/{slug}', [ArtWorkController::class, 'show']);
+Route::get('/art/{slug}', [ArtWorkController::class, 'show'])->name('artwork.show');
 
 Route::get('/order/create', [OrderController::class, 'create'])->name('order.create');
 Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');

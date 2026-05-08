@@ -82,6 +82,16 @@ class ArtWork extends Model
         return $this->belongsToMany(Artist::class, 'art_work_artists', 'art_work_id', 'artist_id');
     }
 
+    public function constituents(): BelongsToMany
+    {
+        return $this->belongsToMany(Constituent::class, 'art_work_constituents', 'art_work_id', 'constituent_id');
+    }
+
+    public function cultures(): BelongsToMany
+    {
+        return $this->belongsToMany(Culture::class, 'art_work_cultures', 'art_work_id', 'culture_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ArtWorkImage::class, 'art_work_id');
@@ -114,8 +124,11 @@ class ArtWork extends Model
 
     public function getImageUrlAttribute()
     {
-        $image = $this->images()->where('is_primary', true)->first() ?? $this->images()->first();
-        return $image ? $image->image_url : null;
+        $images = $this->images; // Use loaded collection
+        if ($images->isEmpty()) return null;
+        
+        $primary = $images->where('is_primary', true)->first();
+        return $primary ? $primary->image_url : $images->first()->image_url;
     }
 
     public function getCreatedAtAttribute()

@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('materials', function (Blueprint $table) {
+        Schema::create('art_work_artists', function (Blueprint $table) {
             $table->engine    = 'InnoDB';
             $table->charset   = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->increments('material_id');
-            $table->string('name');
+            $table->unsignedInteger('art_work_id');
+            $table->unsignedInteger('artist_id');
 
-            $table->index('name', 'idx_materials_name');
+            $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
+            $table->foreign('artist_id')->references('artist_id')->on('artists');
+
+            $table->unique(['art_work_id', 'artist_id'], 'uq_art_work_artists_art_work_artist');
         });
     }
 
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('materials');
+        Schema::dropIfExists('art_work_artists');
     }
 };

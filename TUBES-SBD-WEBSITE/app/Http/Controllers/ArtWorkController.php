@@ -20,9 +20,13 @@ class ArtWorkController extends Controller
             $query = ArtWork::query()
                 ->with([
                     'images',
+                    'artists',
                     'department',
                     'objectType',
                     'location',
+                    'classification',
+                    'repository',
+                    'materials',
                 ])
                 ->whereHas('images')
                 ->when($request->filled('department_id'), function ($q) use ($request) {
@@ -90,9 +94,13 @@ class ArtWorkController extends Controller
                 return ArtWork::where('slug', $slug)
                     ->with([
                         'images',
+                        'artists',
                         'department',
                         'objectType',
                         'location',
+                        'classification',
+                        'repository',
+                        'materials',
                     ])
                     ->firstOrFail();
             });

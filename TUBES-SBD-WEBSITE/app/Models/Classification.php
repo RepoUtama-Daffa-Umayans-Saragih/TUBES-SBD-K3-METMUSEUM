@@ -23,4 +23,9 @@ class Classification extends Model
     {
         return $this->hasMany(ArtWork::class, 'classification_id');
     }
+
+    public function getNameAttribute()
+    {
+        return $this->classification_name;
+    }
 }

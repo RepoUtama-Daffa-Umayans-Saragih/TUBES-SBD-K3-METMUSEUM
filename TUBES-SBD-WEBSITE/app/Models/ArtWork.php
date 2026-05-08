@@ -77,6 +77,11 @@ class ArtWork extends Model
         return $this->belongsToMany(Material::class, 'art_work_materials', 'art_work_id', 'material_id');
     }
 
+    public function artists(): BelongsToMany
+    {
+        return $this->belongsToMany(Artist::class, 'art_work_artists', 'art_work_id', 'artist_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ArtWorkImage::class, 'art_work_id');
@@ -95,6 +100,16 @@ class ArtWork extends Model
     public function getYearStartAttribute()
     {
         return $this->object_begin_date;
+    }
+
+    public function getYearEndAttribute()
+    {
+        return $this->object_end_date;
+    }
+
+    public function getObjectNumberAttribute()
+    {
+        return $this->accession_number;
     }
 
     public function getImageUrlAttribute()

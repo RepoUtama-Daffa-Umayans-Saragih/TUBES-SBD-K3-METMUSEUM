@@ -23,4 +23,9 @@ class Repository extends Model
     {
         return $this->hasMany(ArtWork::class, 'repository_id');
     }
+
+    public function getNameAttribute()
+    {
+        return $this->repository_name;
+    }
 }

@@ -9,10 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
+            $table->increments('order_detail_id');
+            $table->unsignedInteger('order_id');
+            $table->unsignedInteger('ticket_id');
             $table->unsignedInteger('quantity');
+
+            $table->foreign('order_id')->references('order_id')->on('orders')->cascadeOnDelete();
+            $table->foreign('ticket_id')->references('ticket_id')->on('tickets')->cascadeOnDelete();
         });
     }
 

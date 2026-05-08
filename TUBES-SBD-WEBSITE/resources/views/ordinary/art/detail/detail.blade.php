@@ -6,89 +6,14 @@
 @endpush
 
 @section('title', $artwork->title . ' - MET Museum')
-    }
-
-    .meta-value {
-        font-size: 0.95rem;
-        color: #666;
-    }
-
-    .meta-value a {
-        color: #333;
-        text-decoration: none;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .meta-value a:hover {
-        border-bottom-color: #000;
-    }
-
-    .detail-description {
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e0e0e0;
-    }
-
-    .description-label {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #333;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 1rem;
-    }
-
-    .description-text {
-        font-size: 0.95rem;
-        line-height: 1.7;
-        color: #555;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-top: 2rem;
-        padding: 0.7rem 1.5rem;
-        border: 1px solid #ddd;
-        text-decoration: none;
-        color: #333;
-        transition: all 0.3s;
-        font-size: 0.9rem;
-    }
-
-    .back-link:hover {
-        border-color: #000;
-        background-color: #f5f5f5;
-    }
-
-    @media (max-width: 768px) {
-        .detail-grid {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-
-        .detail-title {
-            font-size: 1.5rem;
-        }
-
-        .meta-item {
-            grid-template-columns: 120px 1fr;
-        }
-
-        .image-gallery {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-</style>
-@endsection
 
 @section('content')
 <div class="detail-container">
     <div class="breadcrumb">
-        <a href="/art/collection">Collection</a> / <span>{{ $artwork->title }}</span>
+        <a href="{{ route('art.index') }}">Collection</a> / <span>{{ $artwork->title }}</span>
     </div>
 
     <div class="detail-grid">
-        <!-- Image Section -->
         <div class="detail-image-section">
             @php
                 $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
@@ -116,7 +41,6 @@
             @endif
         </div>
 
-        <!-- Info Section -->
         <div class="detail-info">
             <h1 class="detail-title">{{ $artwork->title }}</h1>
 
@@ -124,15 +48,7 @@
                 @if($artwork->artists->isNotEmpty())
                     <div class="meta-item">
                         <span class="meta-label">Artist{{ $artwork->artists->count() > 1 ? 's' : '' }}</span>
-                        <span class="meta-value">
-                            @foreach($artwork->artists as $artist)
-                                <div>{{ $artist->name }}
-                                    @if($artist->nationality)
-                                        <span class="text-muted-light">({{ $artist->nationality }})</span>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </span>
+                        <span class="meta-value">{{ $artwork->artists->pluck('name')->join(', ') }}</span>
                     </div>
                 @endif
 
@@ -141,13 +57,34 @@
                         <span class="meta-label">Date</span>
                         <span class="meta-value">
                             @if($artwork->year_start && $artwork->year_end)
-                                {{ $artwork->year_start }} – {{ $artwork->year_end }}
+                                {{ $artwork->year_start }} - {{ $artwork->year_end }}
                             @elseif($artwork->year_start)
                                 {{ $artwork->year_start }}
                             @else
                                 {{ $artwork->year_end }}
                             @endif
                         </span>
+                    </div>
+                @endif
+
+                @if($artwork->met_object_id)
+                    <div class="meta-item">
+                        <span class="meta-label">Met Object ID</span>
+                        <span class="meta-value">{{ $artwork->met_object_id }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->object_number)
+                    <div class="meta-item">
+                        <span class="meta-label">Object Number</span>
+                        <span class="meta-value">{{ $artwork->object_number }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->accession_year)
+                    <div class="meta-item">
+                        <span class="meta-label">Accession Year</span>
+                        <span class="meta-value">{{ $artwork->accession_year }}</span>
                     </div>
                 @endif
 
@@ -165,13 +102,6 @@
                     </div>
                 @endif
 
-                @if($artwork->geoLocation)
-                    <div class="meta-item">
-                        <span class="meta-label">Geography</span>
-                        <span class="meta-value">{{ $artwork->geoLocation->name }}</span>
-                    </div>
-                @endif
-
                 @if($artwork->location)
                     <div class="meta-item">
                         <span class="meta-label">Gallery</span>
@@ -179,10 +109,24 @@
                     </div>
                 @endif
 
-                @if($artwork->object_number)
+                @if($artwork->repository)
                     <div class="meta-item">
-                        <span class="meta-label">Object Number</span>
-                        <span class="meta-value">{{ $artwork->object_number }}</span>
+                        <span class="meta-label">Repository</span>
+                        <span class="meta-value">{{ $artwork->repository->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->classification)
+                    <div class="meta-item">
+                        <span class="meta-label">Classification</span>
+                        <span class="meta-value">{{ $artwork->classification->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->materials->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Materials</span>
+                        <span class="meta-value">{{ $artwork->materials->pluck('name')->join(', ') }}</span>
                     </div>
                 @endif
             </div>
@@ -196,7 +140,7 @@
                 </div>
             @endif
 
-            <a href="/art/collection" class="back-link">← Back to Collection</a>
+            <a href="{{ route('art.index') }}" class="back-link">Back to Collection</a>
         </div>
     </div>
 </div>

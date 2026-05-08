@@ -50,9 +50,9 @@ class DatabaseSeeder extends Seeder
         //         'address2' => fake()->secondaryAddress(),
         //         'postal_code_id' => PostalCode::firstOrCreate([
         //             'postal_code' => fake()->postcode(),
-        //                 'postal_city' => fake()->city(),
-        //                 'postal_state' => fake()->state(),
-        //                 'postal_country' => 'United States',
+        //             'postal_city' => fake()->city(),
+        //             'postal_state' => fake()->state(),
+        //             'postal_country' => 'United States',
         //         ])->postal_code_id,
         //     ]);
         // });

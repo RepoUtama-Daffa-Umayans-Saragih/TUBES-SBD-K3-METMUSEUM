@@ -14,7 +14,7 @@ class ObjectType extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
-        'name',
+        'object_type_name',
     ];
 
     public $timestamps = false;
@@ -22,5 +22,10 @@ class ObjectType extends Model
     public function artWorks(): HasMany
     {
         return $this->hasMany(ArtWork::class, 'type_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->object_type_name;
     }
 }

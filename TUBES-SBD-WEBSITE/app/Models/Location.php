@@ -14,7 +14,7 @@ class Location extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
-        'name',
+        'location_name',
         'address',
         'capacity_limit',
     ];
@@ -29,5 +29,10 @@ class Location extends Model
     public function visitSchedules(): HasMany
     {
         return $this->hasMany(VisitSchedule::class, 'location_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->location_name;
     }
 }

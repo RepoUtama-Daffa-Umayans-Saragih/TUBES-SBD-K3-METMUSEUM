@@ -14,7 +14,7 @@ class Department extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
-        'name',
+        'department_name',
     ];
 
     public $timestamps = false;
@@ -22,5 +22,10 @@ class Department extends Model
     public function artWorks(): HasMany
     {
         return $this->hasMany(ArtWork::class, 'department_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->department_name;
     }
 }

@@ -1,10 +1,8 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Models\Artist;
 use App\Models\ArtWork;
 use App\Models\Department;
-use App\Models\GeoLocation;
 use App\Models\ObjectType;
 use Illuminate\Http\Request;
 
@@ -16,10 +14,8 @@ class ArtController extends Controller
     private function getFilterData()
     {
         return [
-            'departments'  => Department::orderBy('name')->get(['department_id', 'name']),
-            'artists'      => Artist::orderBy('name')->get(['artist_id', 'name']),
-            'types'        => ObjectType::orderBy('name')->get(['type_id', 'name']),
-            'geolocations' => GeoLocation::orderBy('name')->get(['geo_id', 'name']),
+            'departments' => Department::orderBy('department_name')->get(['department_id', 'department_name']),
+            'types'       => ObjectType::orderBy('object_type_name')->get(['type_id', 'object_type_name']),
         ];
     }
 
@@ -29,7 +25,7 @@ class ArtController extends Controller
     public function index()
     {
         $artworks = ArtWork::query()
-            ->with(['artists', 'department', 'objectType', 'geoLocation', 'location', 'images'])
+            ->with(['department', 'objectType', 'location', 'images'])
             ->paginate(12);
 
         $filterData = $this->getFilterData();
@@ -46,7 +42,7 @@ class ArtController extends Controller
      */
     public function show($id)
     {
-        $artwork = ArtWork::with(['artists', 'department', 'objectType', 'geoLocation', 'location', 'images'])
+        $artwork = ArtWork::with(['department', 'objectType', 'location', 'images'])
             ->where('art_work_id', $id)
             ->firstOrFail();
 
@@ -62,7 +58,7 @@ class ArtController extends Controller
     public function search(Request $request)
     {
         $query = ArtWork::query()
-            ->with(['artists', 'department', 'objectType', 'geoLocation', 'location', 'images']);
+            ->with(['department', 'objectType', 'location', 'images']);
 
         // Search keyword in title and description
         $keyword = $request->input('q');
@@ -70,14 +66,6 @@ class ArtController extends Controller
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
                     ->orWhere('description', 'like', "%{$keyword}%");
-            });
-        }
-
-        // Filter by artist_id
-        $artistId = $request->input('artist_id');
-        if ($artistId) {
-            $query->whereHas('artists', function ($q) use ($artistId) {
-                $q->where('artists.artist_id', $artistId);
             });
         }
 
@@ -93,22 +81,16 @@ class ArtController extends Controller
             $query->where('type_id', $typeId);
         }
 
-        // Filter by geo_id
-        $geoId = $request->input('geo_id');
-        if ($geoId) {
-            $query->where('geo_id', $geoId);
-        }
-
-        // Filter by year range - year_start
+        // Filter by year range - object_begin_date
         $yearStart = $request->input('year_start');
         if ($yearStart) {
-            $query->where('year_end', '>=', (int) $yearStart);
+            $query->where('object_end_date', '>=', (int) $yearStart);
         }
 
-        // Filter by year range - year_end
+        // Filter by year range - object_end_date
         $yearEnd = $request->input('year_end');
         if ($yearEnd) {
-            $query->where('year_start', '<=', (int) $yearEnd);
+            $query->where('object_begin_date', '<=', (int) $yearEnd);
         }
 
         // Execute query with pagination
@@ -120,10 +102,8 @@ class ArtController extends Controller
             'artworks'            => $artworks,
             'title'               => 'Search Results',
             'search_query'        => $keyword ?? '',
-            'selected_artist'     => $artistId,
             'selected_department' => $departmentId,
             'selected_type'       => $typeId,
-            'selected_geo'        => $geoId,
         ], $filterData));
     }
 }

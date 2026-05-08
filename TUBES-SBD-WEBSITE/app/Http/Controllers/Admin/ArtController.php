@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ArtWork;
 use App\Models\ArtWorkImage;
 use App\Models\Department;
-use App\Models\GeoLocation;
 use App\Models\Location;
 use App\Models\ObjectType;
 use App\Models\Order;
@@ -39,7 +38,7 @@ class ArtController extends Controller
      */
     public function index()
     {
-        $artworks = ArtWork::with('department', 'objectType', 'geoLocation', 'location', 'artists')
+        $artworks = ArtWork::with('department', 'objectType', 'location')
             ->paginate(20);
 
         return view('admin.art.art', [
@@ -52,16 +51,14 @@ class ArtController extends Controller
      */
     public function create()
     {
-        $departments  = Department::orderBy('name')->get();
-        $types        = ObjectType::orderBy('name')->get();
-        $geoLocations = GeoLocation::orderBy('name')->get();
-        $locations    = Location::orderBy('name')->get();
+        $departments = Department::orderBy('department_name')->get();
+        $types       = ObjectType::orderBy('object_type_name')->get();
+        $locations   = Location::orderBy('location_name')->get();
 
         return view('admin.art.create.create', [
-            'departments'  => $departments,
-            'types'        => $types,
-            'geoLocations' => $geoLocations,
-            'locations'    => $locations,
+            'departments' => $departments,
+            'types'       => $types,
+            'locations'   => $locations,
         ]);
     }
 
@@ -71,33 +68,36 @@ class ArtController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'            => 'required|string|max:255',
-            'description'      => 'nullable|string',
-            'department_id'    => 'required|exists:departments,department_id',
-            'object_type_id'   => 'required|exists:object_types,type_id',
-            'geo_location_id'  => 'required|exists:geo_locations,geo_id',
-            'location_id'      => 'required|exists:locations,location_id',
-            'year_start'       => 'nullable|integer|min:1000|max:' . date('Y'),
-            'year_end'         => 'nullable|integer|min:1000|max:' . date('Y'),
-            'object_number'    => 'nullable|string|max:255|unique:art_works,object_number',
-            'accession_number' => 'nullable|string|max:255',
-            'images'           => 'nullable|array',
-            'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'met_object_id'       => 'nullable|string|max:255|unique:art_works,met_object_id',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'department_id'       => 'required|exists:departments,department_id',
+            'type_id'             => 'required|exists:object_types,type_id',
+            'location_id'         => 'required|exists:locations,location_id',
+            'accession_number'    => 'nullable|string|max:255|unique:art_works,accession_number',
+            'accession_year'      => 'nullable|integer|min:1000|max:' . date('Y'),
+            'object_date_display' => 'nullable|string|max:255',
+            'object_begin_date'   => 'nullable|integer|min:1000|max:' . date('Y'),
+            'object_end_date'     => 'nullable|integer|min:1000|max:' . date('Y'),
+            'gallery_number'      => 'nullable|string|max:255',
+            'images'              => 'nullable|array',
+            'images.*'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        $objectNumber = $validated['object_number'] ?? $validated['accession_number'] ?? strtoupper(Str::random(12));
-
         $artwork = ArtWork::create([
-            'object_number' => $objectNumber,
-            'title'         => $validated['title'],
-            'description'   => $validated['description'] ?? null,
-            'department_id' => $validated['department_id'],
-            'type_id'       => $validated['object_type_id'],
-            'geo_id'        => $validated['geo_location_id'] ?? null,
-            'location_id'   => $validated['location_id'] ?? null,
-            'year_start'    => $validated['year_start'] ?? null,
-            'year_end'      => $validated['year_end'] ?? null,
-            'slug'          => Str::slug($validated['title']),
+            'met_object_id'       => $validated['met_object_id'] ?? null,
+            'title'               => $validated['title'],
+            'slug'                => Str::slug($validated['title']),
+            'description'         => $validated['description'] ?? null,
+            'department_id'       => $validated['department_id'],
+            'type_id'             => $validated['type_id'],
+            'location_id'         => $validated['location_id'],
+            'accession_number'    => $validated['accession_number'] ?? null,
+            'accession_year'      => $validated['accession_year'] ?? null,
+            'object_date_display' => $validated['object_date_display'] ?? null,
+            'object_begin_date'   => $validated['object_begin_date'] ?? null,
+            'object_end_date'     => $validated['object_end_date'] ?? null,
+            'gallery_number'      => $validated['gallery_number'] ?? null,
         ]);
 
         // Handle image uploads
@@ -122,18 +122,16 @@ class ArtController extends Controller
      */
     public function edit($id)
     {
-        $artwork      = ArtWork::where('art_work_id', $id)->firstOrFail();
-        $departments  = Department::orderBy('name')->get();
-        $types        = ObjectType::orderBy('name')->get();
-        $geoLocations = GeoLocation::orderBy('name')->get();
-        $locations    = Location::orderBy('name')->get();
+        $artwork     = ArtWork::where('art_work_id', $id)->firstOrFail();
+        $departments = Department::orderBy('department_name')->get();
+        $types       = ObjectType::orderBy('object_type_name')->get();
+        $locations   = Location::orderBy('location_name')->get();
 
         return view('admin.art.edit.edit', [
-            'artwork'      => $artwork,
-            'departments'  => $departments,
-            'types'        => $types,
-            'geoLocations' => $geoLocations,
-            'locations'    => $locations,
+            'artwork'     => $artwork,
+            'departments' => $departments,
+            'types'       => $types,
+            'locations'   => $locations,
         ]);
     }
 
@@ -145,33 +143,36 @@ class ArtController extends Controller
         $artwork = ArtWork::where('art_work_id', $id)->firstOrFail();
 
         $validated = $request->validate([
-            'title'            => 'required|string|max:255',
-            'description'      => 'nullable|string',
-            'department_id'    => 'required|exists:departments,department_id',
-            'object_type_id'   => 'required|exists:object_types,type_id',
-            'geo_location_id'  => 'required|exists:geo_locations,geo_id',
-            'location_id'      => 'required|exists:locations,location_id',
-            'year_start'       => 'nullable|integer|min:1000|max:' . date('Y'),
-            'year_end'         => 'nullable|integer|min:1000|max:' . date('Y'),
-            'object_number'    => 'nullable|string|max:255|unique:art_works,object_number,' . $id . ',art_work_id',
-            'accession_number' => 'nullable|string|max:255',
-            'images'           => 'nullable|array',
-            'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'met_object_id'       => 'nullable|string|max:255|unique:art_works,met_object_id,' . $id . ',art_work_id',
+            'title'               => 'required|string|max:255',
+            'description'         => 'nullable|string',
+            'department_id'       => 'required|exists:departments,department_id',
+            'type_id'             => 'required|exists:object_types,type_id',
+            'location_id'         => 'required|exists:locations,location_id',
+            'accession_number'    => 'nullable|string|max:255|unique:art_works,accession_number,' . $id . ',art_work_id',
+            'accession_year'      => 'nullable|integer|min:1000|max:' . date('Y'),
+            'object_date_display' => 'nullable|string|max:255',
+            'object_begin_date'   => 'nullable|integer|min:1000|max:' . date('Y'),
+            'object_end_date'     => 'nullable|integer|min:1000|max:' . date('Y'),
+            'gallery_number'      => 'nullable|string|max:255',
+            'images'              => 'nullable|array',
+            'images.*'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        $objectNumber = $validated['object_number'] ?? $validated['accession_number'] ?? $artwork->object_number;
-
         $artwork->update([
-            'object_number' => $objectNumber,
-            'title'         => $validated['title'],
-            'description'   => $validated['description'] ?? null,
-            'department_id' => $validated['department_id'],
-            'type_id'       => $validated['object_type_id'],
-            'geo_id'        => $validated['geo_location_id'] ?? null,
-            'location_id'   => $validated['location_id'] ?? null,
-            'year_start'    => $validated['year_start'] ?? null,
-            'year_end'      => $validated['year_end'] ?? null,
-            'slug'          => Str::slug($validated['title']),
+            'met_object_id'       => $validated['met_object_id'] ?? $artwork->met_object_id,
+            'title'               => $validated['title'],
+            'slug'                => Str::slug($validated['title']),
+            'description'         => $validated['description'] ?? null,
+            'department_id'       => $validated['department_id'],
+            'type_id'             => $validated['type_id'],
+            'location_id'         => $validated['location_id'],
+            'accession_number'    => $validated['accession_number'] ?? null,
+            'accession_year'      => $validated['accession_year'] ?? null,
+            'object_date_display' => $validated['object_date_display'] ?? null,
+            'object_begin_date'   => $validated['object_begin_date'] ?? null,
+            'object_end_date'     => $validated['object_end_date'] ?? null,
+            'gallery_number'      => $validated['gallery_number'] ?? null,
         ]);
 
         // Handle image uploads
@@ -196,7 +197,7 @@ class ArtController extends Controller
      */
     public function show($id)
     {
-        $artwork = ArtWork::with('department', 'objectType', 'geoLocation', 'location', 'artists', 'images')
+        $artwork = ArtWork::with('department', 'objectType', 'location', 'images')
             ->where('art_work_id', $id)
             ->firstOrFail();
 

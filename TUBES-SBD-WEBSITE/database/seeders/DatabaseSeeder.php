@@ -22,10 +22,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $postalCode = PostalCode::firstOrCreate([
-            'postal_code' => '10028',
-            'city'        => 'New York',
-            'state'       => 'NY',
-            'country'     => 'United States',
+            'postal_code'    => '10028',
+            'postal_city'    => 'New York',
+            'postal_state'   => 'NY',
+            'postal_country' => 'United States',
         ]);
 
         // Create corresponding user profile
@@ -50,12 +50,23 @@ class DatabaseSeeder extends Seeder
         //         'address2' => fake()->secondaryAddress(),
         //         'postal_code_id' => PostalCode::firstOrCreate([
         //             'postal_code' => fake()->postcode(),
-        //             'city' => fake()->city(),
-        //             'state' => fake()->state(),
-        //             'country' => 'United States',
+        //                 'postal_city' => fake()->city(),
+        //                 'postal_state' => fake()->state(),
+        //                 'postal_country' => 'United States',
         //         ])->postal_code_id,
         //     ]);
         // });
-        $this->call(TicketSystemSeeder::class);
+        $this->call([
+            TicketSystemSeeder::class,
+            DepartmentSeeder::class,
+            GeographySeeder::class,
+            MaterialSeeder::class,
+            ClassificationSeeder::class,
+            ObjectTypeSeeder::class,
+            SearchFieldSeeder::class,
+            SortOptionSeeder::class,
+            ShowOnlySeeder::class,
+            CuratedMetMuseumSeeder::class,
+        ]);
     }
 }

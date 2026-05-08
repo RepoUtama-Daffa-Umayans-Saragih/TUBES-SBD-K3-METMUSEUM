@@ -22,10 +22,17 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $postalCode = PostalCode::firstOrCreate([
+<<<<<<< HEAD
             'postal_code'    => '10028',
             'postal_city'    => 'New York',
             'postal_state'   => 'NY',
             'postal_country' => 'United States',
+=======
+            'postal_code' => '10028',
+            'city'        => 'New York',
+            'state'       => 'NY',
+            'country'     => 'United States',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
         ]);
 
         // Create corresponding user profile
@@ -50,6 +57,7 @@ class DatabaseSeeder extends Seeder
         //         'address2' => fake()->secondaryAddress(),
         //         'postal_code_id' => PostalCode::firstOrCreate([
         //             'postal_code' => fake()->postcode(),
+<<<<<<< HEAD
         //                 'postal_city' => fake()->city(),
         //                 'postal_state' => fake()->state(),
         //                 'postal_country' => 'United States',
@@ -68,5 +76,14 @@ class DatabaseSeeder extends Seeder
             ShowOnlySeeder::class,
             CuratedMetMuseumSeeder::class,
         ]);
+=======
+        //             'city' => fake()->city(),
+        //             'state' => fake()->state(),
+        //             'country' => 'United States',
+        //         ])->postal_code_id,
+        //     ]);
+        // });
+        $this->call(TicketSystemSeeder::class);
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     }
 }

@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
+<<<<<<< HEAD
             $table->integer('user_id')->nullable()->index();
+=======
+            $table->unsignedInteger('user_id')->nullable()->index();
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');

@@ -14,7 +14,11 @@ class TicketType extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
+<<<<<<< HEAD
         'ticket_type_name',
+=======
+        'name',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
         'base_price',
     ];
 
@@ -28,9 +32,12 @@ class TicketType extends Model
     {
         return $this->hasMany(TicketAvailability::class, 'ticket_type_id', 'ticket_type_id');
     }
+<<<<<<< HEAD
 
     public function getNameAttribute()
     {
         return $this->ticket_type_name;
     }
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
 }

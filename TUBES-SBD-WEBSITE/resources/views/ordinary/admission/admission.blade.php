@@ -147,6 +147,7 @@
                              data-type="{{ strtolower($av->ticketType->name) }}"
                              data-price="{{ $av->ticketType->base_price }}">
                             <div class="ticket-info">
+<<<<<<< HEAD
                                 <h3>{{ $av->ticketType->ticket_type_name }} Admission</h3>
 
                                 @if(strtolower($av->ticketType->ticket_type_name) === 'child')
@@ -154,6 +155,14 @@
                                 @elseif(strtolower($av->ticketType->ticket_type_name) === 'student')
                                     <p>with valid ID</p>
                                 @elseif(strtolower($av->ticketType->ticket_type_name) === 'senior')
+=======
+                                <h3>{{ $av->ticketType->name }} Admission</h3>
+                                @if(strtolower($av->ticketType->name) === 'child')
+                                    <p>12 and under</p>
+                                @elseif(strtolower($av->ticketType->name) === 'student')
+                                    <p>with valid ID</p>
+                                @elseif(strtolower($av->ticketType->name) === 'senior')
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                                     <p>65 and over</p>
                                 @endif
                             </div>

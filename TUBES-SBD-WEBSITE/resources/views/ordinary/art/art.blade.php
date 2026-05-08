@@ -46,7 +46,10 @@
                     </select>
                 </div>
 
+<<<<<<< HEAD
                 {{-- Artist Filter Removed
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                 <div class="filter-group">
                     <label for="artist_filter">Artist</label>
                     <select name="artist_id" id="artist_filter" class="filter-select">
@@ -58,7 +61,10 @@
                         @endforeach
                     </select>
                 </div>
+<<<<<<< HEAD
                 --}}
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
 
                 <div class="filter-group">
                     <label for="type_filter">Object Type</label>
@@ -72,7 +78,10 @@
                     </select>
                 </div>
 
+<<<<<<< HEAD
                 {{-- Geo Location Filter Removed
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                 <div class="filter-group">
                     <label for="geo_filter">Geo Location</label>
                     <select name="geo_id" id="geo_filter" class="filter-select">
@@ -84,7 +93,10 @@
                         @endforeach
                     </select>
                 </div>
+<<<<<<< HEAD
                 --}}
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
             </div>
 
             <!-- Active Filters -->
@@ -102,14 +114,20 @@
                             <a href="{{ url()->current() }}?{{ http_build_query(array_filter(array_merge(request()->query(), ['department_id' => null]))) }}" class="remove-filter">×</a>
                         </span>
                     @endif
+<<<<<<< HEAD
                     {{--
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                     @if(request('artist_id'))
                         <span class="filter-tag">
                             Artist: <strong>{{ optional($artists->firstWhere('artist_id', request('artist_id')))->name ?? 'Unknown' }}</strong>
                             <a href="{{ url()->current() }}?{{ http_build_query(array_filter(array_merge(request()->query(), ['artist_id' => null]))) }}" class="remove-filter">×</a>
                         </span>
                     @endif
+<<<<<<< HEAD
                     --}}
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                     <a href="{{ route('art.index') }}" class="clear-filters">Clear all filters</a>
                 </div>
             @endif
@@ -130,8 +148,16 @@
                 <div class="artwork-item">
                     <a href="{{ route('art.show', $artwork->art_work_id) }}" class="artwork-card">
                         <div class="artwork-image">
+<<<<<<< HEAD
                             <img
                                 src="{{ $artwork->image_url ?: 'https://via.placeholder.com/280x320?text=No+Image' }}"
+=======
+                            @php
+                                $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
+                            @endphp
+                            <img
+                                src="{{ $primaryImage ? asset('storage/' . $primaryImage->url) : 'https://via.placeholder.com/280x320?text=No+Image' }}"
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                                 alt="{{ $artwork->title }}"
                                 loading="lazy"
                             >
@@ -142,9 +168,15 @@
 
                         <div class="artwork-info">
                             <h3 class="artwork-title">{{ $artwork->title }}</h3>
+<<<<<<< HEAD
                             {{-- @if($artwork->artists->count() > 0)
                                 <p class="artwork-artist">{{ $artwork->artists->pluck('name')->join(', ') }}</p>
                             @endif --}}
+=======
+                            @if($artwork->artists->count() > 0)
+                                <p class="artwork-artist">{{ $artwork->artists->pluck('name')->join(', ') }}</p>
+                            @endif
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                             @if($artwork->year_start || $artwork->year_end)
                                 <p class="artwork-date">
                                     {{ $artwork->year_start }}

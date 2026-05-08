@@ -17,9 +17,15 @@ class PostalCode extends Model
 
     protected $fillable = [
         'postal_code',
+<<<<<<< HEAD
         'postal_city',
         'postal_state',
         'postal_country',
+=======
+        'city',
+        'state',
+        'country',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     ];
 
     public function userProfiles(): HasMany

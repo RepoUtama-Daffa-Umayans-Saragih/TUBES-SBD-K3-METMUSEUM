@@ -21,10 +21,17 @@ class AdminMiddleware
             return redirect('/account/login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+<<<<<<< HEAD
         // Cek apakah user memiliki role Admin (Bypassed for development)
         // if (Auth::user()->role !== 'Admin') {
         //     return redirect('/art/collection')->with('error', 'Anda tidak memiliki akses ke halaman ini. Hanya admin yang diizinkan.');
         // }
+=======
+        // Cek apakah user memiliki role Admin
+        if (Auth::user()->role !== 'Admin') {
+            return redirect('/art/collection')->with('error', 'Anda tidak memiliki akses ke halaman ini. Hanya admin yang diizinkan.');
+        }
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
 
         return $next($request);
     }

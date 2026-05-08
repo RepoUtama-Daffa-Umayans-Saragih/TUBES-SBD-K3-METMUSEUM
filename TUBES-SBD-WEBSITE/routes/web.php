@@ -152,4 +152,8 @@ Route::get('/visit-guides/accessibility', function () {
 
 Route::get('/member/membership', function () {
     return view('ordinary.member.membership.membership');
+<<<<<<< HEAD
 })->name('member.membership');
+=======
+})->name('member.membership');
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454

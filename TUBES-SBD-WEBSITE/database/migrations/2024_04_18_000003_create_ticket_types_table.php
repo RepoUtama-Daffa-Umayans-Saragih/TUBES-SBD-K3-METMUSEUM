@@ -8,16 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->increments('user_id');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->timestamps();
+        Schema::create('ticket_types', function (Blueprint $table) {
+            $table->increments('ticket_type_id');
+            $table->string('name', 100);
+            $table->decimal('base_price', 15, 2);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('ticket_types');
     }
 };

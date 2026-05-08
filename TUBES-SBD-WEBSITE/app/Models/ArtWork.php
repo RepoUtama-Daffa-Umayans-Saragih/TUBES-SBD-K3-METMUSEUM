@@ -16,11 +16,16 @@ class ArtWork extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
+<<<<<<< HEAD
         'met_object_id',
+=======
+        'object_number',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
         'title',
         'slug',
         'description',
         'gallery_number',
+<<<<<<< HEAD
         'accession_number',
         'accession_year',
         'object_date_display',
@@ -43,6 +48,14 @@ class ArtWork extends Model
         'link_resource',
         'object_url',
         'object_wikidata_url',
+=======
+        'year_start',
+        'year_end',
+        'department_id',
+        'type_id',
+        'geo_id',
+        'location_id',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     ];
 
     public $timestamps = false;
@@ -57,11 +70,20 @@ class ArtWork extends Model
         return $this->belongsTo(ObjectType::class, 'type_id');
     }
 
+<<<<<<< HEAD
+=======
+    public function geoLocation(): BelongsTo
+    {
+        return $this->belongsTo(GeoLocation::class, 'geo_id');
+    }
+
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class, 'location_id');
     }
 
+<<<<<<< HEAD
     public function repository(): BelongsTo
     {
         return $this->belongsTo(Repository::class, 'repository_id');
@@ -72,11 +94,21 @@ class ArtWork extends Model
         return $this->belongsTo(Classification::class, 'classification_id');
     }
 
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     public function materials(): BelongsToMany
     {
         return $this->belongsToMany(Material::class, 'art_work_materials', 'art_work_id', 'material_id');
     }
 
+<<<<<<< HEAD
+=======
+    public function artists(): BelongsToMany
+    {
+        return $this->belongsToMany(Artist::class, 'art_work_artists', 'art_work_id', 'artist_id');
+    }
+
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     public function images(): HasMany
     {
         return $this->hasMany(ArtWorkImage::class, 'art_work_id');
@@ -86,6 +118,7 @@ class ArtWork extends Model
     {
         return $this->images();
     }
+<<<<<<< HEAD
 
     public function getNameAttribute()
     {
@@ -112,4 +145,6 @@ class ArtWork extends Model
     {
         return \Carbon\Carbon::now();
     }
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
 }

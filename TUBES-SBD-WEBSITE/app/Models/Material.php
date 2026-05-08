@@ -14,7 +14,11 @@ class Material extends Model
     protected $keyType    = 'int';
 
     protected $fillable = [
+<<<<<<< HEAD
         'material_name',
+=======
+        'name',
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
     ];
 
     public $timestamps = false;

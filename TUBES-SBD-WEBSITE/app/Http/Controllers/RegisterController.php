@@ -35,10 +35,17 @@ class RegisterController extends Controller
 
         $user = DB::transaction(function () use ($validated): User {
             $postalCode = PostalCode::firstOrCreate([
+<<<<<<< HEAD
                 'postal_code'    => $validated['postal_code'],
                 'postal_city'    => $validated['city'],
                 'postal_state'   => $validated['state'],
                 'postal_country' => $validated['country'],
+=======
+                'postal_code' => $validated['postal_code'],
+                'city'        => $validated['city'],
+                'state'       => $validated['state'],
+                'country'     => $validated['country'],
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
             ]);
 
             $user = User::create([

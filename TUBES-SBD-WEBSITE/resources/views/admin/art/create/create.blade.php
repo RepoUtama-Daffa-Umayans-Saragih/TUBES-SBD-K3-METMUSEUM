@@ -61,17 +61,30 @@
                     @error('department_id') <span class="error-message">{{ $message }}</span> @enderror
                 </div>
 
+<<<<<<< HEAD
                 <div class="field @error('type_id') error @enderror">
                     <label for="type_id">Object Type *</label>
                     <select id="type_id" name="type_id" required>
                         <option value="">Select Type</option>
                         @foreach($types as $type)
                             <option value="{{ $type->type_id }}" @selected(old('type_id') == $type->type_id)>
+=======
+                <div class="field @error('object_type_id') error @enderror">
+                    <label for="object_type_id">Object Type *</label>
+                    <select id="object_type_id" name="object_type_id" required>
+                        <option value="">Select Type</option>
+                        @foreach($types as $type)
+                            <option value="{{ $type->type_id }}" @selected(old('object_type_id') == $type->type_id)>
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                                 {{ $type->name }}
                             </option>
                         @endforeach
                     </select>
+<<<<<<< HEAD
                     @error('type_id') <span class="error-message">{{ $message }}</span> @enderror
+=======
+                    @error('object_type_id') <span class="error-message">{{ $message }}</span> @enderror
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                 </div>
             </div>
 
@@ -79,7 +92,10 @@
             <div class="section-title">Location</div>
 
             <div class="form-group grid-2">
+<<<<<<< HEAD
                 {{-- 
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                 <div class="field @error('geo_location_id') error @enderror">
                     <label for="geo_location_id">Geographic Location</label>
                     <select id="geo_location_id" name="geo_location_id">
@@ -92,7 +108,10 @@
                     </select>
                     @error('geo_location_id') <span class="error-message">{{ $message }}</span> @enderror
                 </div>
+<<<<<<< HEAD
                 --}}
+=======
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
 
                 <div class="field @error('location_id') error @enderror">
                     <label for="location_id">Museum Location</label>
@@ -112,6 +131,7 @@
             <div class="section-title">Dating</div>
 
             <div class="form-group grid-2">
+<<<<<<< HEAD
                 <div class="field @error('object_begin_date') error @enderror">
                     <label for="object_begin_date">Year Start</label>
                     <input type="number" id="object_begin_date" name="object_begin_date" value="{{ old('object_begin_date') }}" min="0" max="9999">
@@ -122,17 +142,37 @@
                     <label for="object_end_date">Year End</label>
                     <input type="number" id="object_end_date" name="object_end_date" value="{{ old('object_end_date') }}" min="0" max="9999">
                     @error('object_end_date') <span class="error-message">{{ $message }}</span> @enderror
+=======
+                <div class="field @error('year_start') error @enderror">
+                    <label for="year_start">Year Start</label>
+                    <input type="number" id="year_start" name="year_start" value="{{ old('year_start') }}" min="0" max="9999">
+                    @error('year_start') <span class="error-message">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="field @error('year_end') error @enderror">
+                    <label for="year_end">Year End</label>
+                    <input type="number" id="year_end" name="year_end" value="{{ old('year_end') }}" min="0" max="9999">
+                    @error('year_end') <span class="error-message">{{ $message }}</span> @enderror
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
                 </div>
             </div>
 
             <!-- Accession -->
             <div class="section-title">Accession Information</div>
 
+<<<<<<< HEAD
             <div class="form-group @error('accession_number') error @enderror">
                 <label for="accession_number">Object Number *</label>
                 <input type="text" id="accession_number" name="accession_number" value="{{ old('accession_number') }}" required>
                 <small class="form-helper-text">Must be unique. Example: 1998.242</small>
                 @error('accession_number') <span class="error-message">{{ $message }}</span> @enderror
+=======
+            <div class="form-group @error('object_number') error @enderror">
+                <label for="object_number">Object Number *</label>
+                <input type="text" id="object_number" name="object_number" value="{{ old('object_number') }}" required>
+                <small class="form-helper-text">Must be unique. Example: 1998.242</small>
+                @error('object_number') <span class="error-message">{{ $message }}</span> @enderror
+>>>>>>> d4924d7e134627f65fb14d5d19ae9cabdff3b454
             </div>
 
             <!-- Images -->

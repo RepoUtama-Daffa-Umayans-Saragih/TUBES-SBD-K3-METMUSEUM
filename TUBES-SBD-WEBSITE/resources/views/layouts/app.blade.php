@@ -6,7 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'The Metropolitan Museum of Art' }}</title>
 
-@vite(['resources/css/app.css', 'resources/css/layouts/app.css', 'resources/js/app.js'])
+@vite('resources/css/app.css')
+@vite('resources/css/layouts/app.css')
+@vite('resources/js/app.js')
 
     @stack('styles')
 </head>

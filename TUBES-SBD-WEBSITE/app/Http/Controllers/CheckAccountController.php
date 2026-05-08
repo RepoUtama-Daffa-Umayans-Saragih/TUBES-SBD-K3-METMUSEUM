@@ -12,7 +12,7 @@ class CheckAccountController extends Controller
      */
     public function show()
     {
-        if (Auth::check() || session('guest_id')) {
+        if (Auth::check()) {
             return redirect()->route('account.index');
         }
 

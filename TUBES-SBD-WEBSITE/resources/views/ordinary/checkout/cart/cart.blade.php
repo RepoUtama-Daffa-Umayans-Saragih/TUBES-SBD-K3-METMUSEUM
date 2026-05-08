@@ -82,8 +82,9 @@
                             @guest
                                 <div style="margin-bottom: 20px;">
                                     <h3 style="font-size: 1rem; margin-bottom: 10px; color: #1a1a1a;">Visitor Details</h3>
-                                    <div style="margin-bottom: 10px;">
-                                        <input type="text" name="name" placeholder="Full Name" required style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                    <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+                                        <input type="text" name="first_name" placeholder="First Name" required style="flex: 1; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                        <input type="text" name="last_name" placeholder="Last Name" required style="flex: 1; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
                                     </div>
                                     <div>
                                         <input type="email" name="email" placeholder="Email Address" required style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 4px;">
@@ -115,7 +116,8 @@
             headers: {
                 'X-CSRF-TOKEN': token,
                 'Accept': 'application/json'
-            }
+            },
+            credentials: 'same-origin'
         })
         .then(function(res) { return res.json(); })
         .then(function(data) {

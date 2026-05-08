@@ -670,6 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify(payload)
                 })
                 .then(function(res) { return res.json(); })

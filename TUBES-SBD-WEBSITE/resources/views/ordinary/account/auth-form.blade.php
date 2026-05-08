@@ -1,6 +1,8 @@
-@vite('resources/css/app.css')
-@vite('resources/css/ordinary/account/auth-form.css')
 @extends('layouts.app')
+
+@push('styles')
+@vite('resources/css/ordinary/account/auth-form.css')
+@endpush
 
 @section('content')
 <div class="container">

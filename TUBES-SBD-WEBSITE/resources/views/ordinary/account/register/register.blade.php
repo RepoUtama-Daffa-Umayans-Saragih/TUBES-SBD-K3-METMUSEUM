@@ -1,140 +1,272 @@
-@extends('layouts.app')
+@extends('layouts.sub')
 
-@push('styles')
-@vite('resources/css/app.css')
-@vite('resources/css/ordinary/account/register/register.css')
-@endpush
+@section('title', 'Create Account')
 
 @section('content')
-<div class="container">
-    <div class="auth-container">
-        <div class="auth-card">
-            <h1>Create Account</h1>
-            <p class="auth-subtitle">Join us to enhance your museum experience</p>
+   <div class="min-h-screen bg-[#f3f3f3] font-sans">
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+  <!-- CONTENT -->
+  <main class="px-[132px] pt-[82px] pb-[120px]">
 
-            <!-- Check for Account Section -->
-            <div class="check-account-box">
-                <p class="check-account-text">
-                    If you are a Member, or if your email may already be on record with the Museum, please click the button below to check if you already have an account and reset your password.
-                </p>
-                <a href="{{ route('account.account-check') }}" class="btn btn-primary btn-check-account">
-                    Check for account
-                </a>
-            </div>
+    <!-- TITLE -->
+    <h1 class="text-[82px] font-black leading-none tracking-[-3px] text-[#222]">
+      Register
+    </h1>
 
-            <form action="{{ route('register.store') }}" method="POST" class="auth-form" novalidate>
-                @csrf
+    <!-- DESC -->
+    <p class="mt-12 text-[18px] text-[#222]">
+      Enter your contact details to create an account.
+    </p>
 
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
-                    @error('email')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
+    <!-- ALERT BOX -->
+    <div class="mt-10 w-[850px] bg-[#eadde3] px-8 py-8">
+      
+      <p class="text-[19px] leading-[1.55] font-semibold text-[#222] max-w-[760px]">
+        If you are a Member, or if your email may already be on record with the Museum,
+        please click the button below to check if you already have an account and reset your password.
+      </p>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                    @error('password')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
+      <a href="{{ route('account.account-check') }}" class="mt-8 h-[58px] px-12 bg-gradient-to-b from-[#ef0030] to-[#b30022] text-white text-[18px] font-semibold inline-flex items-center justify-center">
+        Check for account
+      </a>
 
-                <div class="form-group">
-                    <label for="password_confirmation">Confirm Password</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="first_name">First Name</label>
-                    <input type="text" id="first_name" name="first_name" class="form-control @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" maxlength="100" required>
-                    @error('first_name')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="last_name">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" class="form-control @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" maxlength="100" required>
-                    @error('last_name')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="phone_number">Phone Number</label>
-                    <input type="text" id="phone_number" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" value="{{ old('phone_number') }}" required>
-                    @error('phone_number')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="address1">Address Line 1</label>
-                    <input type="text" id="address1" name="address1" class="form-control @error('address1') is-invalid @enderror" value="{{ old('address1') }}" required>
-                    @error('address1')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="address2">Address Line 2 (Optional)</label>
-                    <input type="text" id="address2" name="address2" class="form-control @error('address2') is-invalid @enderror" value="{{ old('address2') }}">
-                    @error('address2')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="city">City</label>
-                    <input type="text" id="city" name="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city') }}" required>
-                    @error('city')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="state">State</label>
-                    <input type="text" id="state" name="state" class="form-control @error('state') is-invalid @enderror" value="{{ old('state') }}" required>
-                    @error('state')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="country">Country</label>
-                    <input type="text" id="country" name="country" class="form-control @error('country') is-invalid @enderror" value="{{ old('country') }}" required>
-                    @error('country')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="postal_code">Postal Code</label>
-                    <input type="text" id="postal_code" name="postal_code" class="form-control @error('postal_code') is-invalid @enderror" value="{{ old('postal_code') }}" required>
-                    @error('postal_code')
-                        <small class="field-error-message">{{ $message }}</small>
-                    @enderror
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
-            </form>
-
-            <div class="auth-links">
-                <p>Already have an account? <a href="{{ route('account.login') }}">Sign in</a></p>
-            </div>
-        </div>
     </div>
-</div>
+
+    <!-- FORM -->
+    <form action="{{ route('register.store') }}" method="POST" class="mt-24 w-[760px]">
+        @csrf
+
+      <!-- ACCOUNT INFO -->
+      <section>
+        
+        <h2 class="text-[74px] font-black leading-none tracking-[-2px] text-[#222]">
+          Account Info
+        </h2>
+
+        <!-- EMAIL -->
+        <div class="mt-10">
+          <label class="block text-[16px] text-[#222] mb-3">
+            Email
+          </label>
+
+          <input
+            type="email"
+            name="email"
+            value="{{ old('email', session('email')) }}"
+            class="w-full h-[58px] border @error('email') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 text-[16px] outline-none"
+            required
+          />
+          @error('email')
+            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="mt-8">
+          <label class="block text-[16px] text-[#222] mb-3">
+            Password
+          </label>
+
+          <div class="relative">
+            <input
+              type="password"
+              name="password"
+              class="w-full h-[58px] border @error('password') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 pr-16 text-[16px] outline-none"
+              required
+            />
+
+            <button
+              type="button"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-[#666]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z"/>
+              </svg>
+            </button>
+          </div>
+          @error('password')
+            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+          @enderror
+
+          <p class="mt-3 text-[14px] text-[#333]">
+            Password must be least 8 characters
+          </p>
+        </div>
+
+        <!-- CONFIRM -->
+        <div class="mt-8">
+          <label class="block text-[16px] text-[#222] mb-3">
+            Confirm Password
+          </label>
+
+          <div class="relative">
+            <input
+              type="password"
+              name="password_confirmation"
+              class="w-full h-[58px] border border-[#7d7d7d] bg-transparent px-5 pr-16 text-[16px] outline-none"
+              required
+            />
+
+            <button
+              type="button"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-[#666]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0Z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- PERSONAL -->
+      <section class="mt-24">
+
+        <h2 class="text-[74px] font-black leading-none tracking-[-2px] text-[#222]">
+          Personal Info
+        </h2>
+
+        <div class="mt-10 space-y-8">
+
+          <div>
+            <label class="block text-[16px] mb-3">First Name</label>
+            <input type="text" name="first_name" value="{{ old('first_name', session('first_name')) }}" class="w-full h-[58px] border @error('first_name') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none" required>
+            @error('first_name')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <div>
+            <label class="block text-[16px] mb-3">Last Name</label>
+            <input type="text" name="last_name" value="{{ old('last_name', session('last_name')) }}" class="w-full h-[58px] border @error('last_name') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none" required>
+            @error('last_name')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <div>
+            <label class="block text-[16px] mb-3">Phone Number</label>
+            <input type="text" name="phone_number" value="{{ old('phone_number') }}" class="w-full h-[58px] border @error('phone_number') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none" required>
+            @error('phone_number')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- CONTACT -->
+      <section class="mt-24">
+
+        <h2 class="text-[74px] font-black leading-none tracking-[-2px] text-[#222]">
+          Contact Info
+        </h2>
+
+        <div class="mt-10 space-y-8">
+
+          <div>
+            <label class="block text-[16px] mb-3">Address 1</label>
+            <input type="text" name="address1" value="{{ old('address1') }}" class="w-full h-[58px] border @error('address1') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none" required>
+            @error('address1')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <div>
+            <label class="block text-[16px] mb-3">Address 2</label>
+            <input type="text" name="address2" value="{{ old('address2') }}" class="w-full h-[58px] border border-[#7d7d7d] bg-transparent px-5 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-[16px] mb-3">City</label>
+            <input type="text" name="city" value="{{ old('city') }}" class="w-full h-[58px] border @error('city') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none" required>
+            @error('city')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- COUNTRY -->
+          <div>
+            <label class="block text-[16px] mb-3">Country</label>
+
+            <div class="relative">
+              <select name="country" class="w-full h-[58px] border @error('country') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 appearance-none text-[16px] outline-none" required>
+                <option value="USA" {{ old('country') == 'USA' ? 'selected' : '' }}>USA</option>
+              </select>
+
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 absolute right-5 top-1/2 -translate-y-1/2 text-[#666] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+            @error('country')
+              <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+          </div>
+
+          <!-- STATE + ZIP -->
+          <div class="flex gap-9">
+
+            <!-- STATE -->
+            <div class="flex-1">
+              <label class="block text-[16px] mb-3">State</label>
+
+              <div class="relative">
+                <select name="state" class="w-full h-[58px] border @error('state') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 appearance-none text-[16px] outline-none" required>
+                  <option value="New York" {{ old('state') == 'New York' ? 'selected' : '' }}>New York</option>
+                </select>
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 absolute right-5 top-1/2 -translate-y-1/2 text-[#666] pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                </svg>
+              </div>
+              @error('state')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+              @enderror
+            </div>
+
+            <!-- ZIP -->
+            <div class="flex-1">
+              <label class="block text-[16px] mb-3">Postal Code</label>
+
+              <input
+                type="text"
+                name="postal_code"
+                value="{{ old('postal_code') }}"
+                class="w-full h-[58px] border @error('postal_code') border-red-500 @else border-[#7d7d7d] @enderror bg-transparent px-5 outline-none"
+                required
+              />
+              @error('postal_code')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+              @enderror
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TERMS -->
+        <p class="mt-20 text-[15px] text-[#333]">
+          By registering, you agree to our
+          <a href="#" class="underline">Terms of Service</a>
+          and
+          <a href="#" class="underline">Privacy Policy</a>.
+        </p>
+
+        <!-- BUTTON -->
+        <button
+          type="submit"
+          class="mt-5 w-[176px] h-[58px] bg-gradient-to-b from-[#ef0030] to-[#b30022] text-white text-[18px] font-semibold"
+        >
+          Register
+        </button>
+
+      </section>
+
+    </form>
+
+  </main>
 @endsection

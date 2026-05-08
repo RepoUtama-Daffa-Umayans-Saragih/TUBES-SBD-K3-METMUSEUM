@@ -1,63 +1,115 @@
-@extends('layouts.app')
+@extends('layouts.sub')
 
-@push('styles')
-@vite('resources/css/ordinary/account/account-check/account-check.css')
-@endpush
+@section('title', 'Check Account')
 
 @section('content')
-<div class="container">
-    <div class="auth-container">
-        <div class="auth-card">
-            <h1>Check for an Account</h1>
-            <p class="auth-subtitle">Enter your information to find your account or register</p>
+ <div class="min-h-screen bg-[#f3f3f3] font-sans flex flex-col justify-between border-t-[3px] border-[#c40024]">
 
-            @if(session('info'))
-                <div class="alert alert-info">
-                    {{ session('info') }}
-                </div>
-            @endif
+  <!-- CONTENT -->
+  <div class="px-[130px] pt-[70px] pb-24">
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+    <!-- TITLE -->
+    <h1 class="text-[84px] leading-none font-black tracking-[-3px] text-[#222]">
+      Check for an Account
+    </h1>
 
-            <form action="{{ route('account.account-check.submit') }}" method="POST" class="auth-form">
-                @csrf
+    <!-- DESCRIPTION -->
+    <p class="mt-12 max-w-[980px] text-[18px] leading-[1.7] text-[#222]">
+      Please enter your email address, first name and last name below and click Submit.
+      If you already have an account in our system you will receive an email within
+      five minutes to reset your password.
+    </p>
 
-                <div class="form-row">
-                    <div class="form-group half">
-                        <label>First Name</label>
-                        <input type="text" name="first_name" value="{{ old('first_name') }}">
-                    </div>
+    <!-- FORM -->
+    <form action="{{ route('account.account-check.submit') }}" method="POST" class="mt-24 w-[760px]">
+      @csrf
 
-                    <div class="form-group half">
-                        <label>Last Name</label>
-                        <input type="text" name="last_name" value="{{ old('last_name') }}">
-                    </div>
-                </div>
+      <!-- EMAIL -->
+      <div>
+        <label class="block text-[16px] text-[#222] mb-3">
+          Email Address
+        </label>
 
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" name="email" value="{{ old('email') }}">
-                </div>
+        <input
+          type="email"
+          name="email"
+          value="{{ old('email') }}"
+          placeholder="Email Address"
+          class="w-full h-[58px] border border-[#7c7c7c] bg-transparent px-5 text-[16px] text-[#444] outline-none @error('email') border-red-500 @enderror"
+          required
+        />
+        @error('email')
+          <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+        @enderror
+      </div>
 
-                <button type="submit" class="btn-primary">Find My Account</button>
+      <!-- NAME ROW -->
+      <div class="flex gap-9 mt-7">
 
-                <a href="{{ route('account.login') }}" class="btn-secondary">
-                    Back to Login
-                </a>
-            </form>
+        <!-- FIRST -->
+        <div class="flex-1">
+          <label class="block text-[16px] text-[#222] mb-3">
+            First Name
+          </label>
 
-            <div class="auth-links">
-                <p>Know your password? <a href="{{ route('account.login') }}">Sign in</a></p>
-            </div>
+          <input
+            type="text"
+            name="first_name"
+            value="{{ old('first_name') }}"
+            placeholder="First Name"
+            class="w-full h-[58px] border border-[#7c7c7c] bg-transparent px-5 text-[16px] text-[#444] outline-none @error('first_name') border-red-500 @enderror"
+            required
+          />
+          @error('first_name')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+          @enderror
         </div>
-    </div>
-</div>
+
+        <!-- LAST -->
+        <div class="flex-1">
+          <label class="block text-[16px] text-[#222] mb-3">
+            Last Name
+          </label>
+
+          <input
+            type="text"
+            name="last_name"
+            value="{{ old('last_name') }}"
+            placeholder="Last Name"
+            class="w-full h-[58px] border border-[#7c7c7c] bg-transparent px-5 text-[16px] text-[#444] outline-none @error('last_name') border-red-500 @enderror"
+            required
+          />
+          @error('last_name')
+            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+          @enderror
+        </div>
+
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="mt-8 flex flex-col gap-7 w-[175px]">
+
+        <!-- SUBMIT -->
+        <button
+          type="submit"
+          class="h-[58px] bg-gradient-to-b from-[#ef002d] to-[#b70024] text-white text-[18px] font-semibold hover:opacity-95 transition"
+        >
+          Submit
+        </button>
+
+        <!-- BACK -->
+        <a href="{{ route('account.login') }}"
+          class="h-[58px] border-[4px] border-[#333] text-[#222] text-[18px] font-medium bg-white hover:bg-[#f7f7f7] transition flex items-center justify-center text-center"
+        >
+          Back to Login
+        </a>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  
+
 @endsection

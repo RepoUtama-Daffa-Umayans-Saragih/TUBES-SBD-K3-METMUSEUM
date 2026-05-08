@@ -32,8 +32,9 @@ Route::get('/about', function () {
 // ========================================
 Route::prefix('art')->group(function () {
     Route::get('/collection', [ArtController::class, 'index'])->name('art.index');
-    Route::get('/collection/{id}', [ArtController::class, 'show'])->name('art.show');
+    Route::get('/curatorial-areas', [ArtController::class, 'curatorialAreas'])->name('art.curatorial-areas');
     Route::get('/collection/search', [ArtController::class, 'search'])->name('art.search');
+    Route::get('/collection/{id}', [ArtController::class, 'show'])->name('art.show');
 });
 
 // ========================================
@@ -98,19 +99,30 @@ Route::get('/cart/modify/cancel', [CartController::class, 'cancelModify'])->name
 Route::post('/cart/add', [CartController::class, 'add'])->name('ticket.add');
 Route::post('/admission/cart/store', [CartController::class, 'storeAdmission'])->name('admission.cart.store');
 
+// Fallback for missing checkout GET route to prevent RouteNotFoundException
+Route::get('/checkout', function() {
+    $cartItems = collect();
+    $customer = ['name' => '', 'email' => ''];
+    return view('ordinary.checkout.form', compact('cartItems', 'customer'));
+})->name('ticket.checkout');
+
 Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('ticket.checkout.process');
 Route::get('/checkout/payments/{order}', [CheckoutController::class, 'paymentPage'])->name('checkout.payments')->middleware('no.cache');
 Route::post('/checkout/pay/{order}', [CheckoutController::class, 'pay'])->name('ticket.checkout.pay');
 Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('ticket.checkout.success')->middleware('no.cache');
 
 // ========================================
-// MEMBERSHIP ROUTES (Protected - Requires Authentication)
+// MEMBERSHIP ROUTES
 // ========================================
-Route::prefix('members')->middleware('auth')->group(function () {
+// Index and show are publicly accessible (shown in navbar for all users)
+Route::prefix('members')->group(function () {
     Route::get('/membership', [MembershipController::class, 'index'])->name('membership.index');
     Route::get('/membership/{id}', [MembershipController::class, 'show'])->name('membership.show');
-    Route::post('/membership/purchase', [MembershipController::class, 'purchase'])->name('membership.purchase');
 });
+// Purchase requires authentication
+Route::post('/members/membership/purchase', [MembershipController::class, 'purchase'])
+    ->middleware('auth')
+    ->name('membership.purchase');
 
 // ========================================
 // LEGACY ROUTES (Keeping for compatibility)
@@ -148,7 +160,7 @@ Route::get('/force-logout', function () {
 });
 Route::get('/visit-guides/accessibility', function () {
     return view('ordinary.plan-your-visit.accessibility.accessibility');
-});
+})->name('visit.accessibility');
 
 Route::get('/member/membership', function () {
     return view('ordinary.member.membership.membership');

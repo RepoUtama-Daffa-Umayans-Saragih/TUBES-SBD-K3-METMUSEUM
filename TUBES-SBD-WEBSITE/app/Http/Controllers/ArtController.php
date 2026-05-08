@@ -106,4 +106,12 @@ class ArtController extends Controller
             'selected_type'       => $typeId,
         ], $filterData));
     }
+
+    /**
+     * Display curatorial areas / departments page
+     */
+    public function curatorialAreas()
+    {
+        return view('ordinary.art.curatorial-areas');
+    }
 }

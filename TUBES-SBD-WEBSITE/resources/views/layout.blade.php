@@ -1,21 +1,28 @@
 <!DOCTYPE html>
-<html lang=id>
+<html lang="id">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="The Metropolitan Museum of Art - Collections, Exhibitions, and Visits">
 
-        <title> @yield('title') </title>
+        <title>@yield('title', 'The Metropolitan Museum') - Met Museum</title>
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
 
-        <!-- Styles / Scripts -->
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- Vite CSS & JS -->
+@vite('resources/css/app.css')
+@vite('resources/css/layout.css')
+@vite('resources/js/app.js')
     </head>
     <body>
-    @include('components.navbar')
-    @include('components.footer')
+        @include('components.navbar')
 
-    @yield('content')
+        <main>
+            @yield('content')
+        </main>
+
+        @include('components.footer')
     </body>
 </html>

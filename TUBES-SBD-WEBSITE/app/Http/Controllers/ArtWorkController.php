@@ -1,0 +1,105 @@
+<?php
+namespace App\Http\Controllers;
+
+use App\Http\Requests\FilterArtworkRequest;
+use App\Models\ArtWork;
+use App\Models\Department;
+use App\Models\ObjectType;
+use Illuminate\Support\Facades\Cache;
+
+class ArtWorkController extends Controller
+{
+    private $cacheTTL = 3600;
+
+    public function index(FilterArtworkRequest $request)
+    {
+        $perPage  = $request->input('per_page', 24);
+        $cacheKey = $request->getCacheKey();
+
+        $data = Cache::remember($cacheKey, $this->cacheTTL, function () use ($request, $perPage) {
+            $query = ArtWork::query()
+                ->with([
+                    'images',
+                    'department',
+                    'objectType',
+                    'location',
+                ])
+                ->whereHas('images')
+                ->when($request->filled('department_id'), function ($q) use ($request) {
+                    return $q->where('department_id', $request->input('department_id'));
+                })
+                ->when($request->filled('type_id'), function ($q) use ($request) {
+                    return $q->where('type_id', $request->input('type_id'));
+                })
+                ->when($request->filled('object_begin_date') && $request->filled('object_end_date'), function ($q) use ($request) {
+                    $yearStart = intval($request->input('object_begin_date'));
+                    $yearEnd   = intval($request->input('object_end_date'));
+                    return $q->orWhereBetween('object_begin_date', [$yearStart, $yearEnd])
+                        ->orWhereBetween('object_end_date', [$yearStart, $yearEnd]);
+                })
+                ->when($request->filled('search'), function ($q) use ($request) {
+                    $searchTerm = '%' . $request->input('search') . '%';
+                    return $q->where(function ($query) use ($searchTerm) {
+                        $query->where('title', 'LIKE', $searchTerm)
+                            ->orWhere('description', 'LIKE', $searchTerm);
+                    });
+                })
+                ->orderBy('art_work_id', 'DESC');
+
+            $total    = $query->count();
+            $artworks = $query->paginate($perPage);
+
+            return [
+                'artworks' => $artworks,
+                'total'    => $total,
+            ];
+        });
+
+        $departments = Cache::remember('departments_all', $this->cacheTTL, function () {
+            return Department::all();
+        });
+
+        $types = Cache::remember('types_all', $this->cacheTTL, function () {
+            return ObjectType::all();
+        });
+
+        $activeFilters = [
+            'department_id'     => $request->input('department_id'),
+            'type_id'           => $request->input('type_id'),
+            'object_begin_date' => $request->input('object_begin_date'),
+            'object_end_date'   => $request->input('object_end_date'),
+            'search'            => $request->input('search'),
+        ];
+
+        $hasActiveFilters = collect($activeFilters)->filter()->isNotEmpty();
+
+        return view('ordinary.art.catalog.catalog', [
+            'artworks'         => $data['artworks'],
+            'departments'      => $departments,
+            'types'            => $types,
+            'activeFilters'    => $activeFilters,
+            'hasActiveFilters' => $hasActiveFilters,
+            'totalResults'     => $data['total'],
+        ]);
+    }
+
+    public function show($slug)
+    {
+        try {
+            $artwork = Cache::remember('artwork_' . $slug, $this->cacheTTL, function () use ($slug) {
+                return ArtWork::where('slug', $slug)
+                    ->with([
+                        'images',
+                        'department',
+                        'objectType',
+                        'location',
+                    ])
+                    ->firstOrFail();
+            });
+
+            return view('ordinary.art.detail.detail', compact('artwork'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            abort(404, 'Artwork not found');
+        }
+    }
+}

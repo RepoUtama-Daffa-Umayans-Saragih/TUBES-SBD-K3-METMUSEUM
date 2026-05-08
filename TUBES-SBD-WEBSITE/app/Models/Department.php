@@ -1,0 +1,31 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Department extends Model
+{
+    use HasFactory;
+
+    protected $primaryKey = 'department_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+
+    protected $fillable = [
+        'department_name',
+    ];
+
+    public $timestamps = false;
+
+    public function artWorks(): HasMany
+    {
+        return $this->hasMany(ArtWork::class, 'department_id');
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->department_name;
+    }
+}

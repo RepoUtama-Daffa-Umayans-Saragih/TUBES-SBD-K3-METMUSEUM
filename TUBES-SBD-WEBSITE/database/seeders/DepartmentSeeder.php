@@ -10,6 +10,7 @@ class DepartmentSeeder extends Seeder
     public function run()
     {
         $departments = [
+            // Canonical names (from project taxonomy)
             'African Art in The Michael C. Rockefeller Wing',
             'The American Wing',
             'Ancient American Art in The Michael C. Rockefeller Wing',
@@ -30,7 +31,13 @@ class DepartmentSeeder extends Seeder
             'Oceanic Art in The Michael C. Rockefeller Wing',
             'Photographs',
             'The Robert Lehman Collection',
-            'Thomas J. Watson Library'
+            'Thomas J. Watson Library',
+            // CSV-variant names (exact values from the dataset)
+            'Medieval Art',
+            'The Cloisters',
+            'Robert Lehman Collection',
+            'Arts of Africa, Oceania, and the Americas',
+            'Ancient Near Eastern Art',
         ];
 
         foreach ($departments as $department) {

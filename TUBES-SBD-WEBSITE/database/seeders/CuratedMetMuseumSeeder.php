@@ -41,49 +41,40 @@ class CuratedMetMuseumSeeder extends Seeder
         $defaultRepoId = $this->getGeoId('repositories', 'Metropolitan Museum of Art, New York, NY', 'repository_name', 'repository_id');
 
         $count = 0;
-        while (($row = fgetcsv($handle)) !== false) {
+        $skipped = 0;
+        // Pre-load taxonomy into cache for fast lookup
+        DB::table('object_types')->pluck('type_id', 'object_type_name')->each(fn($id,$n) => $this->cache['object_types'][$n] = $id);
+        DB::table('classifications')->pluck('classification_id', 'classification_name')->each(fn($id,$n) => $this->cache['classifications'][$n] = $id);
+        DB::table('departments')->pluck('department_id', 'department_name')->each(fn($id,$n) => $this->cache['departments'][$n] = $id);
+
+        while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
             if (empty($row[$headerMap['Object ID']])) continue;
 
+            // --- DEPARTMENT: Auto-insert if unknown CSV variant ---
             $deptNameCsv = trim($row[$headerMap['Department']] ?? '');
-            $deptId = $this->getGeoId('departments', $deptNameCsv, 'department_name', 'department_id');
+            $deptId = $this->cache['departments'][$deptNameCsv] ?? null;
+            if (!$deptId && $deptNameCsv) {
+                $deptId = DB::table('departments')->insertGetId(['department_name' => $deptNameCsv]);
+                $this->cache['departments'][$deptNameCsv] = $deptId;
+            }
+            if (!$deptId) { $skipped++; continue; }
 
+            // --- OBJECT TYPE: Exact match, then auto-insert unknown ---
             $typeNameCsv = trim($row[$headerMap['Object Name']] ?? '');
+            $typeId = $this->cache['object_types'][$typeNameCsv] ?? null;
+            if (!$typeId && $typeNameCsv) {
+                DB::table('object_types')->insertOrIgnore(['object_type_name' => $typeNameCsv]);
+                $typeId = DB::table('object_types')->where('object_type_name', $typeNameCsv)->value('type_id');
+                $this->cache['object_types'][$typeNameCsv] = $typeId;
+            }
+
+            // --- CLASSIFICATION: Exact match, then auto-insert unknown ---
             $classNameCsv = trim($row[$headerMap['Classification']] ?? '');
-            $mediumCsv = trim($row[$headerMap['Medium']] ?? '');
-            
-            $combinedForTaxonomy = strtolower(implode(' | ', $row));
-
-            $typeId = null;
-            $classId = null;
-
-            // Map Object Type (Search combined text for known types)
-            $knownTypes = DB::table('object_types')->pluck('object_type_name', 'type_id');
-            foreach ($knownTypes as $id => $name) {
-                if ($typeNameCsv === $name || stripos($combinedForTaxonomy, $name) !== false || stripos($name, $typeNameCsv) !== false) {
-                    $typeId = $id;
-                    break;
-                }
-            }
-
-            // Map Classification
-            $knownClasses = DB::table('classifications')->pluck('classification_name', 'classification_id');
-            foreach ($knownClasses as $id => $name) {
-                if ($classNameCsv === $name || stripos($combinedForTaxonomy, $name) !== false || stripos($name, $classNameCsv) !== false) {
-                    $classId = $id;
-                    break;
-                }
-            }
-
-            // Skip invalid unmatched taxonomy safely
-            if (!$deptId || (!$typeId && !$classId)) {
-                continue;
-            }
-            
-            if (!$typeId || !$classId) {
-                // If one is missing, fallback to the other if possible, or fallback to the first to avoid failing NOT NULL
-                // Wait, they are foreign keys to DIFFERENT tables. We can't fallback typeId to classId.
-                // We will create a dummy 'Unassigned' locally if needed? No, skip safely.
-                continue;
+            $classId = $this->cache['classifications'][$classNameCsv] ?? null;
+            if (!$classId && $classNameCsv) {
+                DB::table('classifications')->insertOrIgnore(['classification_name' => $classNameCsv]);
+                $classId = DB::table('classifications')->where('classification_name', $classNameCsv)->value('classification_id');
+                $this->cache['classifications'][$classNameCsv] = $classId;
             }
 
             $repoName = $row[$headerMap['Repository']] ?: 'Metropolitan Museum of Art, New York, NY';
@@ -91,13 +82,14 @@ class CuratedMetMuseumSeeder extends Seeder
 
             $isPublicDomain = strtolower($row[$headerMap['Is Public Domain']] ?? '') === 'true';
 
+            $objectId = $row[$headerMap['Object ID']];
             $artWorkId = DB::table('art_works')->insertGetId([
-                'met_object_id' => $row[$headerMap['Object ID']],
-                'accession_number' => $row[$headerMap['Object Number']] ?: 'UNKNOWN-' . uniqid(),
-                'accession_year' => is_numeric($row[$headerMap['AccessionYear']]) ? $row[$headerMap['AccessionYear']] : null,
-                'title' => substr($row[$headerMap['Title']] ?: 'Unknown Title', 0, 255),
-                'slug' => 'art-' . $row[$headerMap['Object ID']],
-                'description' => null, // Not directly in CSV
+                'met_object_id'       => $objectId,
+                'accession_number'    => $row[$headerMap['Object Number']] ?: 'UNKNOWN-' . uniqid(),
+                'accession_year'      => is_numeric($row[$headerMap['AccessionYear']]) ? $row[$headerMap['AccessionYear']] : null,
+                'title'               => substr($row[$headerMap['Title']] ?: 'Unknown Title', 0, 255),
+                'slug'                => 'art-' . $objectId,
+                'description'         => null,
                 'gallery_number' => $row[$headerMap['Gallery Number']] ?: null,
                 'is_on_view' => !empty($row[$headerMap['Gallery Number']]),
                 'is_highlight' => strtolower($row[$headerMap['Is Highlight']] ?? '') === 'true',
@@ -113,21 +105,38 @@ class CuratedMetMuseumSeeder extends Seeder
                 'link_resource' => $row[$headerMap['Link Resource']] ?: null,
                 'object_wikidata_url' => $row[$headerMap['Object Wikidata URL']] ?: null,
                 'metadata_date' => $row[$headerMap['Metadata Date']] ? \Carbon\Carbon::parse($row[$headerMap['Metadata Date']])->toDateTimeString() : null,
-                'department_id' => $deptId,
-                'type_id' => $typeId,
-                'classification_id' => $classId,
+                'department_id'       => $deptId,
+                'type_id'             => $typeId,
+                'classification_id'   => $classId,
                 'location_id' => $defaultLocationId,
                 'repository_id' => $repoId,
             ]);
 
-            // Images
-            if ($isPublicDomain || rand(1, 100) > 50) {
-                DB::table('art_work_images')->insert([
-                    'art_work_id' => $artWorkId,
-                    'image_url' => 'https://collectionapi.metmuseum.org/api/collection/v1/iiif/' . $row[$headerMap['Object ID']] . '/main-image',
-                    'is_primary' => true,
-                    'display_order' => 1
-                ]);
+            // Images — attach to ALL artworks
+            $primaryImageUrl = trim($row[$headerMap['Primary Image'] ?? -1] ?? '');
+            $imageUrl = $primaryImageUrl ?: ('https://collectionapi.metmuseum.org/api/collection/v1/iiif/' . $objectId . '/main-image');
+            DB::table('art_work_images')->insert([
+                'art_work_id'   => $artWorkId,
+                'image_url'     => $imageUrl,
+                'is_primary'    => true,
+                'display_order' => 1
+            ]);
+
+            // Additional images
+            if (isset($headerMap['Additional Images'])) {
+                $additionalImages = array_filter(explode('|', $row[$headerMap['Additional Images']] ?? ''));
+                $order = 2;
+                foreach (array_slice($additionalImages, 0, 5) as $imgUrl) {
+                    $imgUrl = trim($imgUrl);
+                    if ($imgUrl) {
+                        DB::table('art_work_images')->insertOrIgnore([
+                            'art_work_id'   => $artWorkId,
+                            'image_url'     => $imgUrl,
+                            'is_primary'    => false,
+                            'display_order' => $order++
+                        ]);
+                    }
+                }
             }
 
             // Pivot relations
@@ -248,14 +257,14 @@ class CuratedMetMuseumSeeder extends Seeder
             }
 
             $count++;
-            if ($count % 500 === 0) {
-                $this->command->info("Processed $count records");
+            if ($count % 100 === 0) {
+                $this->command->info("Processed $count artworks (skipped: $skipped)...");
             }
         }
         fclose($handle);
         
         Schema::enableForeignKeyConstraints();
-        $this->command->info("Finished! Processed $count artworks.");
+        $this->command->info("Finished! Ingested: $count artworks. Skipped: $skipped rows.");
     }
 
     private function getGeoId($table, $name, $nameCol, $idCol)

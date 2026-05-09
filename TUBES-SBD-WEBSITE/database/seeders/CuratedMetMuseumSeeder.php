@@ -12,7 +12,7 @@ class CuratedMetMuseumSeeder extends Seeder
 
     public function run()
     {
-        $csvPath = 'C:/Users/ASUS/Downloads/metmuseum_curated_full_columns_2000.csv';
+        $csvPath = database_path('data/metmuseum_curated_full_columns_2000.csv');
         if (!file_exists($csvPath)) {
             $this->command->error("CSV not found at $csvPath");
             return;

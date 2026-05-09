@@ -21,7 +21,7 @@
             <div class="max-w-screen-2xl mx-auto flex flex-col lg:flex-row items-stretch">
                 <div class="flex-1 p-8 lg:p-16 flex flex-col justify-center">
                     <div class="flex items-center space-x-1 mb-12 text-[13px]">
-                        <span class="underline cursor-pointer">Home</span>
+                        <span class="underline hover:no-underline cursor-pointer">Home</span>
                         <span class="mx-2 font-thin">/</span>
                         <span>Membership</span>
                     </div>

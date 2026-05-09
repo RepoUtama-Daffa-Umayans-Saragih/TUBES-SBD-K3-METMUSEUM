@@ -85,7 +85,7 @@
                             The principles of diversity, equity, inclusion, and accessibility apply to all aspects of
                             The
                             Met's operations, across all categories of individuals. Please see the
-                            <a href="#" class="inline-link">Museum's Institutional Diversity, Inclusion, and Equal
+                            <a href="{{ route('accessibility.cloisters') }}" class="inline-link">Museum's Institutional Diversity, Inclusion, and Equal
                                 Access Policy Statement</a>.
                         </p>
                     </div>

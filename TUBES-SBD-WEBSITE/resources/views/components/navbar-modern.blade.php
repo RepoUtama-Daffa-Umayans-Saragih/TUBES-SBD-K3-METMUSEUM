@@ -61,7 +61,7 @@
                 <div class="grid gap-5" data-menu-content="visit">
                     <a href="{{ route('plan-your-visit.index') }}" class="text-base font-semibold text-white hover:text-white/80 transition">Plan Your Visit</a>
                     <a href="{{ route('ticket.index') }}" class="text-base font-semibold text-white hover:text-white/80 transition">Buy Tickets</a>
-                    <a href="{{ route('membership.index') }}" class="text-base font-semibold text-white hover:text-white/80 transition">Become a Member</a>
+                    <a href="{{ route('member.membership') }}" class="text-base font-semibold text-white hover:text-white/80 transition">Become a Member</a>
                     <a href="#" class="text-base font-semibold text-white hover:text-white/80 transition">Free Tours</a>
                 </div>
                 <div class="grid gap-5" data-menu-content="visit">

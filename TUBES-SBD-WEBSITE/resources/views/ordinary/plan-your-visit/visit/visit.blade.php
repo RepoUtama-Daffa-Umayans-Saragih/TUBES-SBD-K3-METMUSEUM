@@ -80,7 +80,7 @@
             <div class="mt-5">
                 <h4 class="location-name">The Met Fifth Avenue</h4>
                 <p class="location-desc">Over 5,000 years of art from around the world.</p>
-                <a href="#" class="clickable-link mt-1 inline-block">Learn more about The Met Fifth Avenue</a>
+                <a href="{{ route('learn.more') }}" class="clickable-link mt-1 inline-block">Learn more about The Met Fifth Avenue</a>
             </div>
 
             <!-- the met fifth avenue -->
@@ -129,7 +129,7 @@
             <div class="mt-5">
                 <h4 class="location-name">The Met Cloisters</h4>
                 <p class="location-desc">Art, architecture, and gardens of medieval Europe.</p>
-                <a href="#" class="clickable-link mt-1 inline-block">Learn more about The Met Cloisters</a>
+                <a href="{{ route('cloister.learn.more') }}" class="clickable-link mt-1 inline-block">Learn more about The Met Cloisters</a>
             </div>
 
             <div class="location-flex-container">

@@ -75,7 +75,7 @@
                         <p class="mb-8">
                             This information is specific to The Met Fifth Avenue. For information about our other
                             location, please visit
-                            <a href="#" class="inline-link">accessibility at The Met Fifth Avenue</a>.
+                            <a href="{{ route('accessibility.main') }}" class="inline-link">accessibility at The Met Fifth Avenue</a>.
                         </p>
 
                         <p>

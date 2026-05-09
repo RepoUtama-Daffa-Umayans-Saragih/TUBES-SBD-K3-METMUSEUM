@@ -25,9 +25,11 @@
         <span
             class="mx-2.5 text-black font-extralight text-lg group-hover:text-black transition-colors duration-200">/</span>
 
-        <h1 class="text-[13px] font-semibold text-black tracking-tight no-underline hover:underline cursor-pointer">
-            Plan Your Visit
-        </h1>
+        <a href="{{ route('plan-your-visit.index') }}" class="no-underline">
+                <h1 class="text-[13px] font-semibold text-black tracking-tight no-underline hover:underline cursor-pointer">
+                    Plan Your Visit
+                </h1>
+            </a>
 
         <span
             class="mx-2.5 text-black font-extralight text-lg group-hover:text-black transition-colors duration-200">/</span>
@@ -64,7 +66,7 @@
                 <p class="gallery-desc">Accessibility at The Met Cloisters is somewhat limited for wheelchair and
                     stroller users and others who need step-free access due to the building's landmark status. A free
                     shuttle service is available to visitors requiring step-free access to enter the building.</p>
-                <a href="#"
+                <a href="{{ route('accessibility.cloisters') }}"
                     class="text-black text-sm font-semibold underline underline-offset-4 decoration-1 hover:no-underline transition-all duration-300">Learn
                     more about Accessible Entrances.</a>
             </div>
@@ -135,7 +137,7 @@
                     See information about visiting The Met Fifth Avenue, including directions, admission prices, and
                     dining options.
                 </p>
-                <a href="#" class="footer-action-link">
+                <a href="{{ route('learn.more') }}" class="footer-action-link">
                     Read more <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                         stroke="currentColor" class="w-4 h-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />

@@ -165,3 +165,19 @@ Route::get('/visit-guides/accessibility', function () {
 Route::get('/member/membership', function () {
     return view('ordinary.member.membership.membership');
 })->name('member.membership');
+
+Route::get('/plan-your-visit/fifth/learn-more', function () {
+    return view('ordinary.plan-your-visit.fifth.learn-more');
+})->name('learn.more');
+
+Route::get('/plan-your-visit/cloister/learn-more', function () {
+    return view('ordinary.plan-your-visit.cloister.learn-more');
+})->name('cloister.learn.more');
+
+Route::get('/plan-your-visit/accessibility/cloisters', function () {
+    return view('ordinary.plan-your-visit.accessibility.accessibility-cloisters');
+})->name('accessibility.cloisters');
+
+Route::get('/plan-your-visit/accessibility', function () {
+    return view('ordinary.plan-your-visit.accessibility.accessibility');
+})->name('accessibility.main');

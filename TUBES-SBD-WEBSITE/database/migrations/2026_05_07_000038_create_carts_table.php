@@ -13,8 +13,8 @@ return new class extends Migration
             $table->increments('cart_id');
             $table->unsignedInteger('user_id')->nullable();
             $table->unsignedInteger('guest_id')->nullable();
-            $table->timestamp('created_at')->nullable();
             $table->dateTime('expires_at');
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('user_id')->references('user_id')->on('users');
             $table->foreign('guest_id')->references('guest_id')->on('guests');

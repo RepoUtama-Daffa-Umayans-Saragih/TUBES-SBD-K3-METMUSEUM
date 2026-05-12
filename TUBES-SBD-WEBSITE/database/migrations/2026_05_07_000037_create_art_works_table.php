@@ -38,6 +38,7 @@ return new class extends Migration
             $table->unsignedInteger('classification_id');
             $table->unsignedInteger('location_id');
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('repository_id')->references('repository_id')->on('repositories');
             $table->foreign('department_id')->references('department_id')->on('departments');

@@ -19,7 +19,7 @@ class Location extends Model
         'capacity_limit',
     ];
 
-    public $timestamps = false;
+    // timestamps mengikuti default Laravel (created_at, updated_at)
 
     public function artWorks(): HasMany
     {

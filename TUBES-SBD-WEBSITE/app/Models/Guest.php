@@ -13,7 +13,7 @@ class Guest extends Model
     public $incrementing  = true;
     protected $keyType    = 'int';
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     protected $fillable = [
         'email',

@@ -22,7 +22,7 @@ class TicketType extends Model
         'base_price' => 'decimal:2',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function ticketAvailabilities(): HasMany
     {

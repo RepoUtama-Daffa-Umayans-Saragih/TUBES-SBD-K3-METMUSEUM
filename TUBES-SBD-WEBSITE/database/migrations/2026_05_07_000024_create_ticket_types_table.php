@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('ticket_type_name', 100)->unique();
             $table->decimal('base_price', 15, 2);
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('address2', 255)->nullable();
             $table->unsignedInteger('postal_code_id');
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('user_id')->references('user_id')->on('users');
             $table->foreign('postal_code_id')->references('postal_code_id')->on('postal_codes');

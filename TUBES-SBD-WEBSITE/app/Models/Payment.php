@@ -26,7 +26,7 @@ class Payment extends Model
         'amount'  => 'decimal:2',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function order(): BelongsTo
     {

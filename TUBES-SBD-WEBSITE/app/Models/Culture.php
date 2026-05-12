@@ -9,12 +9,12 @@ class Culture extends Model
 {
     use HasFactory;
 
-    protected $table = 'cultures';
+    protected $table      = 'cultures';
     protected $primaryKey = 'culture_id';
-    public $timestamps = false;
+    // timestamps mengikuti default Laravel (created_at, updated_at)
 
     protected $fillable = [
-        'culture_name'
+        'culture_name',
     ];
 
     public function artWorks(): BelongsToMany

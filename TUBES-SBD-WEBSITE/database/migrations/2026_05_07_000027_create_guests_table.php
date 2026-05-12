@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('session_token')->unique()->nullable();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

@@ -17,7 +17,7 @@ class Department extends Model
         'department_name',
     ];
 
-    public $timestamps = false;
+    // timestamps mengikuti default Laravel (created_at, updated_at)
 
     public function artWorks(): HasMany
     {

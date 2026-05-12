@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->integer('capacity_limit')->nullable();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

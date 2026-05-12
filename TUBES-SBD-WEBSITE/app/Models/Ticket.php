@@ -25,7 +25,7 @@ class Ticket extends Model
         'used_at' => 'datetime',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function order(): BelongsTo
     {

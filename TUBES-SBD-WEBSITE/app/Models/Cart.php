@@ -20,8 +20,7 @@ class Cart extends Model
         'expires_at',
     ];
 
-    public $timestamps      = true;
-    public const UPDATED_AT = null;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     protected $casts = [
         'created_at' => 'datetime',

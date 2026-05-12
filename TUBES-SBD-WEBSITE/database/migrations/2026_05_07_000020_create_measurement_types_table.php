@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('measurement_type_id');
             $table->string('measurement_type_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

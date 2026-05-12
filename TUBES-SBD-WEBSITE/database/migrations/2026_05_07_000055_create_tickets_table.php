@@ -16,6 +16,7 @@ return new class extends Migration
             $table->enum('status', ['valid', 'used', 'cancelled']);
             $table->dateTime('used_at')->nullable();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('order_id')->references('order_id')->on('orders');
             $table->foreign('ticket_availability_id')->references('ticket_availability_id')->on('ticket_availability');

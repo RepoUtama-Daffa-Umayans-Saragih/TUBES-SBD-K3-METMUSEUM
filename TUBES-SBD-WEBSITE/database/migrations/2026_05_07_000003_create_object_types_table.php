@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('type_id');
             $table->string('object_type_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('repository_id');
             $table->string('repository_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

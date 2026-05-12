@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('material_id');
             $table->string('material_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

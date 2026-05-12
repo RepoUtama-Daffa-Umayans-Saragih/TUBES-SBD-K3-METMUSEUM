@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('expired_at')->nullable();
             $table->decimal('total_amount', 15, 2);
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('user_id')->references('user_id')->on('users');
             $table->foreign('guest_id')->references('guest_id')->on('guests');

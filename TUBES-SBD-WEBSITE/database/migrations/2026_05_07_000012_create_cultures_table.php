@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('culture_id');
             $table->string('culture_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

@@ -22,6 +22,7 @@ class Order extends Model
         'order_date',
         'expired_at',
         'total_amount',
+        'status',
     ];
 
     protected $casts = [
@@ -30,7 +31,7 @@ class Order extends Model
         'total_amount' => 'decimal:2',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function user(): BelongsTo
     {
@@ -50,5 +51,10 @@ class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class, 'order_id', 'order_id');
+    }
+
+    public function orderDetails(): HasMany
+    {
+        return $this->hasMany(OrderDetail::class, 'order_id', 'order_id');
     }
 }

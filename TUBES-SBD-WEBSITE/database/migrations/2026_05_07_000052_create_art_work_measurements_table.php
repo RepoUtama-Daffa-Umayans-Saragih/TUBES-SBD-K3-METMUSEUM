@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('element_description')->nullable();
             $table->decimal('value', 12, 4);
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
             $table->foreign('measurement_element_id')->references('measurement_element_id')->on('measurement_elements');

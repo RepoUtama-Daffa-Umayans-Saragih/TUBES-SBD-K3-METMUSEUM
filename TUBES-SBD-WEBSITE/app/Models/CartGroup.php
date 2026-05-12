@@ -10,10 +10,10 @@ class CartGroup extends Model
 {
     use HasFactory;
 
-    protected $primaryKey   = 'cart_group_id';
-    public $incrementing    = true;
-    protected $keyType      = 'int';
-    public const UPDATED_AT = null;
+    protected $primaryKey = 'cart_group_id';
+    public $incrementing  = true;
+    protected $keyType    = 'int';
+    public $timestamps    = true;
 
     protected $fillable = [
         'cart_id',

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->unsignedInteger('ticket_availability_id');
             $table->integer('quantity');
             $table->unique(['cart_group_id', 'ticket_availability_id']);
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('cart_group_id')->references('cart_group_id')->on('cart_groups')->onDelete('cascade');
             $table->foreign('ticket_availability_id')->references('ticket_availability_id')->on('ticket_availability');

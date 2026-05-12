@@ -13,6 +13,7 @@ return new class extends Migration
             $table->unsignedInteger('subregion_id');
             $table->string('locale_name');
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('subregion_id')->references('subregion_id')->on('subregions');
             $table->unique(['subregion_id', 'locale_name']);

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedInteger('excavation_id')->nullable();
             $table->unsignedInteger('river_id')->nullable();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
             $table->foreign('geography_type_id')->references('geography_type_id')->on('geography_types');

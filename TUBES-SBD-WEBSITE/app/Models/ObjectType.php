@@ -17,7 +17,7 @@ class ObjectType extends Model
         'object_type_name',
     ];
 
-    public $timestamps = false;
+    // timestamps mengikuti default Laravel (created_at, updated_at)
 
     public function artWorks(): HasMany
     {

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('measurement_unit_name', 100)->unique();
             $table->string('measurement_unit_symbol', 20)->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

@@ -24,7 +24,7 @@ class VisitSchedule extends Model
         'visit_date' => 'date',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function location(): BelongsTo
     {

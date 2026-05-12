@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('aat_url')->nullable();
             $table->text('wikidata_url')->nullable();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

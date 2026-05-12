@@ -13,6 +13,7 @@ return new class extends Migration
             $table->unsignedInteger('location_id');
             $table->date('visit_date');
             $table->integer('capacity_limit');
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('location_id')->references('location_id')->on('locations');
             $table->unique(['location_id', 'visit_date']);

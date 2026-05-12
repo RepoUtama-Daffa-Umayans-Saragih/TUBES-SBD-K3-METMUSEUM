@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('suffix_id')->nullable();
             $table->integer('display_order')->default(1);
             $table->unique(['art_work_id', 'constituent_id', 'role_id']);
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
             $table->foreign('constituent_id')->references('constituent_id')->on('constituents');

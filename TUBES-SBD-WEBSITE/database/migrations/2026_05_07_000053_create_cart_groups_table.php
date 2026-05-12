@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('cart_groups', function (Blueprint $table) {
             $table->increments('cart_group_id');
             $table->unsignedInteger('cart_id');
-            $table->timestamp('created_at');
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('cart_id')->references('cart_id')->on('carts')->onDelete('cascade');
         });

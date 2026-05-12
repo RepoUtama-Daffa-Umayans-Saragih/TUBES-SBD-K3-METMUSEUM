@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('excavation_id');
             $table->string('excavation_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

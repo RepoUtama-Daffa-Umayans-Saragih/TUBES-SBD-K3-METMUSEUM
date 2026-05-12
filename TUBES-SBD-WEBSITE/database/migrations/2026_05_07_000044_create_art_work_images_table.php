@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -16,11 +16,12 @@ return new class extends Migration
             $table->boolean('is_primary')->default(false);
             $table->integer('display_order')->default(1);
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
         });
 
-        // Perbaikan untuk MariaDB 11: 
+        // Perbaikan untuk MariaDB 11:
         // 1. Buat Virtual Column yang hanya berisi ID jika is_primary = 1
         // 2. Berikan Unique Index pada kolom virtual tersebut
         DB::statement("ALTER TABLE art_work_images ADD COLUMN primary_check INT AS (CASE WHEN is_primary = 1 THEN art_work_id ELSE NULL END) VIRTUAL");

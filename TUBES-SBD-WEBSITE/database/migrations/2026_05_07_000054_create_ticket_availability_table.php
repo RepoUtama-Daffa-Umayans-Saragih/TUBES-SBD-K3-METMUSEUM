@@ -13,6 +13,7 @@ return new class extends Migration
             $table->unsignedInteger('ticket_type_id');
             $table->unsignedInteger('visit_schedule_id');
             $table->unique(['ticket_type_id', 'visit_schedule_id']);
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('ticket_type_id')->references('ticket_type_id')->on('ticket_types');
             $table->foreign('visit_schedule_id')->references('visit_schedule_id')->on('visit_schedules');

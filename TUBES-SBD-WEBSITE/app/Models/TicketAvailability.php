@@ -19,7 +19,7 @@ class TicketAvailability extends Model
         'visit_schedule_id',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function ticketType(): BelongsTo
     {

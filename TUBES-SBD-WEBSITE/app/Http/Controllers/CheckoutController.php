@@ -1,14 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Mail\OrderSuccessMail;
 use App\Models\Cart;
 use App\Models\Guest;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketAvailability;
-use App\Models\VisitSchedule;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -16,13 +15,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderSuccessMail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
-
 
     public function checkout(Request $request): RedirectResponse
     {
@@ -35,8 +32,8 @@ class CheckoutController extends Controller
             abort(403, 'User or guest identity not found. Please add items to cart first.');
         }
 
-        $context   = $this->resolveCartContext($request);
-        $cart      = $context['cart'];
+        $context = $this->resolveCartContext($request);
+        $cart    = $context['cart'];
 
         if (! $cart || $cart->cartGroups->isEmpty()) {
             return redirect()->route('ticket.cart')->with('error', 'Cart is empty');
@@ -45,15 +42,19 @@ class CheckoutController extends Controller
         // Validate that all groups have items
         foreach ($cart->cartGroups as $group) {
             if ($group->cartItems->isEmpty()) {
-                 return redirect()->route('ticket.cart')->with('error', 'One or more cart groups are empty.');
+                return redirect()->route('ticket.cart')->with('error', 'One or more cart groups are empty.');
             }
         }
 
         // --- IDEMPOTENCY: Reuse existing pending order ---
         $existingOrder = Order::query()
             ->where(function ($query) use ($userId, $guestId) {
-                if ($userId) $query->where('user_id', $userId);
-                else $query->where('guest_id', $guestId);
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                } else {
+                    $query->where('guest_id', $guestId);
+                }
+
             })
             ->where('expired_at', '>', now())
             ->whereHas('payment', fn($q) => $q->where('payment_status', 'Pending'))
@@ -71,8 +72,16 @@ class CheckoutController extends Controller
 
                 $orderTotalAmount = 0.0;
                 foreach ($cartItems as $item) {
-                    $availability = TicketAvailability::with('ticketType')->find($item->ticket_availability_id);
+                    $availability      = TicketAvailability::with('ticketType')->find($item->ticket_availability_id);
                     $orderTotalAmount += ((float) ($availability->ticketType->base_price ?? 0)) * (int) $item->quantity;
+                }
+
+                // Defensive normalization for XOR constraint
+                if ($userId && $guestId) {
+                    // If both are set, prefer user session
+                    $guestId = null;
+                } elseif (! $userId && ! $guestId) {
+                    throw new \Exception('User or guest identity required for order.');
                 }
 
                 $order = Order::create([
@@ -106,13 +115,13 @@ class CheckoutController extends Controller
     public function paymentPage(Order $order): View
     {
         // Ownership validation
-        $userId = Auth::id();
+        $userId  = Auth::id();
         $guestId = session('guest_id');
 
-        $isOwner = ($order->user_id && $order->user_id == $userId) || 
-                   ($order->guest_id && $order->guest_id == $guestId);
+        $isOwner = ($order->user_id && $order->user_id == $userId) ||
+            ($order->guest_id && $order->guest_id == $guestId);
 
-        if (!$isOwner) {
+        if (! $isOwner) {
             abort(403, 'Unauthorized access to this order.');
         }
 
@@ -138,12 +147,14 @@ class CheckoutController extends Controller
     public function pay(Request $request, Order $order)
     {
         // Ownership validation
-        $userId = Auth::id();
+        $userId  = Auth::id();
         $guestId = session('guest_id');
-        $isOwner = ($order->user_id && $order->user_id == $userId) || 
-                   ($order->guest_id && $order->guest_id == $guestId);
+        $isOwner = ($order->user_id && $order->user_id == $userId) ||
+            ($order->guest_id && $order->guest_id == $guestId);
 
-        if (!$isOwner) abort(403);
+        if (! $isOwner) {
+            abort(403);
+        }
 
         if ($order->payment && $order->payment->payment_status === 'Paid') {
             return redirect()->route('ticket.checkout.success', $order->order_id)
@@ -151,7 +162,7 @@ class CheckoutController extends Controller
         }
 
         $billing = null;
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $request->validate([
                 'first_name'  => 'required',
                 'last_name'   => 'required',
@@ -179,7 +190,7 @@ class CheckoutController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if (!$payment || $payment->payment_status !== 'Pending') {
+                if (! $payment || $payment->payment_status !== 'Pending') {
                     return;
                 }
 
@@ -204,7 +215,7 @@ class CheckoutController extends Controller
                     $cart = $cartQuery->whereKey(session('cart_id'))->first();
                 }
 
-                if (!$cart) {
+                if (! $cart) {
                     throw new \Exception('Cart not found. Cannot generate tickets.');
                 }
 
@@ -234,7 +245,7 @@ class CheckoutController extends Controller
         // STEP 1: Load Order Relations
         $order->load([
             'tickets.ticketAvailability.ticketType',
-            'guest'
+            'guest',
         ]);
 
         // STEP 2: Determine Email Target
@@ -247,12 +258,12 @@ class CheckoutController extends Controller
             } catch (\Exception $e) {
                 Log::error('Email sending failed', [
                     'order_id' => $order->order_id,
-                    'error'    => $e->getMessage()
+                    'error'    => $e->getMessage(),
                 ]);
             }
         } else {
             Log::error('Email sending failed: No email found for order', [
-                'order_id' => $order->order_id
+                'order_id' => $order->order_id,
             ]);
         }
 

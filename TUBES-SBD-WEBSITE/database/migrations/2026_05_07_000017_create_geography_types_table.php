@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('geography_type_id');
             $table->string('geography_type_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

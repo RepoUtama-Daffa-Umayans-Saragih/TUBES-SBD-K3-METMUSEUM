@@ -15,6 +15,7 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->enum('payment_status', ['Pending', 'Paid', 'Failed', 'Refunded']);
             $table->dateTime('paid_at')->nullable();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 
             $table->foreign('order_id')->references('order_id')->on('orders');
         });

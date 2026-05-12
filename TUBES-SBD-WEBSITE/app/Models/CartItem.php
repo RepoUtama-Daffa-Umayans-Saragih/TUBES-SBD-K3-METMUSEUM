@@ -19,7 +19,7 @@ class CartItem extends Model
         'quantity',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function cart(): BelongsTo
     {

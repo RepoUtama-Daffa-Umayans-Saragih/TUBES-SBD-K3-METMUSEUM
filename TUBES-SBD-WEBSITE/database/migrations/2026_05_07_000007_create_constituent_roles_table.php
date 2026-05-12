@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('role_id');
             $table->string('role_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

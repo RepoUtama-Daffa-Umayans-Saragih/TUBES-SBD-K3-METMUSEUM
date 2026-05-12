@@ -23,7 +23,7 @@ class UserProfile extends Model
         'postal_code_id',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function user(): BelongsTo
     {

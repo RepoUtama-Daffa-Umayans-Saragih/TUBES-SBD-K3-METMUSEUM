@@ -45,7 +45,7 @@ class ArtWork extends Model
         'object_wikidata_url',
     ];
 
-    public $timestamps = false;
+    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function department(): BelongsTo
     {
@@ -125,8 +125,10 @@ class ArtWork extends Model
     public function getImageUrlAttribute()
     {
         $images = $this->images; // Use loaded collection
-        if ($images->isEmpty()) return null;
-        
+        if ($images->isEmpty()) {
+            return null;
+        }
+
         $primary = $images->where('is_primary', true)->first();
         return $primary ? $primary->image_url : $images->first()->image_url;
     }

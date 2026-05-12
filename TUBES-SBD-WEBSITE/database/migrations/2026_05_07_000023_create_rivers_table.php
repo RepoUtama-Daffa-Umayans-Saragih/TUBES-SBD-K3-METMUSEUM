@@ -15,6 +15,7 @@ return new class extends Migration
             $table->increments('river_id');
             $table->string('river_name')->unique();
             $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

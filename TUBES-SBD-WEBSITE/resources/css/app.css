@@ -2,6 +2,8 @@
 /* ============================= */
 
 @import 'tailwindcss';
+
+/* Ordinary (public-facing) site CSS */
 @import './ordinary/plan-your-visit/visit/visit.css';
 @import './ordinary/member/membership/membership.css';
 @import './ordinary/plan-your-visit/accessibility/accessibility.css';

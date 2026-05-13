@@ -205,9 +205,8 @@
     text-transform: uppercase;
 }
 
-.status-pending { background: #fef7e0; color: #f29900; }
-.status-paid, .status-valid { background: #e6f4ea; color: #1e8e3e; }
-.status-completed, .status-used { background: #e1f5fe; color: #01579b; }
+.status-pending { background: #fff3e0; color: #ef6c00; }
+.status-paid { background: #e8f5e9; color: #2e7d32; }
 
 .qr-grid {
     display: grid;

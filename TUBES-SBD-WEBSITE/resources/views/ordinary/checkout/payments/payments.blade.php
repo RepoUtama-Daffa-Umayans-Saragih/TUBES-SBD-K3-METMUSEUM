@@ -113,14 +113,8 @@
                             <div class="qr-card">
                                 <div class="item-name" style="font-weight: 700; color: #1a1a1a;">{{ $ticket->ticketAvailability->ticketType->name ?? 'Admission' }}</div>
                                 <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ $ticket->ticketAvailability->visitSchedule->location->name }}</div>
-                                <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
-                                <div class="item-meta" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Status: <span class="status-badge status-{{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
-                                <div class="qr-code-text">
-                                    <div style="margin-bottom: 10px; display: flex; justify-content: center;">
-                                        {!! QrCode::size(120)->generate($ticket->qr_code) !!}
-                                    </div>
-                                    {{ $ticket->qr_code }}
-                                </div>
+                                <div class="item-meta" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">{{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
+                                <div class="qr-code-text">{{ $ticket->qr_code }}</div>
                             </div>
                         @endforeach
                     </div>

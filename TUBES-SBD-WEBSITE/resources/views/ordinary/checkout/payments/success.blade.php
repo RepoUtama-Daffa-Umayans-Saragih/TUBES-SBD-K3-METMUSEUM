@@ -25,11 +25,7 @@
                 </div>
                 <div class="summary-row">
                     <div class="summary-title-line">Payment status</div>
-                    <div class="summary-subline">
-                        <span class="status-badge {{ strtolower($order->payment?->payment_status ?? 'pending') }}">
-                            {{ $order->payment?->payment_status ?? 'Pending' }}
-                        </span>
-                    </div>
+                    <div class="summary-subline">{{ $order->payment?->payment_status ?? 'Pending' }}</div>
                 </div>
                 <div class="summary-row">
                     <div class="summary-title-line">Order date</div>
@@ -47,13 +43,8 @@
                 <div class="success-ticket">
                     <div class="booking-card-title">{{ $ticket->ticketAvailability->ticketType->name ?? 'Ticket' }}</div>
                     <div class="booking-card-meta">{{ $ticket->ticketAvailability->visitSchedule->location->name ?? '-' }} · {{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
-                    <div class="booking-card-meta">Status: <span class="status-badge {{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
-                    <div class="qr-box">
-                        <div style="margin-bottom: 15px; display: flex; justify-content: center;">
-                            {!! QrCode::size(140)->generate($ticket->qr_code) !!}
-                        </div>
-                        {{ $ticket->qr_code }}
-                    </div>
+                    <div class="booking-card-meta">Status: {{ ucfirst($ticket->status) }}</div>
+                    <div class="qr-box">{{ $ticket->qr_code }}</div>
                 </div>
             @endforeach
         </div>

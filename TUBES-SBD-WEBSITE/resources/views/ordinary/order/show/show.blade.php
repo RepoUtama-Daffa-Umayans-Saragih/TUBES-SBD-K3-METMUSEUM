@@ -101,15 +101,10 @@
                                 <h4>{{ $ticket->ticketAvailability->ticketType->name ?? 'General Admission' }}</h4>
                                 <p class="location">{{ $ticket->ticketAvailability->visitSchedule->location->name ?? 'MET Museum' }}</p>
                                 <p class="date">Visit Date: {{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('M d, Y') ?? 'N/A' }}</p>
-                                <p class="status">Status: <strong class="status-badge {{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</strong></p>
+                                <p class="status">Status: <strong>{{ ucfirst($ticket->status) }}</strong></p>
                             </div>
                             <div class="ticket-qr">
-                                <div class="qr-placeholder">
-                                    <div style="margin-bottom: 10px; display: flex; justify-content: center;">
-                                        {!! QrCode::size(140)->generate($ticket->qr_code) !!}
-                                    </div>
-                                    {{ $ticket->qr_code }}
-                                </div>
+                                <div class="qr-placeholder">{{ $ticket->qr_code }}</div>
                             </div>
                         </div>
                     @empty

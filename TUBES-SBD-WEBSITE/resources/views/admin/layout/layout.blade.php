@@ -20,10 +20,24 @@
             </li>
 
             <li class="admin-nav-section">
+                <div class="admin-nav-section-title">Analytics</div>
+            </li>
+            <li class="admin-nav-item">
+                <a href="{{ route('admin.ticket-analytics.index') }}" class="admin-nav-link @if(request()->routeIs('admin.ticket-analytics.*')) active @endif">
+                    🎫 Ticket Analytics
+                </a>
+            </li>
+            <li class="admin-nav-item">
+                <a href="{{ route('admin.payment.index') }}" class="admin-nav-link @if(request()->routeIs('admin.payment.*')) active @endif">
+                    💳 Payment
+                </a>
+            </li>
+
+            <li class="admin-nav-section">
                 <div class="admin-nav-section-title">Collection</div>
             </li>
             <li class="admin-nav-item">
-                <a href="{{ route('admin.art.index') }}" class="admin-nav-link @if(request()->routeIs('admin.art.*')) active @endif">
+                <a href="{{ route('admin.artworks.index') }}" class="admin-nav-link @if(request()->routeIs('admin.artworks.*')) active @endif">
                     🎨 Artworks
                 </a>
             </li>

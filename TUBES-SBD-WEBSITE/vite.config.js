@@ -8,7 +8,11 @@ export default defineConfig({
             input: [
                 'resources/css/app.css', 
                 'resources/js/app.js',
-                'resources/css/ordinary/art/search/search.css'
+                'resources/css/ordinary/art/search/search.css',
+                'resources/css/admin/ticket-analytics/index.css',
+                'resources/js/admin/ticket-analytics/index.js',
+                'resources/css/admin/payment/index.css',
+                'resources/js/admin/payment/index.js'
             ],
             refresh: true,
         }),

@@ -34,8 +34,24 @@
 
         @foreach($order->tickets as $ticket)
             <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    {!! QrCode::size(100)->generate($ticket->qr_code) !!}
+                </div>
                 <p><strong>QR Code:</strong> {{ $ticket->qr_code }}</p>
-                <p><strong>Status:</strong> {{ $ticket->status }}</p>
+                <p><strong>Status:</strong> 
+                    <span style="
+                        padding: 2px 8px; 
+                        border-radius: 10px; 
+                        font-size: 12px; 
+                        font-weight: bold;
+                        @if(strtolower($ticket->status) === 'pending') background: #fef7e0; color: #f29900;
+                        @elseif(strtolower($ticket->status) === 'paid' || strtolower($ticket->status) === 'valid') background: #e6f4ea; color: #1e8e3e;
+                        @elseif(strtolower($ticket->status) === 'completed' || strtolower($ticket->status) === 'used') background: #e1f5fe; color: #01579b;
+                        @endif
+                    ">
+                        {{ ucfirst($ticket->status) }}
+                    </span>
+                </p>
                 <p><strong>Type:</strong> {{ $ticket->ticketAvailability->ticketType->name ?? '-' }}</p>
             </div>
         @endforeach

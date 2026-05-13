@@ -14,7 +14,6 @@ use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
-use App\Http\Controllers\Admin\TicketAnalyticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ArtController;
 use App\Http\Controllers\ArtWorkController;
@@ -153,12 +152,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
-    
-    // Ticket Analytics Dashboard
-    Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
-        Route::get('/', [TicketAnalyticsController::class, 'index'])->name('index');
-        Route::get('/data', [TicketAnalyticsController::class, 'getAnalyticsData'])->name('data');
-    });
 });
 Route::get('/force-logout', function () {
     Auth::logout();

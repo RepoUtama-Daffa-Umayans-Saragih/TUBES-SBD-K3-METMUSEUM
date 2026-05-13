@@ -310,6 +310,108 @@
         </div>
     </section>
     
+    <!-- Latest Transactions -->
+    <section class="analytics-section transactions-section">
+        <h2 class="section-title">Latest Transactions</h2>
+        
+        <!-- Latest Orders -->
+        <div class="transactions-container">
+            <div class="transaction-card">
+                <div class="transaction-header">
+                    <h3>Latest Orders</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Tickets</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($latestTransactions as $transaction)
+                                <tr>
+                                    <td><strong>#{{ $transaction['order_id'] }}</strong></td>
+                                    <td>
+                                        <div class="customer-cell">
+                                            <div class="customer-name">{{ $transaction['user_name'] }}</div>
+                                            <div class="customer-email">{{ $transaction['user_email'] }}</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ $transaction['ticket_count'] }}</td>
+                                    <td><strong>₹{{ number_format($transaction['total_amount'], 0) }}</strong></td>
+                                    <td>
+                                        <span class="badge-{{ strtolower($transaction['payment_status']) }}">
+                                            {{ ucfirst($transaction['payment_status']) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-{{ strtolower($transaction['order_status']) }}">
+                                            {{ ucfirst($transaction['order_status']) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $transaction['created_at']->format('M d, H:i') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="empty-cell">No transactions available</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Latest Payments -->
+            <div class="transaction-card">
+                <div class="transaction-header">
+                    <h3>Latest Payments</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($latestPayments as $payment)
+                                <tr>
+                                    <td><strong>#{{ $payment['id'] }}</strong></td>
+                                    <td>#{{ $payment['order_id'] }}</td>
+                                    <td>{{ $payment['user_name'] }}</td>
+                                    <td><strong>₹{{ number_format($payment['amount'], 0) }}</strong></td>
+                                    <td>{{ $payment['method'] }}</td>
+                                    <td>
+                                        <span class="badge-{{ strtolower($payment['status']) }}">
+                                            {{ ucfirst($payment['status']) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $payment['created_at']->format('M d, H:i') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="empty-cell">No payments available</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    
 </div>
 @endsection
 

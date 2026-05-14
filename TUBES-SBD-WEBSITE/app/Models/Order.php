@@ -22,7 +22,6 @@ class Order extends Model
         'order_date',
         'expired_at',
         'total_amount',
-        'status',
     ];
 
     protected $casts = [
@@ -35,26 +34,26 @@ class Order extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function guest(): BelongsTo
     {
-        return $this->belongsTo(Guest::class, 'guest_id', 'guest_id');
+        return $this->belongsTo(Guest::class, 'guest_id');
     }
 
     public function tickets(): HasMany
     {
-        return $this->hasMany(Ticket::class, 'order_id', 'order_id');
+        return $this->hasMany(Ticket::class, 'order_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'order_id');
     }
 
     public function payment(): HasOne
     {
-        return $this->hasOne(Payment::class, 'order_id', 'order_id');
-    }
-
-    public function orderDetails(): HasMany
-    {
-        return $this->hasMany(OrderDetail::class, 'order_id', 'order_id');
+        return $this->hasOne(Payment::class, 'order_id')->latestOfMany('payment_id');
     }
 }

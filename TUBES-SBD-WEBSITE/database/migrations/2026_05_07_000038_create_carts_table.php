@@ -20,7 +20,9 @@ return new class extends Migration
             $table->foreign('guest_id')->references('guest_id')->on('guests');
         });
 
-        DB::statement('ALTER TABLE carts ADD CONSTRAINT carts_user_guest_xor_check CHECK ((user_id IS NOT NULL AND guest_id IS NULL) OR (user_id IS NULL AND guest_id IS NOT NULL))');
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE carts ADD CONSTRAINT carts_user_guest_xor_check CHECK ((user_id IS NOT NULL AND guest_id IS NULL) OR (user_id IS NULL AND guest_id IS NOT NULL))');
+        }
     }
 
     public function down(): void

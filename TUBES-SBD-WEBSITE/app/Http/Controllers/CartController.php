@@ -278,25 +278,14 @@ class CartController extends Controller
 
     public function removeGroup(Request $request, $id): JsonResponse
     {
-        $userId  = Auth::id();
-        $guestId = $userId ? null : session('guest_id');
-
-        if (! $userId && ! $guestId) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
-        }
-
-        $cartGroup = CartGroup::where('cart_group_id', $id)
-            ->whereHas('cart', function ($query) use ($userId, $guestId) {
-                if ($userId) {
-                    $query->where('user_id', $userId);
-                } else {
-                    $query->where('guest_id', $guestId);
-                }
-            })
-            ->first();
+        $cartGroup = CartGroup::where('cart_group_id', $id)->first();
 
         if (! $cartGroup) {
-            return response()->json(['success' => false, 'message' => 'Cart group not found or unauthorized.'], 404);
+            return response()->json(['success' => false, 'message' => 'Cart group not found.'], 404);
+        }
+
+        if (! \Illuminate\Support\Facades\Gate::allows('modify', $cartGroup)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
         }
 
         try {
@@ -314,21 +303,13 @@ class CartController extends Controller
 
     public function modifyGroup(Request $request, $id): RedirectResponse
     {
-        $userId  = Auth::id();
-        $guestId = $userId ? null : session('guest_id');
-
-        $cartGroup = CartGroup::where('cart_group_id', $id)
-            ->whereHas('cart', function ($query) use ($userId, $guestId) {
-                if ($userId) {
-                    $query->where('user_id', $userId);
-                } else {
-                    $query->where('guest_id', $guestId);
-                }
-            })->first();
+        $cartGroup = CartGroup::where('cart_group_id', $id)->first();
 
         if (! $cartGroup) {
-            abort(403, 'Unauthorized access to cart group.');
+            abort(404, 'Cart group not found.');
         }
+
+        \Illuminate\Support\Facades\Gate::authorize('modify', $cartGroup);
 
         session(['modify_cart_group_id' => $id]);
 

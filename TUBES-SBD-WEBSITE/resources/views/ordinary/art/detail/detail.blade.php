@@ -21,7 +21,7 @@
             @endphp
 
             @if($primaryImage)
-                <img src="{{ asset('storage/' . $primaryImage->url) }}" alt="{{ $artwork->title }}" class="main-image" id="mainImage">
+                <img src="{{ asset('storage/' . $primaryImage->image_url) }}" alt="{{ $artwork->title }}" class="main-image" id="mainImage">
             @else
                 <div class="main-image" style="background-color: #e8e8e8;"></div>
             @endif
@@ -30,10 +30,10 @@
                 <div class="image-gallery">
                     @foreach($allImages as $image)
                         <img
-                            src="{{ asset('storage/' . $image->url) }}"
+                            src="{{ asset('storage/' . $image->image_url) }}"
                             alt="{{ $artwork->title }}"
                             class="gallery-thumbnail {{ $image->is_primary ? 'active' : '' }}"
-                            data-src="{{ asset('storage/' . $image->url) }}"
+                            data-src="{{ asset('storage/' . $image->image_url) }}"
                             onclick="document.getElementById('mainImage').src = this.dataset.src; document.querySelectorAll('.gallery-thumbnail').forEach(el => el.classList.remove('active')); this.classList.add('active');"
                         >
                     @endforeach
@@ -45,25 +45,74 @@
             <h1 class="detail-title">{{ $artwork->title }}</h1>
 
             <div class="detail-meta">
-                @if($artwork->artists->isNotEmpty())
+                @if($artwork->constituents->isNotEmpty())
                     <div class="meta-item">
-                        <span class="meta-label">Artist{{ $artwork->artists->count() > 1 ? 's' : '' }}</span>
-                        <span class="meta-value">{{ $artwork->artists->pluck('name')->join(', ') }}</span>
+                        <span class="meta-label">Attribution</span>
+                        <span class="meta-value">
+                            @foreach($artwork->constituents as $constituent)
+                                <div class="constituent-line">
+                                    @if($constituent->pivot->role) <span class="role">{{ $constituent->pivot->role->name }}:</span> @endif
+                                    @if($constituent->pivot->prefix) <span class="prefix">{{ $constituent->pivot->prefix->name }}</span> @endif
+                                    <span class="name">{{ $constituent->display_name }}</span>
+                                    @if($constituent->pivot->suffix) <span class="suffix">{{ $constituent->pivot->suffix->name }}</span> @endif
+                                </div>
+                            @endforeach
+                        </span>
                     </div>
                 @endif
 
-                @if($artwork->year_start || $artwork->year_end)
+                @if($artwork->object_date_display)
+                    <div class="meta-item">
+                        <span class="meta-label">Date</span>
+                        <span class="meta-value">{{ $artwork->object_date_display }}</span>
+                    </div>
+                @elseif($artwork->object_begin_date || $artwork->object_end_date)
                     <div class="meta-item">
                         <span class="meta-label">Date</span>
                         <span class="meta-value">
-                            @if($artwork->year_start && $artwork->year_end)
-                                {{ $artwork->year_start }} - {{ $artwork->year_end }}
-                            @elseif($artwork->year_start)
-                                {{ $artwork->year_start }}
+                            @if($artwork->object_begin_date && $artwork->object_end_date)
+                                {{ $artwork->object_begin_date }} - {{ $artwork->object_end_date }}
+                            @elseif($artwork->object_begin_date)
+                                {{ $artwork->object_begin_date }}
                             @else
-                                {{ $artwork->year_end }}
+                                {{ $artwork->object_end_date }}
                             @endif
                         </span>
+                    </div>
+                @endif
+
+                @if($artwork->mediums->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Medium</span>
+                        <span class="meta-value">{{ $artwork->mediums->pluck('name')->join(', ') }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->geographies->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Geography</span>
+                        <span class="meta-value">
+                            @foreach($artwork->geographies as $geo)
+                                <div class="geography-line">
+                                    <strong>{{ optional($geo->geographyType)->name ?? 'Geography' }}:</strong> 
+                                    {{ implode(', ', array_filter([optional($geo->city)->name, optional($geo->state)->name, optional($geo->country)->name])) }}
+                                </div>
+                            @endforeach
+                        </span>
+                    </div>
+                @endif
+                
+                @if($artwork->creditLine)
+                    <div class="meta-item">
+                        <span class="meta-label">Credit Line</span>
+                        <span class="meta-value">{{ $artwork->creditLine->credit_line_text }}</span>
+                    </div>
+                @endif
+                
+                @if($artwork->dimensions_display)
+                    <div class="meta-item">
+                        <span class="meta-label">Dimensions</span>
+                        <span class="meta-value">{{ $artwork->dimensions_display }}</span>
                     </div>
                 @endif
 
@@ -137,6 +186,51 @@
                     <div class="description-text">
                         {!! nl2br(e($artwork->description)) !!}
                     </div>
+                </div>
+            @endif
+            
+            @if($artwork->provenance)
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Provenance</h3>
+                    <div class="description-text">
+                        {!! nl2br(e($artwork->provenance)) !!}
+                    </div>
+                </div>
+            @endif
+
+            @if($artwork->artWorkSims && $artwork->artWorkSims->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Signatures, Inscriptions, and Markings</h3>
+                    <div class="description-text">
+                        @foreach($artwork->artWorkSims as $sim)
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>{{ $sim->sim_type }}:</strong> 
+                                {{ $sim->sim_text }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+            
+            @if($artwork->exhibitionHistories->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Exhibition History</h3>
+                    <ul class="description-text" style="list-style-type: disc; padding-left: 20px;">
+                        @foreach($artwork->exhibitionHistories as $exhibition)
+                            <li>{{ $exhibition->exhibition_text }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            @if($artwork->references->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">References</h3>
+                    <ul class="description-text" style="list-style-type: disc; padding-left: 20px;">
+                        @foreach($artwork->references as $reference)
+                            <li>{{ $reference->reference_text }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 

@@ -16,19 +16,20 @@ class ArtWorkController extends Controller
         $perPage  = $request->input('per_page', 24);
         $cacheKey = $request->getCacheKey();
 
-        $data = Cache::remember($cacheKey, $this->cacheTTL, function () use ($request, $perPage) {
+        $fetchData = function () use ($request, $perPage) {
             $query = ArtWork::query()
                 ->with([
-                    'images',
-                    'artists',
                     'department',
-                    'objectType',
-                    'location',
-                    'classification',
-                    'repository',
-                    'materials',
+                    'creditLine',
+                    'images' => function($q) {
+                        $q->where('is_primary', true);
+                    },
+                    'constituents',
+                    'mediums'
                 ])
-                ->whereHas('images')
+                ->whereHas('images', function($q) {
+                    $q->where('is_primary', true);
+                })
                 ->when($request->filled('department_id'), function ($q) use ($request) {
                     return $q->where('department_id', $request->input('department_id'));
                 })
@@ -57,15 +58,19 @@ class ArtWorkController extends Controller
                 'artworks' => $artworks,
                 'total'    => $total,
             ];
-        });
+        };
 
-        $departments = Cache::remember('departments_all', $this->cacheTTL, function () {
-            return Department::all();
-        });
+        $data = app()->environment('testing') 
+            ? $fetchData() 
+            : Cache::remember($cacheKey, $this->cacheTTL, $fetchData);
 
-        $types = Cache::remember('types_all', $this->cacheTTL, function () {
-            return ObjectType::all();
-        });
+        $departments = app()->environment('testing') 
+            ? Department::all() 
+            : Cache::remember('departments_all', $this->cacheTTL, function () { return Department::all(); });
+
+        $types = app()->environment('testing') 
+            ? ObjectType::all() 
+            : Cache::remember('types_all', $this->cacheTTL, function () { return ObjectType::all(); });
 
         $activeFilters = [
             'department_id'     => $request->input('department_id'),
@@ -93,14 +98,11 @@ class ArtWorkController extends Controller
             $artwork = Cache::remember('artwork_' . $slug, $this->cacheTTL, function () use ($slug) {
                 return ArtWork::where('slug', $slug)
                     ->with([
-                        'images',
-                        'artists',
-                        'department',
-                        'objectType',
-                        'location',
-                        'classification',
-                        'repository',
-                        'materials',
+                        'department', 'objectType', 'classification', 'creditLine', 'location', 'repository',
+                        'images', 'measurements', 'references', 'exhibitionHistories',
+                        'materials', 'mediums', 'tags', 'cultures', 'periods', 'dynasties', 'reigns', 'portfolios',
+                        'constituents', 'geographies.country', 'geographies.city', 'geographies.geographyType',
+                        'artWorkSims'
                     ])
                     ->firstOrFail();
             });

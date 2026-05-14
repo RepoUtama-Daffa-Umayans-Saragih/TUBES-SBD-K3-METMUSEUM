@@ -25,11 +25,11 @@ class CartGroup extends Model
 
     public function cart(): BelongsTo
     {
-        return $this->belongsTo(Cart::class, 'cart_id', 'cart_id');
+        return $this->belongsTo(Cart::class, 'cart_id');
     }
 
     public function cartItems(): HasMany
     {
-        return $this->hasMany(CartItem::class, 'cart_group_id', 'cart_group_id');
+        return $this->hasMany(CartItem::class, 'cart_group_id');
     }
 }

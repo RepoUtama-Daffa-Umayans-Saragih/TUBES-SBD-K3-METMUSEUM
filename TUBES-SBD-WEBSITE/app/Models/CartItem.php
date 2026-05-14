@@ -21,9 +21,9 @@ class CartItem extends Model
 
     // timestamps diaktifkan agar created_at & updated_at otomatis
 
-    public function cart(): BelongsTo
+    public function cartGroup(): BelongsTo
     {
-        return $this->belongsTo(CartGroup::class, 'cart_group_id', 'cart_group_id');
+        return $this->belongsTo(CartGroup::class, 'cart_group_id');
     }
 
     public function ticketAvailability(): BelongsTo

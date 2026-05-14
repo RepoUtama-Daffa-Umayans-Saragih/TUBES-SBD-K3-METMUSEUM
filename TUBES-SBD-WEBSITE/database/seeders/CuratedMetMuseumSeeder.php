@@ -21,12 +21,12 @@ class CuratedMetMuseumSeeder extends Seeder
         $this->command->info("Starting to seed from $csvPath");
         Schema::disableForeignKeyConstraints();
 
-        // Truncate relevant tables
         $tablesToTruncate = [
             'art_work_geographies', 'art_work_constituents', 'art_work_tags',
             'art_work_cultures', 'art_work_periods', 'art_work_dynasties',
             'art_work_reigns', 'art_work_portfolios', 'art_work_materials',
-            'art_work_images', 'art_works'
+            'art_work_mediums', 'art_work_sims', 'art_work_images', 'art_works',
+            'mediums', 'credit_lines'
         ];
         
         foreach ($tablesToTruncate as $table) {
@@ -83,6 +83,8 @@ class CuratedMetMuseumSeeder extends Seeder
             $isPublicDomain = strtolower($row[$headerMap['Is Public Domain']] ?? '') === 'true';
 
             $objectId = $row[$headerMap['Object ID']];
+            $creditLineId = $this->getGeoId('credit_lines', $row[$headerMap['Credit Line']] ?? '', 'credit_line_text', 'credit_line_id');
+
             $artWorkId = DB::table('art_works')->insertGetId([
                 'met_object_id'       => $objectId,
                 'accession_number'    => $row[$headerMap['Object Number']] ?: 'UNKNOWN-' . uniqid(),
@@ -98,14 +100,14 @@ class CuratedMetMuseumSeeder extends Seeder
                 'object_date_display' => $row[$headerMap['Object Date']] ?: null,
                 'object_begin_date' => is_numeric($row[$headerMap['Object Begin Date']]) ? $row[$headerMap['Object Begin Date']] : null,
                 'object_end_date' => is_numeric($row[$headerMap['Object End Date']]) ? $row[$headerMap['Object End Date']] : null,
-                'medium_display' => $row[$headerMap['Medium']] ?: null,
                 'dimensions_display' => $row[$headerMap['Dimensions']] ?: null,
-                'credit_line' => $row[$headerMap['Credit Line']] ?: null,
                 'rights_and_reproduction' => $row[$headerMap['Rights and Reproduction']] ?: null,
                 'link_resource' => $row[$headerMap['Link Resource']] ?: null,
                 'object_wikidata_url' => $row[$headerMap['Object Wikidata URL']] ?: null,
                 'metadata_date' => $row[$headerMap['Metadata Date']] ? \Carbon\Carbon::parse($row[$headerMap['Metadata Date']])->toDateTimeString() : null,
+                'provenance'          => null,
                 'department_id'       => $deptId,
+                'credit_line_id'      => $creditLineId,
                 'type_id'             => $typeId,
                 'classification_id'   => $classId,
                 'location_id' => $defaultLocationId,
@@ -146,6 +148,9 @@ class CuratedMetMuseumSeeder extends Seeder
             $this->seedPivots($artWorkId, $row[$headerMap['Reign']], 'reigns', 'reign_name', 'reign_id', 'art_work_reigns');
             $this->seedPivots($artWorkId, $row[$headerMap['Portfolio']], 'portfolios', 'portfolio_name', 'portfolio_id', 'art_work_portfolios');
             
+            // Seed mediums
+            $this->seedPivots($artWorkId, $row[$headerMap['Medium']] ?? '', 'mediums', 'medium_name', 'medium_id', 'art_work_mediums');
+
             // Materials (from Object Type and Classification as fallback for filter coverage)
             $materials = array_filter([$typeNameCsv, $classNameCsv]);
             foreach ($materials as $mat) {
@@ -256,6 +261,53 @@ class CuratedMetMuseumSeeder extends Seeder
                 }
             }
 
+
+            // SIM (Signatures, Inscriptions, and Markings)
+            $simMappings = [
+                'Signature' => ['Signature', 'Signatures'],
+                'Inscription' => ['Inscription', 'Inscriptions'],
+                'Marking' => ['Marking', 'Markings']
+            ];
+
+            foreach ($simMappings as $simType => $possibleColumns) {
+                foreach ($possibleColumns as $colName) {
+                    if (isset($headerMap[$colName]) && !empty($row[$headerMap[$colName]])) {
+                        $sims = explode('|', $row[$headerMap[$colName]]);
+                        foreach ($sims as $simText) {
+                            $simText = trim($simText);
+                            if ($simText !== '') {
+                                DB::table('art_work_sims')->insert([
+                                    'art_work_id' => $artWorkId,
+                                    'sim_type' => $simType,
+                                    'sim_text' => $simText, // Raw text preserved
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Legacy combined column fallback
+            $legacySimCol = 'Signatures, Inscriptions, and Markings';
+            if (isset($headerMap[$legacySimCol]) && !empty($row[$headerMap[$legacySimCol]])) {
+                $sims = explode('|', $row[$headerMap[$legacySimCol]]);
+                foreach ($sims as $simText) {
+                    $simText = trim($simText);
+                    if ($simText !== '') {
+                        // Default to Inscription if combined and we can't tell, or Marking. We will just use 'Inscription' as fallback
+                        DB::table('art_work_sims')->insert([
+                            'art_work_id' => $artWorkId,
+                            'sim_type' => 'Inscription', 
+                            'sim_text' => $simText,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
             $count++;
             if ($count % 100 === 0) {
                 $this->command->info("Processed $count artworks (skipped: $skipped)...");
@@ -275,7 +327,7 @@ class CuratedMetMuseumSeeder extends Seeder
             $id = DB::table($table)->where($nameCol, $name)->value($idCol);
             
             // Allow dynamic insertion ONLY for non-taxonomy metadata
-            if (!$id && in_array($table, ['repositories', 'locations', 'tags', 'cultures', 'periods', 'dynasties', 'reigns', 'portfolios', 'constituent_roles', 'constituent_prefixes', 'constituent_suffixes', 'nationalities'])) {
+            if (!$id && in_array($table, ['repositories', 'locations', 'tags', 'cultures', 'periods', 'dynasties', 'reigns', 'portfolios', 'constituent_roles', 'constituent_prefixes', 'constituent_suffixes', 'nationalities', 'mediums', 'credit_lines'])) {
                 $id = DB::table($table)->insertGetId([$nameCol => $name]);
             }
             $this->cache[$table][$name] = $id;

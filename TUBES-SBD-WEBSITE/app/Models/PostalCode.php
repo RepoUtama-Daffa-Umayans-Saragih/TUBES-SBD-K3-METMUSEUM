@@ -5,15 +5,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class PostalCode extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table      = 'postal_codes';
     protected $primaryKey = 'postal_code_id';
     public $incrementing  = true;
     protected $keyType    = 'int';
-    public $timestamps    = false;
 
     protected $fillable = [
         'postal_code',
@@ -24,6 +25,6 @@ class PostalCode extends Model
 
     public function userProfiles(): HasMany
     {
-        return $this->hasMany(UserProfile::class, 'postal_code_id', 'postal_code_id');
+        return $this->hasMany(UserProfile::class, 'postal_code_id');
     }
 }

@@ -70,10 +70,12 @@
                 <div class="info-group">
                     <span class="info-label">Dating</span>
                     <div class="info-value">
-                        @if($artwork->year_start && $artwork->year_end)
-                            <strong>{{ $artwork->year_start }} – {{ $artwork->year_end }}</strong>
-                        @elseif($artwork->year_start)
-                            <strong>{{ $artwork->year_start }}</strong>
+                        @if($artwork->object_date_display)
+                            <strong>{{ $artwork->object_date_display }}</strong>
+                        @elseif($artwork->object_begin_date && $artwork->object_end_date)
+                            <strong>{{ $artwork->object_begin_date }} – {{ $artwork->object_end_date }}</strong>
+                        @elseif($artwork->object_begin_date)
+                            <strong>{{ $artwork->object_begin_date }}</strong>
                         @else
                             Not specified
                         @endif
@@ -83,13 +85,15 @@
                 <div class="info-group">
                     <span class="info-label">Locations</span>
                     <div class="info-value">
-                        @if($artwork->geoLocation)
-                            <div><strong>Geographic:</strong> {{ $artwork->geoLocation->name }}</div>
+                        @if($artwork->geographies->isNotEmpty())
+                            @foreach($artwork->geographies as $geo)
+                                <div><strong>{{ optional($geo->geographyType)->name ?? 'Geographic' }}:</strong> {{ implode(', ', array_filter([optional($geo->city)->name, optional($geo->state)->name, optional($geo->country)->name])) }}</div>
+                            @endforeach
                         @endif
                         @if($artwork->location)
                             <div><strong>Museum:</strong> {{ $artwork->location->name }}</div>
                         @endif
-                        @if(!$artwork->geoLocation && !$artwork->location)
+                        @if($artwork->geographies->isEmpty() && !$artwork->location)
                             Not specified
                         @endif
                     </div>
@@ -138,12 +142,24 @@
                     <span class="timestamp">{{ $artwork->updated_at->diffForHumans() }}</span>
                 </td>
             </tr>
-            @if($artwork->artists && $artwork->artists->count() > 0)
+            @if($artwork->constituents && $artwork->constituents->count() > 0)
                 <tr>
-                    <td class="metadata-label">Artists</td>
+                    <td class="metadata-label">Attribution</td>
                     <td>
-                        @foreach($artwork->artists as $artist)
-                            <div class="badge">{{ $artist->name }}</div>
+                        @foreach($artwork->constituents as $constituent)
+                            <div class="badge">{{ $constituent->display_name }} ({{ optional($constituent->pivot->role)->name ?? 'Unknown Role' }})</div>
+                        @endforeach
+                    </td>
+                </tr>
+            @endif
+            @if($artwork->artWorkSims && $artwork->artWorkSims->isNotEmpty())
+                <tr>
+                    <td class="metadata-label">SIM Data</td>
+                    <td>
+                        @foreach($artwork->artWorkSims as $sim)
+                            <div style="margin-bottom: 0.25rem;">
+                                <strong>{{ $sim->sim_type }}:</strong> {{ $sim->sim_text }}
+                            </div>
                         @endforeach
                     </td>
                 </tr>

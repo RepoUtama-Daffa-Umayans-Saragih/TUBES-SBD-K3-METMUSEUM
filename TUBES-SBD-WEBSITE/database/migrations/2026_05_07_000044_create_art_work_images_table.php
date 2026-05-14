@@ -21,19 +21,13 @@ return new class extends Migration
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
         });
 
-        // Perbaikan untuk MariaDB 11:
-        // 1. Buat Virtual Column yang hanya berisi ID jika is_primary = 1
-        // 2. Berikan Unique Index pada kolom virtual tersebut
-        DB::statement("ALTER TABLE art_work_images ADD COLUMN primary_check INT AS (CASE WHEN is_primary = 1 THEN art_work_id ELSE NULL END) VIRTUAL");
-        DB::statement("CREATE UNIQUE INDEX art_work_images_primary_unique ON art_work_images (primary_check)");
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            DB::statement("CREATE UNIQUE INDEX art_work_images_one_primary_per_artwork ON art_work_images (art_work_id, is_primary) WHERE is_primary = 1");
+        }
     }
 
     public function down(): void
     {
-        // Drop index dulu, baru drop tabel
-        Schema::table('art_work_images', function (Blueprint $table) {
-            $table->dropIndex('art_work_images_primary_unique');
-        });
         Schema::dropIfExists('art_work_images');
     }
 };

@@ -30,6 +30,6 @@ class Payment extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');
+        return $this->belongsTo(Order::class, 'order_id');
     }
 }

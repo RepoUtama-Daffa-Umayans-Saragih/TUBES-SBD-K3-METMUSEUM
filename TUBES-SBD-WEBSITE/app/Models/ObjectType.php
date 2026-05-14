@@ -12,6 +12,7 @@ class ObjectType extends Model
     protected $primaryKey = 'type_id';
     public $incrementing  = true;
     protected $keyType    = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'object_type_name',

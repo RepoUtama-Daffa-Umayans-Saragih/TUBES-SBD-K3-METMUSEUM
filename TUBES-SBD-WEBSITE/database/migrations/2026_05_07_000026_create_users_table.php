@@ -12,8 +12,10 @@ return new class extends Migration
             $table->increments('user_id');
             $table->string('email')->unique();
             $table->string('password');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->boolean('is_admin')->default(false);
+            $table->dateTime('premium_started_at')->nullable();
+            $table->dateTime('premium_ended_at')->nullable();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
             $table->softDeletes();
         });
     }

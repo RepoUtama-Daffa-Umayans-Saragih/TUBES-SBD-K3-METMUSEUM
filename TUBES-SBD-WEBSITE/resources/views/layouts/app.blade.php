@@ -14,7 +14,7 @@
 </head>
 <body>
     <!-- Navigation -->
-    @include('components.navbar')
+    @include('components.navbar-sub')
 
     <!-- Main Content -->
     <main class="main-content">
@@ -22,7 +22,7 @@
     </main>
 
     <!-- Footer -->
-    @include('components.footer')
+    @include('components.footer-sub')
 
     @stack('scripts')
 </body>

@@ -35,6 +35,11 @@
                         Join today and become part of our global community of supporters dedicated to helping The Met
                         educate and inspire millions each year through the power of art.
                     </p>
+                    
+                     <div class="faq-btn-wrapper mt-8">
+                        <button class="btn-faq-red">Become a Member!</button>
+                    </div>
+                    
                 </div>
                 <div class="flex-1">
                     <img src="{{ asset('images/member-image.avif') }}" alt="Met Members" class="w-full h-full object-cover">
@@ -44,185 +49,7 @@
 
         <!-- Membership Cards Section -->
         <div class="max-w-screen-xl mx-auto px-6 py-16">
-            <h2 class="text-3xl md:text-5xl font-semibold mb-4">Membership</h2>
-            <h2 class="text-xl font-extrabold mb-10">Membership pays for itself in two visits!</h2>
-
-            <!-- Grid 3 Kolom Tetap -->
-            <div class="card-grid-met">
-                <!-- Individual -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Individual</h3>
-                        <p class="card-price">$120 per year</p>
-                        <div class="card-icons">👤 <span class="mx-1">+</span> <span class="opacity-30">👤</span></div>
-                        <p class="text-sm font-semibold mb-6">1 Member Card + 1 guest</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <ul class="benefit-list bold-list">
-                                <li><span>Free Admission for one Member cardholder and one guest (two total), plus children
-                                        17 and under</span></li>
-                                <li><span>Member Preview Days</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Express entry with Member Entrance</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Weekend Member Mornings</span> <span class="info-icon">ⓘ</span></li>
-                            </ul>
-                            <ul class="benefit-list mt-4">
-                                <li><span>Member-only ticketed events</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Priority access in exhibition virtual queues</span></li>
-                                <li><span>15% off at The Met Store (30% off seasonally)*, plus 10% discount on parking and
-                                        dining</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Monthly E-newsletter, <i>What's On </i>Member Calendar, and digital
-                                        <i>Bulletin</i></span></li>
-                            </ul>
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $74 is tax-deductible</p>
-                    </div>
-                </div>
-
-                <!-- Dual (Contoh Card 2) -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Dual</h3>
-                        <p class="card-price">$220 per year</p>
-                        <div class="card-icons">👤👤 <span class="mx-1">+</span> <span class="opacity-30">👤👤</span></div>
-                        <p class="text-sm font-semibold mb-6">2 Member Cards + 2 guests</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <p class="italic mb-4 text-[15px]">All Individual benefits, plus:</p>
-                            <ul class="benefit-list bold-list">
-                                <li><span>Free Admission for two Member cardholders and two guests (four total), plus
-                                        children 17 and under</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>The Met After Hours</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Access to the Balcony Lounge</span> <span class="info-icon">ⓘ</span></li>
-                            </ul>
-
-                            <ul class="benefit-list mt-4">
-                                <li><span>Print subscription to the <i>Bulletin</i></span> <span class="info-icon">ⓘ</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $114 is tax-deductible</p>
-                    </div>
-                </div>
-                <!-- Family card -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Family</h3>
-                        <p class="card-price">$230 per year</p>
-                        <div class="card-icons">👤👤 <span class="mx-1">+</span> <span class="opacity-30">👤👤</span></div>
-                        <p class="text-sm font-semibold mb-6">2 Member Cards + 2 guests</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <p class="italic mb-4 text-[15px]">All Dual benefits, plus:</p>
-                            <ul class="benefit-list bold-list">
-                                <li><span>81st Street Studio Member Mornings</span> <span class="info-icon">ⓘ</span></li>
-                                <li><span>Children's Classes and Camps early registration and discounts</span></li>
-                            </ul>
-
-                            <ul class="benefit-list mt-4">
-                                <li><span>Two Kid's Passports, stamped on each visit</i></span>
-                                <li><span>Family Member Activity Guide</i></span>
-                            </ul>
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $119 is tax-deductible</p>
-                    </div>
-                </div>
-
-                <!--Enthusiast card -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Enthusiast</h3>
-                        <p class="card-price">$600 per year</p>
-                        <div class="card-icons">👤👤 <span class="mx-1">+</span> <span class="opacity-30">👤👤👤👤</span>
-                        </div>
-                        <p class="text-sm font-semibold mb-6">2 Member Cards + 4 guests</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <p class="italic mb-4 text-[15px]">All Dual benefits, plus:</p>
-                            <ul class="benefit-list bold-list">
-                                <li><span>Free Admission for two Member cardholders, and for guests (six total), plus
-                                        children 17 and under</span><span class="info-icon">ⓘ</span></li>
-                                <li><span>Member Evening Receptions</span><span class="info-icon">ⓘ</span></li>
-                            </ul>
-
-                            <ul class="benefit-list mt-4">
-                                <li><span>Evening with the Director</span><span class="info-icon">ⓘ</span></li>
-                                <li><span>Reciprocal Benefits at 16 museums nationwide</span><span
-                                        class="info-icon">ⓘ</span></li>
-                                <li><span>81st Street Studio Member Mornings</span><span class="info-icon">ⓘ</span></li>
-                                <li><span>Children's Classes and Camps early registration and discounts</span></li>
-                            </ul>
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $344 is tax-deductible</p>
-                    </div>
-                </div>
-
-                <!--Ambassador card -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Ambassador</h3>
-                        <p class="card-price">$1,500 per year</p>
-                        <div class="card-icons">👤👤 <span class="mx-1">+</span> <span class="opacity-30">👤👤👤👤</span>
-                        </div>
-                        <p class="text-sm font-semibold mb-6">2 Member Cards + 4 guests</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <p class="italic mb-4 text-[15px]">All Enthusiast benefits, plus:</p>
-                            <ul class="benefit-list bold-list">
-                                <li><span>Annual Curatorial Preview and Reception</span><span class="info-icon">ⓘ</span>
-                                </li>
-                            </ul>
-
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $1,199 is tax-deductible</p>
-                    </div>
-                </div>
-
-                <!--Global card -->
-                <div class="card-met">
-                    <div class="card-top">
-                        <h3 class="card-type">Global</h3>
-                        <p class="card-price">$90 per year</p>
-                        <div class="card-icons">👤 <span class="mx-1">+</span> <span class="opacity-30">👤</span></div>
-                        <p class="text-sm font-semibold mb-6">1 Member Card + 1 guest</p>
-                        <button class="btn-join">Join/Renew</button>
-                    </div>
-                    <div class="card-bottom">
-                        <div class="benefit-content">
-                            <ul class="benefit-list bold-list">
-                                <li><span>For Member outside of a 200 mile radius of the Museum</span></li>
-                            </ul>
-                            <p class="italic mb-4 mt-4 text-[15px]">All the benefits of the Individual level.</p>
-
-                        </div>
-                        <p class="legal-text">Within the limits prescribed by law, $44 is tax-deductible</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Patron Section -->
-            <section class="patron-wrapper">
-                <div class="patron-card">
-                    <div class="patron-img-box">
-                        <img src="{{ asset('images/patron-image.jpg') }}" alt="Patron">
-                    </div>
-                    <div class="patron-info-box">
-                        <h2 class="patron-h">Patron Program</h2>
-                        <p class="patron-p">Become a Met insider with exclusive events and behind-the-scenes access and
-                            deepen your impact at The Met.</p>
-                        <a href="#" class="patron-link">Learn More</a>
-                    </div>
-                </div>
-            </section>
+           
 
             <!-- Questions & FAQ Section -->
             <section class="mt-20 border-t border-gray-200 pt-14">
@@ -304,25 +131,8 @@
                 </div>
             </section>
 
-            <footer class="met-footer">
-                <div class="footer-container">
-                    <!-- Footer Links -->
-                    <nav class="footer-nav">
-                        <a href="#" class="footer-link">Site Index</a>
-                        <a href="#" class="footer-link">Terms and Conditions</a>
-                        <a href="#" class="footer-link">Privacy Policy</a>
-                        <a href="#" class="footer-link">Contact Information</a>
-                    </nav>
-
-                    <!-- Copyright -->
-                    <p class="footer-copyright">
-                        © 2000–2025 The Metropolitan Museum of Art. All rights reserved.
-                    </p>
-                </div>
-            </footer>
-        </div>
-    </body>
-
+           
+               
 @endsection
 
 </html>

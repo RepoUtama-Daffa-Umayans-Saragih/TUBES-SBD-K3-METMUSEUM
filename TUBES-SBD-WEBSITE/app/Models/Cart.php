@@ -29,16 +29,16 @@ class Cart extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function guest(): BelongsTo
     {
-        return $this->belongsTo(Guest::class, 'guest_id', 'guest_id');
+        return $this->belongsTo(Guest::class, 'guest_id');
     }
 
     public function cartGroups(): HasMany
     {
-        return $this->hasMany(CartGroup::class, 'cart_id', 'cart_id');
+        return $this->hasMany(CartGroup::class, 'cart_id');
     }
 }

@@ -44,10 +44,12 @@
                         <td>{{ $artwork->department?->name ?? 'N/A' }}</td>
                         <td>{{ $artwork->objectType?->name ?? 'N/A' }}</td>
                         <td>
-                            @if($artwork->year_start && $artwork->year_end)
-                                {{ $artwork->year_start }} – {{ $artwork->year_end }}
-                            @elseif($artwork->year_start)
-                                {{ $artwork->year_start }}
+                            @if($artwork->object_date_display)
+                                {{ $artwork->object_date_display }}
+                            @elseif($artwork->object_begin_date && $artwork->object_end_date)
+                                {{ $artwork->object_begin_date }} – {{ $artwork->object_end_date }}
+                            @elseif($artwork->object_begin_date)
+                                {{ $artwork->object_begin_date }}
                             @else
                                 N/A
                             @endif

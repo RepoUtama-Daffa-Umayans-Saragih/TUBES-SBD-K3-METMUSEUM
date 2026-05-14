@@ -14,6 +14,7 @@
         <p>Discover thousands of artworks from across the globe</p>
     </div>
 
+    @php dump('CATALOG BLADE DUMP:', optional($artworks)->toArray()); @endphp
     @if($hasActiveFilters)
         <div class="active-filters">
             <span class="active-filters-label">Active Filters:</span>
@@ -50,10 +51,10 @@
                     <a href="/art/collection?{{ http_build_query(array_filter(array_merge(request()->query(), ['geo_id' => null]))) }}" class="filter-badge-remove" title="Remove">✕</a>
                 </span>
             @endif
-            @if($activeFilters['year_start'] || $activeFilters['year_end'])
+            @if($activeFilters['object_begin_date'] || $activeFilters['object_end_date'])
                 <span class="filter-badge">
-                    Years: {{ $activeFilters['year_start'] ?? 'Start' }} - {{ $activeFilters['year_end'] ?? 'End' }}
-                    <a href="/art/collection?{{ http_build_query(array_filter(array_merge(request()->query(), ['year_start' => null, 'year_end' => null]))) }}" class="filter-badge-remove" title="Remove">✕</a>
+                    Years: {{ $activeFilters['object_begin_date'] ?? 'Start' }} - {{ $activeFilters['object_end_date'] ?? 'End' }}
+                    <a href="/art/collection?{{ http_build_query(array_filter(array_merge(request()->query(), ['object_begin_date' => null, 'object_end_date' => null]))) }}" class="filter-badge-remove" title="Remove">✕</a>
                 </span>
             @endif
         </div>
@@ -106,13 +107,13 @@
                 </div>
 
                 <div class="filter-group">
-                    <label for="year_start">Year From</label>
-                    <input type="number" id="year_start" name="year_start" placeholder="e.g., 1800" value="{{ request('year_start') }}">
+                    <label for="object_begin_date">Year From</label>
+                    <input type="number" id="object_begin_date" name="object_begin_date" placeholder="e.g., 1800" value="{{ request('object_begin_date') }}">
                 </div>
 
                 <div class="filter-group">
-                    <label for="year_end">Year To</label>
-                    <input type="number" id="year_end" name="year_end" placeholder="e.g., 1900" value="{{ request('year_end') }}">
+                    <label for="object_end_date">Year To</label>
+                    <input type="number" id="object_end_date" name="object_end_date" placeholder="e.g., 1900" value="{{ request('object_end_date') }}">
                 </div>
 
                 <button type="submit" class="filter-button">Apply Filters</button>
@@ -137,24 +138,26 @@
                                     $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
                                 @endphp
                                 @if($primaryImage)
-                                    <img src="{{ asset('storage/' . $primaryImage->url) }}" alt="{{ $artwork->title }}" class="artwork-image">
+                                    <img src="{{ asset('storage/' . $primaryImage->image_url) }}" alt="{{ $artwork->title }}" class="artwork-image">
                                 @else
                                     <div class="artwork-image" style="background-color: #e8e8e8;"></div>
                                 @endif
                             </div>
                             <div class="artwork-info">
                                 <h3 class="artwork-title">{{ $artwork->title }}</h3>
-                                @if($artwork->artists->isNotEmpty())
-                                    <p class="artwork-artist">{{ $artwork->artists->pluck('name')->join(', ') }}</p>
+                                @if($artwork->constituents->isNotEmpty())
+                                    <p class="artwork-artist">{{ $artwork->constituents->pluck('display_name')->join(', ') }}</p>
                                 @endif
-                                @if($artwork->year_start || $artwork->year_end)
+                                @if($artwork->object_date_display)
+                                    <p class="artwork-year">{{ $artwork->object_date_display }}</p>
+                                @elseif($artwork->object_begin_date || $artwork->object_end_date)
                                     <p class="artwork-year">
-                                        @if($artwork->year_start && $artwork->year_end)
-                                            {{ $artwork->year_start }} – {{ $artwork->year_end }}
-                                        @elseif($artwork->year_start)
-                                            {{ $artwork->year_start }}
+                                        @if($artwork->object_begin_date && $artwork->object_end_date)
+                                            {{ $artwork->object_begin_date }} – {{ $artwork->object_end_date }}
+                                        @elseif($artwork->object_begin_date)
+                                            {{ $artwork->object_begin_date }}
                                         @else
-                                            {{ $artwork->year_end }}
+                                            {{ $artwork->object_end_date }}
                                         @endif
                                     </p>
                                 @endif

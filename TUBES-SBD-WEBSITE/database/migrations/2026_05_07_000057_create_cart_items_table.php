@@ -21,7 +21,9 @@ return new class extends Migration
             $table->foreign('ticket_availability_id')->references('ticket_availability_id')->on('ticket_availability');
         });
 
-        DB::statement('ALTER TABLE cart_items ADD CONSTRAINT cart_items_quantity_check CHECK (quantity > 0)');
+        if (DB::connection()->getDriverName() !== 'sqlite') {
+            DB::statement('ALTER TABLE cart_items ADD CONSTRAINT cart_items_quantity_check CHECK (quantity > 0)');
+        }
     }
 
     public function down(): void

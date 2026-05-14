@@ -115,15 +115,7 @@ class CheckoutController extends Controller
     public function paymentPage(Order $order): View
     {
         // Ownership validation
-        $userId  = Auth::id();
-        $guestId = session('guest_id');
-
-        $isOwner = ($order->user_id && $order->user_id == $userId) ||
-            ($order->guest_id && $order->guest_id == $guestId);
-
-        if (! $isOwner) {
-            abort(403, 'Unauthorized access to this order.');
-        }
+        \Illuminate\Support\Facades\Gate::authorize('view', $order);
 
         $order->load([
             'payment',
@@ -147,14 +139,7 @@ class CheckoutController extends Controller
     public function pay(Request $request, Order $order)
     {
         // Ownership validation
-        $userId  = Auth::id();
-        $guestId = session('guest_id');
-        $isOwner = ($order->user_id && $order->user_id == $userId) ||
-            ($order->guest_id && $order->guest_id == $guestId);
-
-        if (! $isOwner) {
-            abort(403);
-        }
+        \Illuminate\Support\Facades\Gate::authorize('view', $order);
 
         if ($order->payment && $order->payment->payment_status === 'Paid') {
             return redirect()->route('ticket.checkout.success', $order->order_id)
@@ -273,6 +258,9 @@ class CheckoutController extends Controller
 
     public function success(Order $order): View
     {
+        // Ownership validation
+        \Illuminate\Support\Facades\Gate::authorize('view', $order);
+
         $order->load([
             'payment',
             'tickets.ticketAvailability.visitSchedule.location',

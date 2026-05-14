@@ -12,6 +12,7 @@ class Repository extends Model
     protected $primaryKey = 'repository_id';
     public $incrementing  = true;
     protected $keyType    = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'repository_name',

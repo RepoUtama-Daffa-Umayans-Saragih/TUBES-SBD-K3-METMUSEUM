@@ -123,15 +123,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $userId = Auth::id();
-        $guestId = session('guest_id');
-
-        $isOwner = ($order->user_id && $order->user_id === $userId) || 
-                   ($order->guest_id && $order->guest_id === $guestId);
-
-        if (!$isOwner && !($order->user_id === null && $order->guest_id === null)) {
-            abort(403, 'Unauthorized access to this order.');
-        }
+        \Illuminate\Support\Facades\Gate::authorize('view', $order);
 
         $order->load([
             'payment',

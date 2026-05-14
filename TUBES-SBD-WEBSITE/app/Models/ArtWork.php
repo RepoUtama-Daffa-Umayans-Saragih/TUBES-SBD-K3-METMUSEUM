@@ -26,9 +26,7 @@ class ArtWork extends Model
         'object_date_display',
         'object_begin_date',
         'object_end_date',
-        'medium_display',
         'dimensions_display',
-        'credit_line',
         'rights_and_reproduction',
         'metadata_date',
         'is_on_view',
@@ -43,9 +41,9 @@ class ArtWork extends Model
         'link_resource',
         'object_url',
         'object_wikidata_url',
+        'provenance',
+        'credit_line_id',
     ];
-
-    // timestamps diaktifkan agar created_at & updated_at otomatis
 
     public function department(): BelongsTo
     {
@@ -72,19 +70,32 @@ class ArtWork extends Model
         return $this->belongsTo(Classification::class, 'classification_id');
     }
 
+    public function creditLine(): BelongsTo
+    {
+        return $this->belongsTo(CreditLine::class, 'credit_line_id');
+    }
+
     public function materials(): BelongsToMany
     {
         return $this->belongsToMany(Material::class, 'art_work_materials', 'art_work_id', 'material_id');
     }
 
-    public function artists(): BelongsToMany
+    public function mediums(): BelongsToMany
     {
-        return $this->belongsToMany(Artist::class, 'art_work_artists', 'art_work_id', 'artist_id');
+        return $this->belongsToMany(Medium::class, 'art_work_mediums', 'art_work_id', 'medium_id')->withPivot('display_order');
     }
 
     public function constituents(): BelongsToMany
     {
-        return $this->belongsToMany(Constituent::class, 'art_work_constituents', 'art_work_id', 'constituent_id');
+        return $this->belongsToMany(Constituent::class, 'art_work_constituents', 'art_work_id', 'constituent_id')
+            ->using(ArtWorkConstituent::class)
+            ->withPivot(['role_id', 'prefix_id', 'suffix_id', 'display_order'])
+            ->withTimestamps();
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'art_work_tags', 'art_work_id', 'tag_id');
     }
 
     public function cultures(): BelongsToMany
@@ -92,14 +103,49 @@ class ArtWork extends Model
         return $this->belongsToMany(Culture::class, 'art_work_cultures', 'art_work_id', 'culture_id');
     }
 
+    public function periods(): BelongsToMany
+    {
+        return $this->belongsToMany(Period::class, 'art_work_periods', 'art_work_id', 'period_id');
+    }
+
+    public function dynasties(): BelongsToMany
+    {
+        return $this->belongsToMany(Dynasty::class, 'art_work_dynasties', 'art_work_id', 'dynasty_id');
+    }
+
+    public function reigns(): BelongsToMany
+    {
+        return $this->belongsToMany(Reign::class, 'art_work_reigns', 'art_work_id', 'reign_id');
+    }
+
+    public function portfolios(): BelongsToMany
+    {
+        return $this->belongsToMany(Portfolio::class, 'art_work_portfolios', 'art_work_id', 'portfolio_id');
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ArtWorkImage::class, 'art_work_id');
     }
 
-    public function artWorkImages(): HasMany
+    public function measurements(): HasMany
     {
-        return $this->images();
+        return $this->hasMany(ArtWorkMeasurement::class, 'art_work_id');
+    }
+
+    public function exhibitionHistories(): HasMany
+    {
+        return $this->hasMany(ArtWorkExhibitionHistory::class, 'art_work_id');
+    }
+
+    public function references(): HasMany
+    {
+        return $this->hasMany(ArtWorkReference::class, 'art_work_id');
+    }
+
+    public function geographies(): HasMany
+    {
+        return $this->hasMany(ArtWorkGeography::class, 'art_work_id');
     }
 
     public function getNameAttribute()
@@ -133,13 +179,8 @@ class ArtWork extends Model
         return $primary ? $primary->image_url : $images->first()->image_url;
     }
 
-    public function getCreatedAtAttribute()
+    public function artWorkSims(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return \Carbon\Carbon::now();
-    }
-
-    public function getUpdatedAtAttribute()
-    {
-        return \Carbon\Carbon::now();
+        return $this->hasMany(ArtWorkSim::class, 'art_work_id');
     }
 }

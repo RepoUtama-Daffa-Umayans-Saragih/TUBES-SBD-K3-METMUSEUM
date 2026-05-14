@@ -23,11 +23,11 @@ class TicketAvailability extends Model
 
     public function ticketType(): BelongsTo
     {
-        return $this->belongsTo(TicketType::class, 'ticket_type_id', 'ticket_type_id');
+        return $this->belongsTo(TicketType::class, 'ticket_type_id');
     }
 
     public function visitSchedule(): BelongsTo
     {
-        return $this->belongsTo(VisitSchedule::class, 'visit_schedule_id', 'visit_schedule_id');
+        return $this->belongsTo(VisitSchedule::class, 'visit_schedule_id');
     }
 }

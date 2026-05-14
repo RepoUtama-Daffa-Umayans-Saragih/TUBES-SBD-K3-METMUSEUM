@@ -116,6 +116,36 @@
                 </div>
             </div>
 
+            <!-- Taxonomies & Attribution (ID Based for Sync) -->
+            <div class="section-title">Taxonomies & Attribution</div>
+            <div class="form-group grid-2">
+                <div class="field">
+                    <label>Medium IDs</label>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        @php
+                            $mediumIds = $artwork->mediums->pluck('medium_id')->toArray();
+                        @endphp
+                        <input type="number" name="medium_ids[]" placeholder="Medium ID" value="{{ $mediumIds[0] ?? '' }}" min="1">
+                        <input type="number" name="medium_ids[]" placeholder="Medium ID" value="{{ $mediumIds[1] ?? '' }}" min="1">
+                        <input type="number" name="medium_ids[]" placeholder="Medium ID" value="{{ $mediumIds[2] ?? '' }}" min="1">
+                    </div>
+                    <small class="form-helper-text">Enter valid Medium IDs to attach.</small>
+                </div>
+                
+                <div class="field">
+                    <label>Primary Constituent (Attribution)</label>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        @php
+                            $firstConst = $artwork->constituents->first();
+                        @endphp
+                        <input type="number" name="constituents[0][constituent_id]" placeholder="Constituent ID" value="{{ optional($firstConst)->constituent_id }}" min="1">
+                        <input type="number" name="constituents[0][role_id]" placeholder="Role ID (e.g. 1 for Artist)" value="{{ optional(optional($firstConst)->pivot)->role_id }}" min="1">
+                        <input type="number" name="constituents[0][display_order]" placeholder="Display Order" value="{{ optional(optional($firstConst)->pivot)->display_order ?? 1 }}" min="1">
+                    </div>
+                    <small class="form-helper-text">Enter Constituent ID and Role ID to attach.</small>
+                </div>
+            </div>
+
             <!-- Dating -->
             <div class="section-title">Dating</div>
 

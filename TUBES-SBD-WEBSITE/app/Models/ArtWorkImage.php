@@ -15,8 +15,12 @@ class ArtWorkImage extends Model
 
     protected $fillable = [
         'art_work_id',
-        'url',
+        'image_url',
         'is_primary',
+    ];
+
+    protected $casts = [
+        'is_primary' => 'boolean',
     ];
 
     // timestamps diaktifkan agar created_at & updated_at otomatis

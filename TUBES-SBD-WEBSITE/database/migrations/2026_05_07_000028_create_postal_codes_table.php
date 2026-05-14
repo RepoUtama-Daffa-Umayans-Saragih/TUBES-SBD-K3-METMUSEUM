@@ -18,6 +18,8 @@ return new class extends Migration
                 ['postal_code', 'postal_city', 'postal_state', 'postal_country'],
                 'uq_postal_codes_location'
             );
+            $table->softDeletes();
+            $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
         });
     }
 

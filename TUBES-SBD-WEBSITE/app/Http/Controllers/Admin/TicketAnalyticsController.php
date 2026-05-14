@@ -194,7 +194,7 @@ class TicketAnalyticsController extends Controller
         
         // Capacity Overview (all scheduled sessions)
         $capacityOverview = VisitSchedule::where('visit_date', '>=', now()->subDays(30))
-            ->with('ticketAvailabilities')
+            ->with(['ticketAvailabilities', 'location'])
             ->orderBy('visit_date')
             ->get()
             ->map(function ($schedule) {

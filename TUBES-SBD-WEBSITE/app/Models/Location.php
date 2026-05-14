@@ -12,6 +12,7 @@ class Location extends Model
     protected $primaryKey = 'location_id';
     public $incrementing  = true;
     protected $keyType    = 'int';
+    public $timestamps = false;
 
     protected $fillable = [
         'location_name',

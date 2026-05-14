@@ -18,7 +18,11 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
+        'is_admin',
+        'premium_started_at',
+        'premium_ended_at',
     ];
+
     protected $hidden = [
         'password',
     ];
@@ -27,6 +31,9 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'premium_started_at' => 'datetime',
+            'premium_ended_at' => 'datetime',
         ];
     }
 

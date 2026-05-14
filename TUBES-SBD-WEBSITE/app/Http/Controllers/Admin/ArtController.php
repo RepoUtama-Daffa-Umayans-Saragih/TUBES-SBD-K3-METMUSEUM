@@ -38,7 +38,7 @@ class ArtController extends Controller
      */
     public function index()
     {
-        $artworks = ArtWork::with('department', 'objectType', 'location')
+        $artworks = ArtWork::with('department', 'objectType', 'location', 'constituents', 'mediums')
             ->paginate(20);
 
         return view('admin.art.art', [
@@ -82,6 +82,12 @@ class ArtController extends Controller
             'gallery_number'      => 'nullable|string|max:255',
             'images'              => 'nullable|array',
             'images.*'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'medium_ids'          => 'nullable|array',
+            'medium_ids.*'        => 'exists:mediums,medium_id',
+            'constituents'        => 'nullable|array', // e.g., [['constituent_id' => 1, 'role_id' => 2, 'display_order' => 1]]
+            'sims'                => 'nullable|array',
+            'sims.*.sim_type'     => 'required|in:Signature,Inscription,Marking',
+            'sims.*.sim_text'     => 'required|string',
         ]);
 
         $artwork = ArtWork::create([
@@ -99,6 +105,31 @@ class ArtController extends Controller
             'object_end_date'     => $validated['object_end_date'] ?? null,
             'gallery_number'      => $validated['gallery_number'] ?? null,
         ]);
+
+        if (isset($validated['medium_ids'])) {
+            $artwork->mediums()->sync($validated['medium_ids']);
+        }
+        
+        if (isset($validated['constituents'])) {
+            $syncData = [];
+            foreach ($validated['constituents'] as $c) {
+                if (isset($c['constituent_id'])) {
+                    $syncData[$c['constituent_id']] = [
+                        'role_id' => $c['role_id'] ?? null,
+                        'prefix_id' => $c['prefix_id'] ?? null,
+                        'suffix_id' => $c['suffix_id'] ?? null,
+                        'display_order' => $c['display_order'] ?? 1,
+                    ];
+                }
+            }
+            $artwork->constituents()->sync($syncData);
+        }
+
+        if (isset($validated['sims'])) {
+            foreach ($validated['sims'] as $simData) {
+                $artwork->artWorkSims()->create($simData);
+            }
+        }
 
         // Handle image uploads
         if ($request->hasFile('images')) {
@@ -122,7 +153,7 @@ class ArtController extends Controller
      */
     public function edit($id)
     {
-        $artwork     = ArtWork::where('art_work_id', $id)->firstOrFail();
+        $artwork     = ArtWork::with(['department', 'objectType', 'location', 'constituents', 'mediums', 'artWorkSims'])->where('art_work_id', $id)->firstOrFail();
         $departments = Department::orderBy('department_name')->get();
         $types       = ObjectType::orderBy('object_type_name')->get();
         $locations   = Location::orderBy('location_name')->get();
@@ -157,6 +188,12 @@ class ArtController extends Controller
             'gallery_number'      => 'nullable|string|max:255',
             'images'              => 'nullable|array',
             'images.*'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'medium_ids'          => 'nullable|array',
+            'medium_ids.*'        => 'exists:mediums,medium_id',
+            'constituents'        => 'nullable|array', 
+            'sims'                => 'nullable|array',
+            'sims.*.sim_type'     => 'required|in:Signature,Inscription,Marking',
+            'sims.*.sim_text'     => 'required|string',
         ]);
 
         $artwork->update([
@@ -174,6 +211,32 @@ class ArtController extends Controller
             'object_end_date'     => $validated['object_end_date'] ?? null,
             'gallery_number'      => $validated['gallery_number'] ?? null,
         ]);
+
+        if (isset($validated['medium_ids'])) {
+            $artwork->mediums()->sync($validated['medium_ids']);
+        }
+        
+        if (isset($validated['constituents'])) {
+            $syncData = [];
+            foreach ($validated['constituents'] as $c) {
+                if (isset($c['constituent_id'])) {
+                    $syncData[$c['constituent_id']] = [
+                        'role_id' => $c['role_id'] ?? null,
+                        'prefix_id' => $c['prefix_id'] ?? null,
+                        'suffix_id' => $c['suffix_id'] ?? null,
+                        'display_order' => $c['display_order'] ?? 1,
+                    ];
+                }
+            }
+            $artwork->constituents()->sync($syncData);
+        }
+
+        if (isset($validated['sims'])) {
+            $artwork->artWorkSims()->delete();
+            foreach ($validated['sims'] as $simData) {
+                $artwork->artWorkSims()->create($simData);
+            }
+        }
 
         // Handle image uploads
         if ($request->hasFile('images')) {
@@ -197,9 +260,13 @@ class ArtController extends Controller
      */
     public function show($id)
     {
-        $artwork = ArtWork::with('department', 'objectType', 'location', 'images')
-            ->where('art_work_id', $id)
-            ->firstOrFail();
+        $artwork = ArtWork::with([
+            'department', 'objectType', 'classification', 'creditLine', 'location', 'repository',
+            'images', 'measurements', 'references', 'exhibitionHistories',
+            'materials', 'mediums', 'tags', 'cultures', 'periods', 'dynasties', 'reigns', 'portfolios',
+            'constituents', 'geographies.country', 'geographies.city', 'geographies.geographyType',
+            'artWorkSims'
+        ])->where('art_work_id', $id)->firstOrFail();
 
         return view('admin.art.show.show', [
             'artwork' => $artwork,

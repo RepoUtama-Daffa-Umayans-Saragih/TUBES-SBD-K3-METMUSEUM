@@ -3,207 +3,484 @@
 @section('title', 'Home')
 
 @section('content')
-    <section class="min-h-[calc(100vh-6rem)] bg-[#b6b6b6] flex items-center justify-center">
-        <div class="w-full max-w-4xl px-6 py-24 text-center">
-            <h1 class="text-5xl md:text-6xl font-semibold tracking-tight text-white leading-tight">Welcome to The Met</h1>
-            <p class="mx-auto mt-8 max-w-3xl text-base md:text-lg text-white/90 leading-relaxed">Experience art, exhibitions, and culture from one of the world’s greatest museums.</p>
-            <a href="{{ route('plan-your-visit.index') }}" class="mt-12 inline-flex items-center justify-center rounded-full border border-white px-10 py-3 text-base font-semibold text-white transition hover:bg-white/15">Plan your visit</a>
+    <section class="relative min-h-[calc(100vh-6rem)] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('{{ asset('images/WhatsApp Image 2026-05-09 at 02.03.14.jpeg')}}');">
+
+        <div class="w-full max-w-4xl px-6 py-24 text-center relative z-10">
+            <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight text-white leading-tight">
+                Welcome to The Met
+            </h1>
+
+            <div class="mt-12">
+                <a href="{{ route('plan-your-visit.index') }}"
+                    class="inline-flex items-center justify-center border-2 border-white px-8 py-4 text-lg font-bold text-white transition hover:bg-white hover:text-black">
+                    Plan your visit
+                </a>
+            </div>
         </div>
     </section>
 
-    <section class="bg-white py-16">
+    <section class="bg-white py-16 overflow-hidden">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-sm uppercase tracking-[0.35em] text-gray-500">Now On View</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-gray-900">Current exhibitions and highlights</h2>
-                </div>
-                <div class="flex items-center gap-3">
-                    <button id="now-on-view-prev" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-700 transition hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <button id="now-on-view-next" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-300 text-gray-700 transition hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
 
-            <div class="mt-10 overflow-hidden">
-                <div id="now-on-view-track" class="grid gap-6 grid-flow-col auto-cols-[minmax(340px,1fr)] transition-transform duration-500">
-                    @foreach(range(1, 10) as $i)
-                        <article class="group relative overflow-hidden rounded-3xl bg-white shadow-sm">
-                            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
-                                <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80" alt="Exhibition {{ $i }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+            <section id="Views" class="max-w-full mx-auto py-10">
+                <div class="px-5">
+                    <div class="view-map-wrapper">
+                        <h3 class="section-title text-2xl font-bold">Now on View</h3>
+                        <a href="#" class="view-map-link">
+                            View all
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tombol Navigasi Kiri -->
+                <button onclick="document.getElementById('carousel').scrollBy({left: -800, behavior: 'smooth'})"
+                    class="nav-btn left-2 lg:left-6 hidden lg:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <!-- Tombol Navigasi Kanan -->
+                <button onclick="document.getElementById('carousel').scrollBy({left: 800, behavior: 'smooth'})"
+                    class="nav-btn right-2 lg:right-6 hidden lg:flex opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div class="view-container">
+                    <div class="image-scroller">
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image1.jpg') }}" alt="Raphael: Sublime Poetry">
                             </div>
-                            <div class="p-6">
-                                <p class="text-xl font-semibold text-gray-900">Exhibition {{ $i }}</p>
-                                <p class="mt-2 text-sm text-gray-500">Through August {{ 5 + $i }}</p>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Raphael: Sublime Poetry</h4>
+                                <p class="view-desc">Through June 28</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image2.jpg') }}" alt="Gothic by Design">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Gothic by Design: The Dawn of Architectural Draftsmanship</h4>
+                                <p class="view-desc">Through July 19</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image3.jpg') }}" alt="The Genesis Facade">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">The Genesis Facade Commission: Jeffrey Gibson, <i>The Animal That
+                                        Therefore I Am</i></h4>
+                                <p class="view-desc">Through June 9</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image4.jpg') }}" alt="View Finding">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">View Finding: Selections from The Walther Collection</h4>
+                                <p class="view-desc">Through May 3</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image5.jpg') }}" alt="The Magical City">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">The Magical City: George Morrison's New York</h4>
+                                <p class="view-desc">Through May 31</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image6.jpg') }}" alt="Chinese Painting and Calligraphy">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Chinese Painting and Calligraphy: Selections from the Collection</h4>
+                                <p class="view-desc">Through May10</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image7.jpg') }}" alt="Fanmania">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Fanmania</h4>
+                                <p class="view-desc">Through May 12</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image8.jpg') }}" alt="Filling in the Gaps">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Filling in the Gaps: A Selection of Works by the 2026 Scholastic Art
+                                    & Writing Awards New York City Gold Key Recipients</h4>
+                                <p class="view-desc">Through May 18</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image9.jpg') }}" alt="Iba Ndiaye">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Iba Ndiaye: Between Latitude and Longitude</h4>
+                                <p class="view-desc">Through May 31</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image10.jpg') }}" alt="Making It Modern">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Making It Modern: European Ceramics from the Martin Eidelberg
+                                    Collection</h4>
+                                <p class="view-desc">Through June 14</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image11.jpg') }}" alt="a Passion for Jade">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">A Passion for Jade: The Bishop Collection</h4>
+                                <p class="view-desc">Through June 28</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image12.jpg') }}" alt="Embracing Color">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Embracing Color: Enamel in Chinese Decorative Art, 1300-1900</h4>
+                                <p class="view-desc">Through June 28</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image13.jpg') }}" alt="Lillian Bassman">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Lillian Bassman: Bazaaar and Beyond</h4>
+                                <p class="view-desc">Through July 26</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image14.jpg') }}" alt="Revolution">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Revolution!</h4>
+                                <p class="view-desc">Through August 2</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image15.jpg') }}" alt="Afterlives">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Afterlives: Contemporary Art in the Byzantine Crypt</h4>
+                                <p class="view-desc">Through January 10, 2027</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image16.jpg') }}" alt="Celebrating the Year of the Horse">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Celebrating the Year of the Horse</h4>
+                                <p class="view-desc">Through January 26, 2027</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image17.jpg') }}" alt="Flip Sides">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Flip Sides: Seeing Korean Art Anew</h4>
+                                <p class="view-desc">Through May 31, 2027</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image18.jpg') }}" alt="Household Gods">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Household Gods: Hindu Devotional Prints, 1860-1930</h4>
+                                <p class="view-desc">Through June 27, 2027</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image19.jpg') }}"
+                                    alt="The Infinite Artistry of Japanese Ceramics">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">The Infinite Artistry of Japanese Ceramics</h4>
+                                <p class="view-desc">Through August 8, 2027</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image20.jpg') }}" alt="Arts of Oceania">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Arts of Oceania</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image21.jpg') }}" alt="Renaisssance Masterpieces of Judaica">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Renaissance Masterpieces of Judaica: The Mishneh Torah and The
+                                    Rothschild Mahzor</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image22.jpg') }}" alt="Michael Lin">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Michael Lin: <i>Pentachrome</i></h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image23.jpg') }}" alt="Arts of Native America">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Arts of Native America: The Charles and Valerie Diker Collection</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image24.jpg') }}" alt="Before Yesterday">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Before Yesterday We Could Fly: An Afrofoturist Period Room</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image25.jpg') }}" alt="Arts of the Ancient Americas">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Arts of the Ancient Americas</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image26.jpg') }}" alt="Wedding Attire">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Wedding Attire: Three Cultures, One Celebration</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image27.jpg') }}" alt="Defensive Display">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Defensive Display: Shields from The Met Collection</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image28.jpg') }}" alt="Arts of Africa">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Arts of Africa</h4>
+                                <p class="view-desc">Ongoing</p>
+                            </div>
+                        </div>
+
+                        <div class="scroller-item">
+                            <div class="image-wrapper">
+                                <img src="{{ asset('images/image29.jpg') }}"
+                                    alt="Baseball Cards from the Collection of Jefferson R. Burdick">
+                            </div>
+                            <div class="content-wrapper">
+                                <h4 class="view-title">Baseball Cards from the Collection of Jefferson R. Burdick</h4>
+                                <p class="view-desc">July 24, 2025-Temporarily Unavailable</p>
+                            </div>
+                            <script>
+                                const track = document.getElementById('sliderTrack');
+                                const nextBtn = document.getElementById('now-on-view-next');
+                                const prevBtn = document.getElementById('now-on-view-prev');
+
+                                const totalCards = 10;
+                                const cardWidth = 724;
+
+                                let currentIndex = 0;
+
+                                nextBtn.addEventListener('click', () => {
+                                    currentIndex++;
+
+                                    if (currentIndex >= totalCards) {
+                                        currentIndex = 0;
+                                    }
+
+                                    track.style.transform =
+                                        `translateX(-${currentIndex * cardWidth}px)`;
+                                });
+
+                                prevBtn.addEventListener('click', () => {
+                                    currentIndex--;
+
+                                    if (currentIndex < 0) {
+                                        currentIndex = totalCards - 1;
+                                    }
+
+                                    track.style.transform =
+                                        `translateX(-${currentIndex * cardWidth}px)`;
+                                });
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white py-16">
+                <div class="max-w-7xl mx-auto px-6">
+                    <h2 class="text-3xl font-semibold text-gray-900">Locations and Hours</h2>
+
+                    <div class="mt-10 grid gap-8 lg:grid-cols-2">
+                        <article class="overflow-hidden rounded-3xl bg-white shadow-sm">
+                            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
+                                <img src="{{ asset('images/visit-location.avif')}}" alt="The Met Fifth Avenue"
+                                    class="h-full w-full object-cover">
+                            </div>
+                            <div class="p-8">
+                                <h3 class="text-2xl font-semibold text-gray-900">The Met Fifth Avenue</h3>
+                                <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Sunday–Tuesday and Thursday:
+                                    10 am–5
+                                    pm</p>
+                                <p class="text-sm text-gray-600"><strong>Extended Hours:</strong> Friday and Saturday: 10
+                                    am–9 pm
+                                </p>
+                                <p class="text-sm text-gray-600"><strong>Closed:</strong> Wednesday</p>
+                                <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, January 1, and
+                                    the first
+                                    Monday in May.</p>
                             </div>
                         </article>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <h2 class="text-3xl font-semibold text-gray-900">Locations and Hours</h2>
-
-            <div class="mt-10 grid gap-8 lg:grid-cols-2">
-                <article class="overflow-hidden rounded-3xl bg-white shadow-sm">
-                    <div class="aspect-[16/10] overflow-hidden bg-gray-100">
-                        <img src="https://images.unsplash.com/photo-1577720643272-265a6e3adb98?auto=format&fit=crop&w=1200&q=80" alt="The Met Fifth Avenue" class="h-full w-full object-cover">
+                        <article class="overflow-hidden rounded-3xl bg-white shadow-sm">
+                            <div class="aspect-[16/10] overflow-hidden bg-gray-100">
+                                <img src="{{ asset('images/the met cloisters.avif') }}" alt="The Met Cloisters"
+                                    class="h-full w-full object-cover">
+                            </div>
+                            <div class="p-8">
+                                <h3 class="text-2xl font-semibold text-gray-900">The Met Cloisters</h3>
+                                <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Thursday–Tuesday: 10 am–5 pm
+                                </p>
+                                <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, and January 1.
+                                </p>
+                            </div>
+                        </article>
                     </div>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-semibold text-gray-900">The Met Fifth Avenue</h3>
-                        <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Sunday–Tuesday and Thursday: 10 am–5 pm</p>
-                        <p class="text-sm text-gray-600"><strong>Extended Hours:</strong> Friday and Saturday: 10 am–9 pm</p>
-                        <p class="text-sm text-gray-600"><strong>Closed:</strong> Wednesday</p>
-                        <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, January 1, and the first Monday in May.</p>
+                </div>
+            </section>
+
+            <section class="bg-white py-16">
+                <div class="max-w-7xl mx-auto px-6">
+                    <div class="grid gap-16 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+                        <div class="max-w-xl">
+                            <h3 class="text-2xl font-semibold text-gray-900">Become a Member Today</h3>
+                            <p class="mt-6 text-lg text-gray-600 leading-8">Members get special access to Raphael: Sublime
+                                Poetry
+                                with Weekend Member Mornings and special Evening Viewings. Join by June 28 for a chance to
+                                win the
+                                ultimate keepsake: a curator-signed exhibition catalogue.</p>
+                            <a href="#"
+                                class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
+                                Join now
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="overflow-hidden rounded-sm bg-black">
+                            <img src="{{ asset('images/becomeMember.jpg')}}"
+                                alt="Circular painting" class="h-full w-full object-cover">
+                        </div>
                     </div>
-                </article>
-
-                <article class="overflow-hidden rounded-3xl bg-white shadow-sm">
-                    <div class="aspect-[16/10] overflow-hidden bg-gray-100">
-                        <img src="https://images.unsplash.com/photo-1512207736139-aea4b5a1e71f?auto=format&fit=crop&w=1200&q=80" alt="The Met Cloisters" class="h-full w-full object-cover">
-                    </div>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-semibold text-gray-900">The Met Cloisters</h3>
-                        <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Thursday–Tuesday: 10 am–5 pm</p>
-                        <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, and January 1.</p>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                <div class="overflow-hidden rounded-3xl bg-gray-100">
-                    <img src="https://images.unsplash.com/photo-1494522358652-9e05a0d0b737?auto=format&fit=crop&w=1200&q=80" alt="The Met Gala red carpet" class="h-full w-full object-cover">
                 </div>
-                <div class="max-w-2xl">
-                    <h3 class="text-3xl font-semibold text-gray-900">The Met Gala® Red Carpet Livestream</h3>
-                    <p class="mt-6 text-lg text-gray-600 leading-8">See how guests arrived at the 2026 Costume Institute Benefit—also known as The Met Gala®—celebrating Costume Art.</p>
-                    <a href="#" class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
-                        Watch now
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid gap-16 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-                <div class="max-w-2xl">
-                    <h3 class="text-3xl font-semibold text-gray-900">Asian American and Pacific Islander Heritage Month</h3>
-                    <p class="mt-6 text-lg text-gray-600 leading-8">Celebrate Asian American and Pacific Islander Heritage Month through art, talks, and more.</p>
-                    <a href="#" class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
-                        Learn more
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="overflow-hidden rounded-3xl bg-gray-100">
-                    <img src="https://images.unsplash.com/photo-1544934521-9a1518bb0ef8?auto=format&fit=crop&w=1200&q=80" alt="Asian American and Pacific Islander Heritage" class="h-full w-full object-cover">
-                </div>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const track = document.getElementById('now-on-view-track');
+                    const prev = document.getElementById('now-on-view-prev');
+                    const next = document.getElementById('now-on-view-next');
+                    const cards = track.querySelectorAll('article');
+                    let index = 0;
+                    const visibleCount = 3;
+                    const total = cards.length;
 
-            <div class="mt-16 grid gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                <div class="overflow-hidden rounded-3xl bg-gray-100">
-                    <img src="https://images.unsplash.com/photo-1512207736139-aea4b5a1e71f?auto=format&fit=crop&w=1200&q=80" alt="Spring at The Met" class="h-full w-full object-cover">
-                </div>
-                <div class="max-w-2xl">
-                    <h3 class="text-3xl font-semibold text-gray-900">Spring at The Met</h3>
-                    <p class="mt-6 text-lg text-gray-600 leading-8">Welcome the season with iconic exhibitions, free tours, events, and performances.</p>
-                    <a href="#" class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
-                        Explore now
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+                    function updatePosition() {
+                        const cardWidth = cards[0].getBoundingClientRect().width + 24;
+                        const distance = Math.min(index, total - visibleCount) * cardWidth;
+                        track.style.transform = `translateX(-${distance}px)`;
+                    }
 
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid gap-16 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-                <div class="max-w-xl">
-                    <h3 class="text-2xl font-semibold text-gray-900">Become a Member Today</h3>
-                    <p class="mt-6 text-lg text-gray-600 leading-8">Members get special access to Raphael: Sublime Poetry with Weekend Member Mornings and special Evening Viewings. Join by June 28 for a chance to win the ultimate keepsake: a curator-signed exhibition catalogue.</p>
-                    <a href="#" class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
-                        Join now
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-                <div class="overflow-hidden rounded-3xl bg-black">
-                    <img src="https://images.unsplash.com/photo-1511275539161-0f33143958f3?auto=format&fit=crop&w=1200&q=80" alt="Circular painting" class="h-full w-full object-cover">
-                </div>
-            </div>
-        </div>
-    </section>
+                    prev.addEventListener('click', () => {
+                        index = Math.max(index - 1, 0);
+                        updatePosition();
+                    });
 
-    <section class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                <div class="overflow-hidden rounded-3xl">
-                    <img src="https://images.unsplash.com/photo-1516819604558-719260e0e04f?auto=format&fit=crop&w=1200&q=80" alt="Met store book" class="h-full w-full object-cover">
-                </div>
-                <div class="max-w-xl">
-                    <h3 class="text-2xl font-semibold text-gray-900">Shop the Show</h3>
-                    <p class="mt-6 text-lg text-gray-600 leading-8">Discover exclusive designs celebrating Costume Art, The Costume Institute’s spring 2026 exhibition.</p>
-                    <a href="#" class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
-                        Visit The Met Store
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const track = document.getElementById('now-on-view-track');
-            const prev = document.getElementById('now-on-view-prev');
-            const next = document.getElementById('now-on-view-next');
-            const cards = track.querySelectorAll('article');
-            let index = 0;
-            const visibleCount = 3;
-            const total = cards.length;
-
-            function updatePosition() {
-                const cardWidth = cards[0].getBoundingClientRect().width + 24;
-                const distance = Math.min(index, total - visibleCount) * cardWidth;
-                track.style.transform = `translateX(-${distance}px)`;
-            }
-
-            prev.addEventListener('click', () => {
-                index = Math.max(index - 1, 0);
-                updatePosition();
-            });
-
-            next.addEventListener('click', () => {
-                index = Math.min(index + 1, total - visibleCount);
-                updatePosition();
-            });
-        });
-    </script>
+                    next.addEventListener('click', () => {
+                        index = Math.min(index + 1, total - visibleCount);
+                        updatePosition();
+                    });
+                });
+            </script>
 @endsection
-

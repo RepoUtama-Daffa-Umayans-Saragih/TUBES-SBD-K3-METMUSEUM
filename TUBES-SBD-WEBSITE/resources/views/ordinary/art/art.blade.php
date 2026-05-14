@@ -4,20 +4,20 @@
 
 @section('content')
 
-<section class="w-full bg-[#f5f5f5] font-sans">
+<section class="w-full bg-white font-sans">
 
   <!-- BREADCRUMB -->
-  <div class="w-full border-b border-[#e5e5e5] bg-[#f5f5f5]">
+  <div class="w-full border-b border-[#e5e5e5] bg-white">
     <div class="max-w-[1600px] mx-auto px-16 h-[84px] flex items-center gap-4">
       
       <!-- HOME ICON -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-[16px] h-[16px] text-[#444]"
+        class="w-[13px] h-[13px] text-black hover:fill-black"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.5"
       >
         <path
           stroke-linecap="round"
@@ -26,11 +26,11 @@
         />
       </svg>
 
-      <span class="text-[#777] text-[28px] leading-none">/</span>
+      <span class="text-black text-[13px] leading-none">/</span>
 
       <a
         href="#"
-        class="text-[18px] font-semibold text-[#222] hover:underline"
+        class="text-[14px] font-semibold text-black hover:underline"
       >
         The Met Collection
       </a>
@@ -41,45 +41,37 @@
   <!-- HERO IMAGE -->
   <div class="w-full overflow-hidden">
     <img
-      src="https://images.metmuseum.org/CRDImages/ad/original/DP251139.jpg"
+      src="{{ asset('images/met-collection.avif')}}"
       alt="The Met Collection"
-      class="w-full h-[650px] object-cover"
+      class="w-full h-[250px] md:h-[250px] lg:h-[550px] object-cover"
     />
   </div>
 
   <!-- CONTENT -->
-  <div class="max-w-[1600px] mx-auto px-16 pt-14 pb-20">
+  <div class="max-w-[1600px] mx-auto px-16 pt-10 pb-20">
 
-    <h1 class="text-[72px] font-bold text-[#222] tracking-[-2px] leading-none">
+    <h1 class="text-[88px] md:text-[36px] font-bold text-black tracking-tight leading-none">
       The Met Collection
     </h1>
-
-    <p class="mt-10 text-[28px] leading-[1.7] text-[#333] max-w-[1200px] font-light">
-      Explore more than 5,000 years of art from around the world. The Met
-      Collection presents artworks, artifacts, and historical objects spanning
-      cultures, civilizations, and artistic movements across history.
+    <p class="mt-2 text-[20px] lg:text-[26px] text-black max-w-[1200px] font-light">
+      Travel around the world and across 5,000 years of history through 490,000+ works of art.
     </p>
 
   </div>
 
-  <section class="w-full bg-[#f5f5f5] font-sans">
+  <section class="w-full bg-white font-sans">
 
-  <div class="max-w-[1550px] mx-auto px-16 py-20">
-
-    <!-- TOP TEXT -->
-    <h2 class="text-[58px] leading-[1.2] tracking-[-1.5px] text-[#111] font-normal max-w-[1250px]">
-      Travel around the world and across 5,000 years of history through 490,000+ works of art.
-    </h2>
+  <div class="max-w-[1550px] mx-auto px-16">
 
     <!-- SEARCH -->
-    <form action="{{ route('art.search') }}" method="GET" class="mt-16 flex items-center w-full border border-[#cfcfcf] bg-white h-[78px]">
+    <form action="{{ route('art.search') }}" method="GET" class="flex items-center w-full border border-[#cfcfcf]  bg-white h-[58px] rounded-md">
       
       <input
         type="text"
         name="q"
         value="{{ request('q') }}"
         placeholder="Search The Collection"
-        class="flex-1 h-full px-6 text-[22px] text-[#444] placeholder:text-[#9b9b9b] outline-none bg-transparent"
+        class="flex-1 h-full px-6 text-[16px] text-gray-600 placeholder:text-[#9b9b9b] font-extralight outline-none bg-transparent"
       />
 
       <button
@@ -88,7 +80,7 @@
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="w-7 h-7 text-[#666]"
+          class="w-6 h-6 text-[#666]"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -105,177 +97,324 @@
     </form>
 
     <!-- QUICK LINKS -->
-    <div class="flex items-center gap-10 mt-12 flex-wrap">
+    <div class="flex items-center gap-3 mt-7 flex-wrap">
       
       <a
         href="{{ route('art.search') }}"
-        class="flex items-center gap-4 text-[20px] text-[#111] font-medium hover:underline"
+        class="flex items-center gap-2 text-[16px] text-[#111] font-medium hover:underline"
       >
         Advanced Collection Search
-        <span class="text-[30px] leading-none text-[#444]">›</span>
       </a>
+      <span class="text-[25px] leading-none text-[#444]">›</span>
 
       <a
         href="#"
-        class="flex items-center gap-4 text-[20px] text-[#111] font-medium hover:underline"
+        class="flex items-center gap-2 text-[16px] text-[#111] font-medium hover:underline"
       >
-        Highlights
-        <span class="text-[30px] leading-none text-[#444]">›</span>
+        Highlight
       </a>
+       <span class="text-[25px] leading-none text-[#444]">›</span>
 
       <a
         href="#"
-        class="flex items-center gap-4 text-[20px] text-[#111] font-medium hover:underline"
+        class="flex items-center gap-2 text-[16px] text-[#111] font-medium hover:underline"
       >
         Public Domain Images
-        <span class="text-[30px] leading-none text-[#444]">›</span>
       </a>
+      <span class="text-[25px] leading-none text-[#444]">›</span>
 
     </div>
 
     <!-- LINE -->
-    <div class="w-full h-[1px] bg-[#dddddd] mt-16"></div>
+    <div class="w-full h-[1px] bg-[#dddddd] mt-8"></div>
 
     <!-- TITLE -->
-    <h3 class="text-[64px] font-normal text-[#111] tracking-[-1.5px] mt-28 mb-14">
+    <h3 class="text-[27px] font-semibold text-black tracking-[-1px] mt-12 mb-2">
       Browse the Art
     </h3>
 
     <!-- GRID -->
-    <div class="grid grid-cols-4 gap-x-8 gap-y-20">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 mb-20">
 
-      <!-- CARD 1 -->
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/af/web-large/DP-14286-001.jpg"
-            alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            src="{{ asset('images/african-wings.jpg') }}"
+            alt="African Art"
+            class="w-full h-[200px] object-cover transition duration-500"
           />
         </div>
 
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           African Art in The Michael C. Rockefeller Wing
         </h4>
-
       </div>
 
-      <!-- CARD 2 -->
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/ad/web-large/DT1567.jpg"
+            src="{{ asset('images/american-wing.jpg') }}"
             alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            class="-full h-[200px] object-cover transition duration-500"
           />
         </div>
-
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           The American Wing
         </h4>
-
       </div>
 
-      <!-- CARD 3 -->
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/ao/web-large/DP251139.jpg"
+            src="{{ asset('images/ancient-american.jpg') }}"
             alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            class="-full h-[200px] object-cover transition duration-500"
           />
         </div>
 
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           Ancient American Art in The Michael C. Rockefeller Wing
         </h4>
-
       </div>
 
-      <!-- CARD 4 -->
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/an/web-large/DT712.jpg"
+            src="{{ asset('images/ancient-westAsian.jpg') }}"
             alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            class="-full h-[200px] object-cover transition duration-500"
           />
         </div>
 
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           Ancient West Asian Art
         </h4>
+      </div>
 
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/arms-and-armor.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Arms and Armor
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/asian-art.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Asian Art
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/costume-institute.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          The Costume Institute
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/drawing-and-prints.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+         Drawings and Prints
+        </h4>
       </div>
 
       <!-- SECOND ROW -->
 
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/eg/web-large/DP354001.jpg"
+            src="{{ asset('images/egyptian-art.jpg') }}"
             alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            class="-full h-[200px] object-cover transition duration-500"
           />
         </div>
 
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           Egyptian Art
         </h4>
-
       </div>
 
       <div class="group cursor-pointer">
-        
         <div class="overflow-hidden">
           <img
-            src="https://images.metmuseum.org/CRDImages/as/web-large/DP130155.jpg"
+            src="{{ asset('images/europhean-painting.jpg') }}"
             alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
+            class="-full h-[200px] object-cover transition duration-500"
           />
         </div>
 
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
-          Asian Art
-        </h4>
-
-      </div>
-
-      <div class="group cursor-pointer">
-        
-        <div class="overflow-hidden">
-          <img
-            src="https://images.metmuseum.org/CRDImages/es/web-large/DT1564.jpg"
-            alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
-          European Sculpture and Decorative Arts
-        </h4>
-
-      </div>
-
-      <div class="group cursor-pointer">
-        
-        <div class="overflow-hidden">
-          <img
-            src="https://images.metmuseum.org/CRDImages/ep/web-large/DT1947.jpg"
-            alt=""
-            class="w-full h-[250px] object-cover group-hover:scale-[1.03] transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[24px] leading-[1.25] text-[#111] mt-5 font-normal">
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
           European Paintings
         </h4>
+      </div>
 
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/european-sculpture.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          European Sculpture and Decorative Arts
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/greek-and-roman.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Greek and Roman Art
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/islamic-art.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Islamic Art
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/robert-lehman.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          The Robert Lehman Collection
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/thomas-j-watson.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Thomas j. Watson Library
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/medieval-art.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Medieval Art and The Cloisters
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/modern-contemporary.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+         Modern and Contemporary Art
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/musical-instrument.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Musical instruments
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/oceanic-art.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Oceanic Art in The Michael C. Rokcefeller Wing
+        </h4>
+      </div>
+
+      <div class="group cursor-pointer">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/photographs.jpg') }}"
+            alt=""
+            class="-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Photographs
+        </h4>
       </div>
 
     </div>

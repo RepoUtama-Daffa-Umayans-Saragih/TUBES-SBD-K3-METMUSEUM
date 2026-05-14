@@ -1,10 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @push('styles')
-@vite('resources/css/app.css')
 @vite('resources/css/admin/layout/layout.css')
 @endpush
 
+@section('content')
 <div class="admin-layout">
     <!-- Sidebar Navigation -->
     <aside class="admin-sidebar">
@@ -76,3 +76,4 @@
         </div>
     </div>
 </div>
+@endsection

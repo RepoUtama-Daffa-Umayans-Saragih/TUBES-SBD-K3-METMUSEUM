@@ -140,14 +140,14 @@ input {
 
 .met-page {
     min-height: calc(100vh - 138px);
-    padding: 54px 28px 84px;
+    padding: 40px 20px 60px;
 }
 
 .login-shell {
-    width: min(1274px, 100%);
+    width: min(1150px, 100%);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: minmax(360px, 580px) minmax(430px, 640px);
+    grid-template-columns: minmax(360px, 460px) minmax(420px, 540px);
     column-gap: 52px;
     align-items: start;
 }
@@ -194,7 +194,8 @@ input {
 }
 
 .login-form {
-    width: 357px;
+    width: 100%;
+    max-width: 380px;
 }
 
 .field {
@@ -244,10 +245,12 @@ input {
     position: absolute;
     top: 50%;
     right: 8px;
+    transform: translateY(-50%);
     width: 32px;
     height: 32px;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 0;
     background: transparent;
     color: #636363;
@@ -330,8 +333,8 @@ input {
 }
 
 .guest-panel {
-    min-height: 630px;
-    padding: 58px 35px 34px;
+    min-height: auto;
+    padding: 30px 20px 30px;
     background: var(--met-panel);
 }
 
@@ -340,7 +343,7 @@ input {
 }
 
 .guest-error-summary {
-    min-height: 101px;
+    display: none;
     color: var(--met-error);
     font-size: 13px;
 }
@@ -357,7 +360,8 @@ input {
 }
 
 .guest-form {
-    width: 355px;
+    width: 100%;
+    max-width: 420px;
 }
 
 .guest-form .field {
@@ -401,8 +405,7 @@ input {
 }
 
 .field-error-message {
-    min-height: 17px;
-    margin: 3px 0 0;
+    margin: 2px 0 0;
     color: var(--met-error);
     font-size: 11px;
     line-height: 1.3;

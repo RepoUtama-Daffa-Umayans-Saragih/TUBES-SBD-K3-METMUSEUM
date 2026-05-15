@@ -78,7 +78,7 @@
                         <p class="mb-8">
                             This information is specific to The Met Fifth Avenue. For information about our other
                             location, please visit
-                            <a href="#" class="inline-link">accessibility at The Met Cloisters</a>.
+                            <a href="{{ route('accessibility.cloisters') }}" class="inline-link">accessibility at The Met Cloisters</a>.
                         </p>
 
                         <p>

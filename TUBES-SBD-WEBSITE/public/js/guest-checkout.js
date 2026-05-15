@@ -85,12 +85,13 @@
 
     function setFieldState(field, errorNode, message) {
         const hasValue = getTrimmedValue(field).length > 0;
+        const isTouched = field.classList.contains("touched");
 
-        field.classList.toggle("is-invalid", Boolean(message));
+        field.classList.toggle("is-invalid", Boolean(message) && isTouched);
         field.classList.toggle("is-valid", !message && hasValue);
 
         if (errorNode) {
-            errorNode.textContent = message;
+            errorNode.textContent = isTouched ? message : "";
         }
     }
 
@@ -188,22 +189,35 @@
     }
 
     fields.email.addEventListener("input", () => handleInput("email"));
-    fields.email.addEventListener("blur", () => handleInput("email"));
+    fields.email.addEventListener("blur", () => {
+        fields.email.classList.add("touched");
+        handleInput("email");
+    });
 
     fields.confirmEmail.addEventListener("input", () =>
         handleInput("confirmEmail"),
     );
-    fields.confirmEmail.addEventListener("blur", () =>
-        handleInput("confirmEmail"),
-    );
+    fields.confirmEmail.addEventListener("blur", () => {
+        fields.confirmEmail.classList.add("touched");
+        handleInput("confirmEmail");
+    });
 
     fields.firstName.addEventListener("input", () => handleInput("firstName"));
-    fields.firstName.addEventListener("blur", () => handleInput("firstName"));
+    fields.firstName.addEventListener("blur", () => {
+        fields.firstName.classList.add("touched");
+        handleInput("firstName");
+    });
 
     fields.lastName.addEventListener("input", () => handleInput("lastName"));
-    fields.lastName.addEventListener("blur", () => handleInput("lastName"));
+    fields.lastName.addEventListener("blur", () => {
+        fields.lastName.classList.add("touched");
+        handleInput("lastName");
+    });
 
     form.addEventListener("submit", (event) => {
+        // Mark all fields as touched on submit to show errors
+        Object.values(fields).forEach(field => field.classList.add("touched"));
+        
         if (!validateForm()) {
             event.preventDefault();
             const firstInvalid = form.querySelector(".is-invalid");
@@ -214,5 +228,4 @@
         }
     });
 
-    validateForm();
 })();

@@ -27,7 +27,7 @@
                 <div class="px-5">
                     <div class="view-map-wrapper">
                         <h3 class="section-title text-2xl font-bold">Now on View</h3>
-                        <a href="#" class="view-map-link">
+                        <a href="{{ route('art.index') }}" class="view-map-link">
                             View all
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                 stroke="currentColor" class="w-4 h-4">
@@ -56,6 +56,7 @@
                 <div class="view-container">
                     <div class="image-scroller">
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image1.jpg') }}" alt="Raphael: Sublime Poetry">
                             </div>
@@ -63,9 +64,11 @@
                                 <h4 class="view-title">Raphael: Sublime Poetry</h4>
                                 <p class="view-desc">Through June 28</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image2.jpg') }}" alt="Gothic by Design">
                             </div>
@@ -73,9 +76,11 @@
                                 <h4 class="view-title">Gothic by Design: The Dawn of Architectural Draftsmanship</h4>
                                 <p class="view-desc">Through July 19</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image3.jpg') }}" alt="The Genesis Facade">
                             </div>
@@ -84,9 +89,11 @@
                                         Therefore I Am</i></h4>
                                 <p class="view-desc">Through June 9</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image4.jpg') }}" alt="View Finding">
                             </div>
@@ -94,9 +101,11 @@
                                 <h4 class="view-title">View Finding: Selections from The Walther Collection</h4>
                                 <p class="view-desc">Through May 3</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image5.jpg') }}" alt="The Magical City">
                             </div>
@@ -104,9 +113,11 @@
                                 <h4 class="view-title">The Magical City: George Morrison's New York</h4>
                                 <p class="view-desc">Through May 31</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image6.jpg') }}" alt="Chinese Painting and Calligraphy">
                             </div>
@@ -114,9 +125,11 @@
                                 <h4 class="view-title">Chinese Painting and Calligraphy: Selections from the Collection</h4>
                                 <p class="view-desc">Through May10</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image7.jpg') }}" alt="Fanmania">
                             </div>
@@ -124,9 +137,11 @@
                                 <h4 class="view-title">Fanmania</h4>
                                 <p class="view-desc">Through May 12</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image8.jpg') }}" alt="Filling in the Gaps">
                             </div>
@@ -135,9 +150,11 @@
                                     & Writing Awards New York City Gold Key Recipients</h4>
                                 <p class="view-desc">Through May 18</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image9.jpg') }}" alt="Iba Ndiaye">
                             </div>
@@ -145,9 +162,11 @@
                                 <h4 class="view-title">Iba Ndiaye: Between Latitude and Longitude</h4>
                                 <p class="view-desc">Through May 31</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image10.jpg') }}" alt="Making It Modern">
                             </div>
@@ -156,9 +175,11 @@
                                     Collection</h4>
                                 <p class="view-desc">Through June 14</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image11.jpg') }}" alt="a Passion for Jade">
                             </div>
@@ -166,9 +187,11 @@
                                 <h4 class="view-title">A Passion for Jade: The Bishop Collection</h4>
                                 <p class="view-desc">Through June 28</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image12.jpg') }}" alt="Embracing Color">
                             </div>
@@ -176,9 +199,11 @@
                                 <h4 class="view-title">Embracing Color: Enamel in Chinese Decorative Art, 1300-1900</h4>
                                 <p class="view-desc">Through June 28</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image13.jpg') }}" alt="Lillian Bassman">
                             </div>
@@ -186,9 +211,11 @@
                                 <h4 class="view-title">Lillian Bassman: Bazaaar and Beyond</h4>
                                 <p class="view-desc">Through July 26</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image14.jpg') }}" alt="Revolution">
                             </div>
@@ -196,9 +223,11 @@
                                 <h4 class="view-title">Revolution!</h4>
                                 <p class="view-desc">Through August 2</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image15.jpg') }}" alt="Afterlives">
                             </div>
@@ -206,9 +235,11 @@
                                 <h4 class="view-title">Afterlives: Contemporary Art in the Byzantine Crypt</h4>
                                 <p class="view-desc">Through January 10, 2027</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image16.jpg') }}" alt="Celebrating the Year of the Horse">
                             </div>
@@ -216,9 +247,11 @@
                                 <h4 class="view-title">Celebrating the Year of the Horse</h4>
                                 <p class="view-desc">Through January 26, 2027</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image17.jpg') }}" alt="Flip Sides">
                             </div>
@@ -226,9 +259,11 @@
                                 <h4 class="view-title">Flip Sides: Seeing Korean Art Anew</h4>
                                 <p class="view-desc">Through May 31, 2027</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image18.jpg') }}" alt="Household Gods">
                             </div>
@@ -236,9 +271,11 @@
                                 <h4 class="view-title">Household Gods: Hindu Devotional Prints, 1860-1930</h4>
                                 <p class="view-desc">Through June 27, 2027</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image19.jpg') }}"
                                     alt="The Infinite Artistry of Japanese Ceramics">
@@ -247,9 +284,11 @@
                                 <h4 class="view-title">The Infinite Artistry of Japanese Ceramics</h4>
                                 <p class="view-desc">Through August 8, 2027</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image20.jpg') }}" alt="Arts of Oceania">
                             </div>
@@ -257,9 +296,11 @@
                                 <h4 class="view-title">Arts of Oceania</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image21.jpg') }}" alt="Renaisssance Masterpieces of Judaica">
                             </div>
@@ -268,9 +309,11 @@
                                     Rothschild Mahzor</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image22.jpg') }}" alt="Michael Lin">
                             </div>
@@ -278,9 +321,11 @@
                                 <h4 class="view-title">Michael Lin: <i>Pentachrome</i></h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image23.jpg') }}" alt="Arts of Native America">
                             </div>
@@ -288,9 +333,11 @@
                                 <h4 class="view-title">Arts of Native America: The Charles and Valerie Diker Collection</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image24.jpg') }}" alt="Before Yesterday">
                             </div>
@@ -298,9 +345,11 @@
                                 <h4 class="view-title">Before Yesterday We Could Fly: An Afrofoturist Period Room</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image25.jpg') }}" alt="Arts of the Ancient Americas">
                             </div>
@@ -308,9 +357,11 @@
                                 <h4 class="view-title">Arts of the Ancient Americas</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image26.jpg') }}" alt="Wedding Attire">
                             </div>
@@ -318,9 +369,11 @@
                                 <h4 class="view-title">Wedding Attire: Three Cultures, One Celebration</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image27.jpg') }}" alt="Defensive Display">
                             </div>
@@ -328,9 +381,11 @@
                                 <h4 class="view-title">Defensive Display: Shields from The Met Collection</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image28.jpg') }}" alt="Arts of Africa">
                             </div>
@@ -338,9 +393,11 @@
                                 <h4 class="view-title">Arts of Africa</h4>
                                 <p class="view-desc">Ongoing</p>
                             </div>
+                        </a>
                         </div>
 
                         <div class="scroller-item">
+                            <a href="{{ route('art.index') }}" class="block hover:opacity-90 transition">
                             <div class="image-wrapper">
                                 <img src="{{ asset('images/image29.jpg') }}"
                                     alt="Baseball Cards from the Collection of Jefferson R. Burdick">
@@ -383,7 +440,8 @@
                             </script>
 
                         </div>
-                    </div>
+                    </a>
+                        </div>
                 </div>
             </section>
 
@@ -397,19 +455,28 @@
                                 <img src="{{ asset('images/visit-location.avif')}}" alt="The Met Fifth Avenue"
                                     class="h-full w-full object-cover">
                             </div>
+                            
+                        <a href="{{ route('learn.more') }}" class="block hover:opacity-90 transition">
                             <div class="p-8">
                                 <h3 class="text-2xl font-semibold text-gray-900">The Met Fifth Avenue</h3>
-                                <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Sunday–Tuesday and Thursday:
-                                    10 am–5
-                                    pm</p>
-                                <p class="text-sm text-gray-600"><strong>Extended Hours:</strong> Friday and Saturday: 10
-                                    am–9 pm
+
+                                <p class="mt-4 text-sm text-gray-600">
+                                    <strong>Hours:</strong> Sunday–Tuesday and Thursday: 10 am–5 pm
                                 </p>
-                                <p class="text-sm text-gray-600"><strong>Closed:</strong> Wednesday</p>
-                                <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, January 1, and
-                                    the first
-                                    Monday in May.</p>
-                            </div>
+
+                                <p class="text-sm text-gray-600">
+                                    <strong>Extended Hours:</strong> Friday and Saturday: 10 am–9 pm
+                                </p>
+
+                                <p class="text-sm text-gray-600">
+                                    <strong>Closed:</strong> Wednesday
+                                </p>
+
+                                <p class="mt-4 text-xs text-gray-500">
+                                    Closed Thanksgiving Day, December 25, January 1, and the first Monday in May.
+                                </p>
+                            </a>
+                        </div>
                         </article>
 
                         <article class="overflow-hidden rounded-3xl bg-white shadow-sm">
@@ -417,13 +484,20 @@
                                 <img src="{{ asset('images/the met cloisters.avif') }}" alt="The Met Cloisters"
                                     class="h-full w-full object-cover">
                             </div>
+                            
+                        <a href="{{ route('cloister.learn.more') }}" class="block hover:opacity-90 transition">
                             <div class="p-8">
                                 <h3 class="text-2xl font-semibold text-gray-900">The Met Cloisters</h3>
-                                <p class="mt-4 text-sm text-gray-600"><strong>Hours:</strong> Thursday–Tuesday: 10 am–5 pm
+
+                                <p class="mt-4 text-sm text-gray-600">
+                                    <strong>Hours:</strong> Thursday–Tuesday: 10 am–5 pm
                                 </p>
-                                <p class="mt-4 text-xs text-gray-500">Closed Thanksgiving Day, December 25, and January 1.
+
+                                <p class="mt-4 text-xs text-gray-500">
+                                    Closed Thanksgiving Day, December 25, and January 1.
                                 </p>
-                            </div>
+                            </a>
+                        </div>
                         </article>
                     </div>
                 </div>
@@ -439,7 +513,7 @@
                                 with Weekend Member Mornings and special Evening Viewings. Join by June 28 for a chance to
                                 win the
                                 ultimate keepsake: a curator-signed exhibition catalogue.</p>
-                            <a href="#"
+                            <a href="{{ route('membership.index') }}"
                                 class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
                                 Join now
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"

@@ -170,6 +170,9 @@ class CheckoutController extends Controller
         }
 
         try {
+            $userId  = $order->user_id;
+            $guestId = $order->guest_id;
+
             DB::transaction(function () use ($order, $userId, $guestId) {
                 $payment = Payment::where('order_id', $order->order_id)
                     ->lockForUpdate()

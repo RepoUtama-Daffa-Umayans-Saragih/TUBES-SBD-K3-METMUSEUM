@@ -120,7 +120,7 @@
                     </div>
                 </div>
                 <div class="button-ticket-container-group">
-                    <button class="btn-ticket-responsive">
+                    <button onclick="window.location='{{ route('ticket.admission') }}'" class="btn-ticket-responsive">
                         Buy tickets
                     </button>
                 </div>

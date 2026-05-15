@@ -27,7 +27,7 @@
       <span class="text-[#777]">/</span>
 
      <a
-        href="#"
+        href="{{ route('about') }}"
         class="text-[14px] font-semibold text-black hover:underline"
       >
        About The Met
@@ -89,7 +89,7 @@
       <!-- GRID -->
       <div class="grid grid-cols-4 gap-x-8 gap-y-24 mt-14">
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/egyptian-art.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -100,7 +100,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/europhean-painting.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -111,7 +111,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/european-sculpture.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -122,7 +122,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/greek-and-roman.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -133,7 +133,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/islamic-art.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -144,7 +144,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/robert-lehman.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -155,7 +155,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/thomas-j-watson.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -166,7 +166,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/medieval-art.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -177,7 +177,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/modern-contemporary.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -188,7 +188,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/musical-instrument.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -199,7 +199,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/oceanic-art.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />
@@ -210,7 +210,7 @@
           </h4>
         </div>
 
-        <div class="group cursor-pointer">
+        <div class="group cursor-pointer" onclick="window.location='{{ route(\'art.index\') }}'">
           <div class="overflow-hidden">
             <img src="{{ asset('images/photographs.jpg') }}" alt=""
               class="-full h-[200px] object-cover transition duration-500" />

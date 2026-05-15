@@ -75,9 +75,9 @@
         <h3 class="font-semibold text-[18px] md:text-[20px] mb-5">About The Met</h3>
         <ul class="space-y-4 md:space-y-5 text-[16px] md:text-[18px] text-[#555]">
           <li><a href="#" class="hover:underline">Mission and History</a></li>
-          <li><a href="#" class="hover:underline">Collection Areas</a></li>
+          <li><a href="{{ route('art.curatorial-areas') }}" class="hover:underline">Collection Areas</a></li>
           <li><a href="#" class="hover:underline">Conservation Departments</a></li>
-          <li><a href="#" class="hover:underline">Accessibility</a></li>
+          <li><a href="{{ route('visit.accessibility') }}" class="hover:underline">Accessibility</a></li>
           <li><a href="#" class="hover:underline">Press</a></li>
         </ul>
       </div>
@@ -86,7 +86,7 @@
       <div>
         <h3 class="font-semibold text-[18px] md:text-[20px] mb-5">Support</h3>
         <ul class="space-y-4 md:space-y-5 text-[16px] md:text-[18px] text-[#555]">
-          <li><a href="#" class="hover:underline">Membership</a></li>
+          <li><a href="{{ route('membership.index') }}" class="hover:underline">Membership</a></li>
           <li><a href="#" class="hover:underline">Host an Event</a></li>
           <li><a href="#" class="hover:underline">Corporate Support</a></li>
         </ul>

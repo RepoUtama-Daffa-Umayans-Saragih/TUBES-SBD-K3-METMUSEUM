@@ -20,8 +20,14 @@
       five minutes to reset your password.
     </p>
 
+    @if(session('success'))
+      <div class="mt-8 p-4 bg-green-50 border border-green-200 text-green-800 text-[16px] w-[760px]">
+        {{ session('success') }}
+      </div>
+    @endif
+
     <!-- FORM -->
-    <form action="{{ route('account.account-check.submit') }}" method="POST" class="mt-24 w-[760px]">
+    <form action="{{ route('account.account-check.submit') }}" method="POST" class="mt-12 w-[760px]">
       @csrf
 
       <!-- EMAIL -->

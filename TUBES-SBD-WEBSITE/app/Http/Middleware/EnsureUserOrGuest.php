@@ -18,10 +18,11 @@ class EnsureUserOrGuest
             return $next($request);
         }
 
-        $request->session()->forget(['guest_user', 'guest_id', 'guest_name']);
+        // Do NOT clear session here — cart_id and other session data must be preserved
+        // so the cart survives the redirect → login → return to checkout cycle.
 
-        return redirect()->route('login')
-            ->with('error', 'Please login or continue as a guest to access admission.');
+        return redirect()->guest(route('login'))
+            ->with('info', 'Please login or continue as a guest to proceed to checkout.');
     }
 
     /**

@@ -51,4 +51,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Cart::class, 'user_id', 'user_id');
     }
+
+    public function getRememberTokenName()
+    {
+        return null;
+    }
 }

@@ -25,6 +25,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GuestCheckoutController;
 use App\Http\Controllers\GuestLoginController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RegisterController;
@@ -75,6 +76,10 @@ Route::prefix('account')->group(function () {
         Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('account.forgot-password');
         Route::post('/forgot-password', [AuthController::class, 'handleForgotPassword'])->name('account.forgot-password.submit');
     });
+    // Reset password routes (must be accessible even if logged in as another user)
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+    
     // Logout route (accessible to both authenticated and guest users)
     Route::post('/logout', [AuthController::class, 'logout'])->name('account.logout');
     // Protected routes (only for authenticated users)
@@ -96,12 +101,11 @@ Route::post('/guest-checkout', [GuestCheckoutController::class, 'store'])->name(
 Route::prefix('tickets')->group(function () {
     Route::get('/', [TicketController::class, 'index'])->name('ticket.index');
     Route::get('/{schedule}', [TicketController::class, 'show'])->name('ticket.select');
-    Route::post('/scan', [TicketController::class, 'scan'])->name('ticket.scan');
+    Route::post('/scan', [TicketController::class, 'scan'])->name('ticket.scan')->middleware('admin');
 });
 Route::get('/admission', [TicketController::class, 'index'])
-    ->middleware('user.or.guest')
     ->name('ticket.admission');
-Route::match(['get', 'post'], '/cart', [CartController::class, 'index'])->name('ticket.cart')->middleware('no.cache');
+Route::match(['get', 'post'], '/cart', [CartController::class, 'index'])->name('ticket.cart')->middleware(['no.cache']);
 Route::delete('/cart/group/{id}', [CartController::class, 'removeGroup'])->name('cart.group.remove');
 Route::get('/cart/group/{id}/modify', [CartController::class, 'modifyGroup'])->name('cart.group.modify');
 Route::get('/cart/modify/cancel', [CartController::class, 'cancelModify'])->name('cart.modify.cancel');
@@ -112,11 +116,11 @@ Route::get('/checkout', function () {
     $cartItems = collect();
     $customer  = ['name' => '', 'email' => ''];
     return view('ordinary.checkout.form', compact('cartItems', 'customer'));
-})->name('ticket.checkout');
-Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('ticket.checkout.process');
-Route::get('/checkout/payments/{order}', [CheckoutController::class, 'paymentPage'])->name('checkout.payments')->middleware('no.cache');
-Route::post('/checkout/pay/{order}', [CheckoutController::class, 'pay'])->name('ticket.checkout.pay');
-Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('ticket.checkout.success')->middleware('no.cache');
+})->name('ticket.checkout')->middleware('user.or.guest');
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('ticket.checkout.process')->middleware('user.or.guest');
+Route::get('/checkout/payments/{order}', [CheckoutController::class, 'paymentPage'])->name('checkout.payments')->middleware(['no.cache', 'user.or.guest']);
+Route::post('/checkout/pay/{order}', [CheckoutController::class, 'pay'])->name('ticket.checkout.pay')->middleware('user.or.guest');
+Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('ticket.checkout.success')->middleware(['no.cache', 'user.or.guest']);
 
 // =========================
 // MEMBERSHIP ROUTES

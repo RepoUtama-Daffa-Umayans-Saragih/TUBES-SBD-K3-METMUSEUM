@@ -80,7 +80,7 @@
                         <h3 class="faq-q">How do I log into my Member Portal?</h3>
                         <p class="faq-a">
                             You may access your Member Portal
-                            <a href="#" class="underline font-medium hover:text-black">here</a>.
+                            <a href="{{ route('account.login') }}" class="underline font-medium hover:text-black">here</a>.
                             You may log in using the email address associated with your Membership.
                         </p>
 
@@ -88,7 +88,7 @@
                             If you are unsure about the password associated with your email or are unsure if you have
                             created a login,
                             please check for your account and follow the instructions
-                            <a href="#" class="underline font-medium hover:text-black">here</a>.
+                            <a href="{{ route('account.login') }}" class="underline font-medium hover:text-black">here</a>.
                         </p>
                     </div>
                     <!-- ... tambahkan pertanyaan lainnya ke bawah ... -->

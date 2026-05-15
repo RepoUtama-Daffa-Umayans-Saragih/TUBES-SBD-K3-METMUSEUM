@@ -256,7 +256,7 @@
                         <p class="booking-desc">Members and Patrons enjoy free and unlimited entry. Scan
                             your
                             Membership card at any gallery entrance for admission. Need help? Visit the
-                            Membership desk in the Great Hall. Membership starts at $90 per year. <a href="#"
+                            Membership desk in the Great Hall. Membership starts at $90 per year. <a href="{{ route('membership.index') }}"
                                 class="clickable-link">Learn more about Membership.</a></p>
                     </div>
                 </div>
@@ -265,10 +265,10 @@
 
         <!--button buy tickets and become a member -->
         <div class="button-container-group">
-            <button class="btn-responsive">
+            <button onclick="window.location='{{ route('ticket.admission') }}'" class="btn-responsive">
                 Buy tickets
             </button>
-            <button class="btn-responsive-secondary">
+            <button onclick="window.location='{{ route('membership.index') }}'" class="btn-responsive-secondary">
                 Become a Member
             </button>
         </div>
@@ -290,7 +290,7 @@
             <h3 class="section-title text-2xl font-bold mb-6">Visiting Guides</h3>
             <!-- images and descriptions -->
             <div class="visiting-container">
-                <div class="visiting-left-side">
+                <div class="visiting-left-side cursor-pointer" onclick="window.location='{{ route('visit.accessibility') }}'">
                     <img src="{{ asset('images/visit-guide.jpg') }}" class="visiting-main-img">
                     <h4 class="visiting-title">Accessibility</h4>
                     <p class="visiting-desc">The Museum is committed to making its collection, buildings, programs, and
@@ -312,7 +312,7 @@
                             Become a Met Member and enjoy an enhanced experience with unlimited free
                             admission, special access to exhibitions, and invitations to Members-only events.
                         </p>
-                        <button class="membership-btn">
+                        <button onclick="window.location='{{ route('membership.index') }}'" class="membership-btn">
                             <span>Join today</span>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                 stroke="currentColor" class="w-4 h-4">

@@ -54,6 +54,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        // Migrate any anonymous session cart to the authenticated user's DB cart
+        CartController::migrateSessionCartToDb(Auth::id(), null);
+
         return redirect()->intended(route('account.index'))
             ->with('success', 'Welcome back! You have logged in successfully.');
     }

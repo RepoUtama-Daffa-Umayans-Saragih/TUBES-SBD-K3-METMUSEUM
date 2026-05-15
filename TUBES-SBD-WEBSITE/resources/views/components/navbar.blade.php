@@ -36,22 +36,23 @@
                     <i class="fa-solid fa-shopping-cart"></i> Cart
                 </a>
 
-                @auth
-                    <a href="{{ route('order.show') }}" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
-                        Orders
-                    </a>
+                @if(Auth::check() || session()->has('guest_id'))
+                    @auth
+                        <a href="{{ route('order.show') }}" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
+                            Orders
+                        </a>
+                    @endauth
                     <form action="{{ route('account.logout') }}" method="POST" class="inline m-0 p-0">
                         @csrf
                         <button type="submit" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
                             Logout
                         </button>
                     </form>
-                @endauth
-                @guest
+                @else
                     <a href="{{ route('account.login') }}" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
                         Login
                     </a>
-                @endguest
+                @endif
 
                 <a href="{{ route('membership.index') }}" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
                     Membership

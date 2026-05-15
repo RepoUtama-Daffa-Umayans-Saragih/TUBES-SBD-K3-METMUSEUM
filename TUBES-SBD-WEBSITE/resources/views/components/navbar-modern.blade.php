@@ -76,11 +76,13 @@
                         <i class="fas fa-shopping-cart"></i> Cart
                     </a>
 
-                    @auth
-                        <a href="{{ route('order.show') }}"
-                            class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
-                            Orders
-                        </a>
+                    @if(Auth::check() || session()->has('guest_id'))
+                        @auth
+                            <a href="{{ route('order.show') }}"
+                                class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
+                                Orders
+                            </a>
+                        @endauth
 
                         <form action="{{ route('account.logout') }}" method="POST" class="inline">
                             @csrf
@@ -89,14 +91,12 @@
                                 Logout
                             </button>
                         </form>
-                    @endauth
-
-                    @guest
+                    @else
                         <a href="{{ route('account.login') }}"
                             class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
                             Login
                         </a>
-                    @endguest
+                    @endif
 
                     <a href="{{ route('membership.index') }}"
                         class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">

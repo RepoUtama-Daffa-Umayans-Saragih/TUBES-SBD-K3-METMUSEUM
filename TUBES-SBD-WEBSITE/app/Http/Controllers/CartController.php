@@ -5,15 +5,149 @@ use App\Models\Cart;
 use App\Models\CartGroup;
 use App\Models\CartItem;
 use App\Models\TicketAvailability;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CartController extends Controller
 {
+    // =========================================================
+    // SESSION CART HELPERS (for anonymous / unauthenticated users)
+    // =========================================================
+
+    private function isAnonymous(): bool
+    {
+        return ! Auth::id() && ! session('guest_id');
+    }
+
+    private function getSessionCart(): array
+    {
+        return session('session_cart', []);
+    }
+
+    private function saveSessionCart(array $groups): void
+    {
+        session(['session_cart' => array_values($groups)]);
+    }
+
+    private function buildSessionCartDisplay(): array
+    {
+        $groups         = $this->getSessionCart();
+        $cartGroupsData = collect();
+        $globalSubtotal = 0;
+
+        foreach ($groups as $group) {
+            $groupTotal   = 0;
+            $groupItems   = collect();
+            $locationName = 'Unknown Location';
+            $visitDate    = 'Unknown Date';
+
+            foreach ($group['items'] as $item) {
+                $availability = TicketAvailability::with([
+                    'ticketType',
+                    'visitSchedule.location',
+                ])->find($item['ticket_availability_id']);
+
+                if (! $availability) {
+                    continue;
+                }
+
+                $ticketType = $availability->ticketType;
+                $schedule   = $availability->visitSchedule;
+                $location   = $schedule?->location;
+
+                if ($location && $locationName === 'Unknown Location') {
+                    $locationName = $location->name;
+                }
+                if ($schedule && $visitDate === 'Unknown Date') {
+                    $rawDate   = $schedule->visit_date;
+                    $visitDate = $rawDate instanceof Carbon
+                        ? $rawDate->format('l, F j, Y')
+                        : Carbon::parse($rawDate)->format('l, F j, Y');
+                }
+
+                $price     = (float) ($ticketType?->base_price ?? 0);
+                $itemTotal = $price * $item['quantity'];
+                $groupTotal += $itemTotal;
+
+                $groupItems->push([
+                    'id'                     => 'session:' . $item['ticket_availability_id'],
+                    'ticket_type'            => $ticketType?->name,
+                    'quantity'               => $item['quantity'],
+                    'price'                  => $price,
+                    'item_total'             => $itemTotal,
+                    'ticket_availability_id' => $item['ticket_availability_id'],
+                ]);
+            }
+
+            $globalSubtotal += $groupTotal;
+
+            if ($groupItems->isNotEmpty()) {
+                $cartGroupsData->push([
+                    'group_id'    => 'session:' . $group['session_group_id'],
+                    'location'    => $locationName,
+                    'visit_date'  => $visitDate,
+                    'items'       => $groupItems,
+                    'group_total' => $groupTotal,
+                ]);
+            }
+        }
+
+        return [
+            'cartGroups'     => $cartGroupsData,
+            'globalSubtotal' => $globalSubtotal,
+        ];
+    }
+
+    /**
+     * Persist session cart into the database after authentication.
+     * Called by LoginController and GuestLoginController after auth success.
+     */
+    public static function migrateSessionCartToDb(?int $userId = null, ?int $guestId = null): void
+    {
+        $sessionCart = session('session_cart', []);
+        if (empty($sessionCart)) {
+            return;
+        }
+
+        // Remove any existing DB cart for this user/guest to avoid duplicates
+        if ($userId) {
+            Cart::where('user_id', $userId)->delete();
+        } elseif ($guestId) {
+            Cart::where('guest_id', $guestId)->delete();
+        }
+
+        $cart = Cart::create([
+            'user_id'    => $userId,
+            'guest_id'   => $guestId,
+            'expires_at' => now()->addHours(2),
+        ]);
+
+        session(['cart_id' => $cart->cart_id]);
+
+        foreach ($sessionCart as $group) {
+            $cartGroup = CartGroup::create(['cart_id' => $cart->cart_id]);
+            foreach ($group['items'] as $item) {
+                CartItem::create([
+                    'cart_group_id'          => $cartGroup->cart_group_id,
+                    'ticket_availability_id' => $item['ticket_availability_id'],
+                    'quantity'               => $item['quantity'],
+                ]);
+            }
+        }
+
+        session()->forget('session_cart');
+    }
+
+    // =========================================================
+    // PUBLIC CONTROLLER METHODS
+    // =========================================================
+
     public function add(Request $request): JsonResponse | RedirectResponse
     {
         $validated = $request->validate([
@@ -25,15 +159,32 @@ class CartController extends Controller
         $userId  = Auth::id();
         $guestId = $userId ? null : session('guest_id');
 
-        // AUTO-CREATE GUEST IF MISSING (ONLY ONCE)
+        // ── ANONYMOUS: store in session cart ─────────────────────────
         if (! $userId && ! $guestId) {
-            $guest = \App\Models\Guest::create([
-                'session_token' => session()->getId(),
-            ]);
-            $guestId = $guest->guest_id;
-            session(['guest_id' => $guestId]);
+            $groups = $this->getSessionCart();
+
+            if (empty($groups)) {
+                $groups[] = [
+                    'session_group_id' => (string) Str::uuid(),
+                    'items'            => [],
+                ];
+            }
+
+            $groups[0]['items'][] = [
+                'ticket_availability_id' => $validated['ticket_availability_id'],
+                'quantity'               => $validated['quantity'],
+            ];
+
+            $this->saveSessionCart($groups);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Item added to cart.'], 201);
+            }
+
+            return redirect()->route('ticket.cart')->with('success', 'Item added to cart.');
         }
 
+        // ── AUTHENTICATED: store in DB cart ──────────────────────────
         $cart = $this->resolveCart($userId, $guestId);
 
         if (! $cart) {
@@ -42,7 +193,6 @@ class CartController extends Controller
                 'guest_id'   => $guestId,
                 'expires_at' => now()->addHours(2),
             ]);
-
             session()->put('cart_id', $cart->cart_id);
         }
 
@@ -52,12 +202,9 @@ class CartController extends Controller
 
         $cartGroup = $cart->cartGroups()->first();
         if (! $cartGroup) {
-            $cartGroup = CartGroup::create([
-                'cart_id' => $cart->cart_id,
-            ]);
+            $cartGroup = CartGroup::create(['cart_id' => $cart->cart_id]);
         }
 
-        // IMMUTABLE RULE: No direct update, just add if exists
         CartItem::create([
             'cart_group_id'          => $cartGroup->cart_group_id,
             'ticket_availability_id' => $validated['ticket_availability_id'],
@@ -70,10 +217,7 @@ class CartController extends Controller
         ]);
 
         if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'Item added to cart.',
-                'data'    => $cart,
-            ], 201);
+            return response()->json(['message' => 'Item added to cart.', 'data' => $cart], 201);
         }
 
         return redirect()->route('ticket.cart')->with('success', 'Item added to cart.');
@@ -88,6 +232,27 @@ class CartController extends Controller
         $userId  = Auth::id();
         $guestId = $userId ? null : ($validated['guest_id'] ?? session('guest_id'));
 
+        // ── ANONYMOUS: display session cart ──────────────────────────
+        if (! $userId && ! $guestId) {
+            $display = $this->buildSessionCartDisplay();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'data' => [
+                        'cart_groups'     => $display['cartGroups'],
+                        'global_subtotal' => $display['globalSubtotal'],
+                    ],
+                ]);
+            }
+
+            return view('ordinary.checkout.cart.cart', [
+                'cartGroups'     => $display['cartGroups'],
+                'globalSubtotal' => $display['globalSubtotal'],
+                'title'          => 'Cart',
+            ]);
+        }
+
+        // ── AUTHENTICATED: display DB cart ───────────────────────────
         $cart = $this->resolveCart($userId, $guestId);
 
         if ($cart) {
@@ -98,32 +263,32 @@ class CartController extends Controller
         }
 
         $cartGroupsData = collect();
-        $globalSubtotal  = 0;
+        $globalSubtotal = 0;
 
         if ($cart) {
             foreach ($cart->cartGroups as $group) {
-                $groupTotal = 0;
-                $groupItems = collect();
+                $groupTotal   = 0;
+                $groupItems   = collect();
                 $locationName = 'Unknown Location';
-                $visitDate = 'Unknown Date';
+                $visitDate    = 'Unknown Date';
 
                 foreach ($group->cartItems as $item) {
-                    $ticketType  = $item->ticketAvailability?->ticketType;
-                    $schedule    = $item->ticketAvailability?->visitSchedule;
-                    $location    = $schedule?->location;
+                    $ticketType = $item->ticketAvailability?->ticketType;
+                    $schedule   = $item->ticketAvailability?->visitSchedule;
+                    $location   = $schedule?->location;
 
                     if ($location && $locationName === 'Unknown Location') {
                         $locationName = $location->name;
                     }
                     if ($schedule && $visitDate === 'Unknown Date') {
-                        $rawDate = $schedule->visit_date;
-                        $visitDate = $rawDate instanceof \Carbon\Carbon 
-                            ? $rawDate->format('l, F j, Y') 
-                            : \Carbon\Carbon::parse($rawDate)->format('l, F j, Y');
+                        $rawDate   = $schedule->visit_date;
+                        $visitDate = $rawDate instanceof Carbon
+                            ? $rawDate->format('l, F j, Y')
+                            : Carbon::parse($rawDate)->format('l, F j, Y');
                     }
 
-                    $price       = (float) ($ticketType?->base_price ?? 0);
-                    $itemTotal   = $price * $item->quantity;
+                    $price     = (float) ($ticketType?->base_price ?? 0);
+                    $itemTotal = $price * $item->quantity;
                     $groupTotal += $itemTotal;
 
                     $groupItems->push([
@@ -188,23 +353,64 @@ class CartController extends Controller
     public function storeAdmission(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'location_id'       => ['required', 'integer'],
-            'visit_schedule_id' => ['required', 'integer'],
-            'items'             => ['required', 'array', 'min:1'],
+            'location_id'            => ['required', 'integer'],
+            'visit_schedule_id'      => ['required', 'integer'],
+            'items'                  => ['required', 'array', 'min:1'],
             'items.*.ticket_type_id' => ['required', 'integer'],
-            'items.*.quantity'  => ['required', 'integer', 'min:1'],
+            'items.*.quantity'       => ['required', 'integer', 'min:1'],
         ]);
 
         $userId  = Auth::id();
         $guestId = $userId ? null : session('guest_id');
 
-        // AUTO-CREATE GUEST IF MISSING
+        // ── ANONYMOUS: store group in session cart ────────────────────
         if (! $userId && ! $guestId) {
-            $guest = \App\Models\Guest::create(['session_token' => session()->getId()]);
-            $guestId = $guest->guest_id;
-            session(['guest_id' => $guestId]);
+            $items = [];
+
+            foreach ($validated['items'] as $item) {
+                $availability = TicketAvailability::where('ticket_type_id', $item['ticket_type_id'])
+                    ->where('visit_schedule_id', $validated['visit_schedule_id'])
+                    ->first();
+
+                if (! $availability) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Ticket availability not found for type ' . $item['ticket_type_id'],
+                    ], 422);
+                }
+
+                $items[] = [
+                    'ticket_availability_id' => $availability->ticket_availability_id,
+                    'quantity'               => $item['quantity'],
+                ];
+            }
+
+            $sessionGroupId = (string) Str::uuid();
+            $groups         = $this->getSessionCart();
+
+            // Handle modify: remove old session group
+            if (session()->has('modify_session_group_id')) {
+                $modifyId = session('modify_session_group_id');
+                $groups   = array_filter($groups, fn ($g) => $g['session_group_id'] !== $modifyId);
+                session()->forget('modify_session_group_id');
+            }
+
+            $groups[] = [
+                'session_group_id'  => $sessionGroupId,
+                'location_id'       => $validated['location_id'],
+                'visit_schedule_id' => $validated['visit_schedule_id'],
+                'items'             => $items,
+            ];
+
+            $this->saveSessionCart($groups);
+
+            return response()->json([
+                'success'       => true,
+                'cart_group_id' => 'session:' . $sessionGroupId,
+            ], 200);
         }
 
+        // ── AUTHENTICATED: store in DB cart ──────────────────────────
         try {
             DB::beginTransaction();
 
@@ -222,9 +428,7 @@ class CartController extends Controller
                 throw new \RuntimeException('Cart expired');
             }
 
-            $cartGroup = CartGroup::create([
-                'cart_id' => $cart->cart_id,
-            ]);
+            $cartGroup = CartGroup::create(['cart_id' => $cart->cart_id]);
 
             foreach ($validated['items'] as $item) {
                 $availability = TicketAvailability::where('ticket_type_id', $item['ticket_type_id'])
@@ -244,7 +448,7 @@ class CartController extends Controller
 
             if (session()->has('modify_cart_group_id')) {
                 $oldGroupId = session('modify_cart_group_id');
-                
+
                 $oldGroup = CartGroup::where('cart_group_id', $oldGroupId)
                     ->where('cart_id', $cart->cart_id)
                     ->lockForUpdate()
@@ -263,21 +467,32 @@ class CartController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'cart_group_id' => $cartGroup->cart_group_id
+                'success'       => true,
+                'cart_group_id' => $cartGroup->cart_group_id,
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to store admission tickets. ' . $e->getMessage()
+                'message' => 'Failed to store admission tickets. ' . $e->getMessage(),
             ], 500);
         }
     }
 
     public function removeGroup(Request $request, $id): JsonResponse
     {
+        // ── SESSION CART GROUP ────────────────────────────────────────
+        if (str_starts_with((string) $id, 'session:')) {
+            $sessionGroupId = substr((string) $id, 8);
+            $groups         = $this->getSessionCart();
+            $groups         = array_filter($groups, fn ($g) => $g['session_group_id'] !== $sessionGroupId);
+            $this->saveSessionCart(array_values($groups));
+
+            return response()->json(['success' => true, 'message' => 'Group removed.']);
+        }
+
+        // ── DB CART GROUP ─────────────────────────────────────────────
         $cartGroup = CartGroup::where('cart_group_id', $id)->first();
 
         if (! $cartGroup) {
@@ -303,6 +518,22 @@ class CartController extends Controller
 
     public function modifyGroup(Request $request, $id): RedirectResponse
     {
+        // ── SESSION CART GROUP ────────────────────────────────────────
+        if (str_starts_with((string) $id, 'session:')) {
+            $sessionGroupId = substr((string) $id, 8);
+            $groups         = $this->getSessionCart();
+            $exists         = collect($groups)->firstWhere('session_group_id', $sessionGroupId);
+
+            if (! $exists) {
+                abort(404, 'Cart group not found.');
+            }
+
+            session(['modify_session_group_id' => $sessionGroupId]);
+
+            return redirect()->route('ticket.admission');
+        }
+
+        // ── DB CART GROUP ─────────────────────────────────────────────
         $cartGroup = CartGroup::where('cart_group_id', $id)->first();
 
         if (! $cartGroup) {
@@ -319,6 +550,8 @@ class CartController extends Controller
     public function cancelModify(): RedirectResponse
     {
         session()->forget('modify_cart_group_id');
+        session()->forget('modify_session_group_id');
+
         return redirect()->route('ticket.cart');
     }
 }

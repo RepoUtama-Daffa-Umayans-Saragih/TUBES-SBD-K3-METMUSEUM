@@ -4,7 +4,95 @@
 
 Dibuat: 2026-05-15
 Project: TUBES-SBD-K3 MetMuseum Website
-Status: Pre-Implementation Technical Analysis
+Status: Phase 2 Implementation (References Scraping) - Post CSV Corruption Fix
+Revisi: Dokumentasi diperbarui berdasarkan learning dari debugging CSV corruption
+
+
+================================================================================
+0. PROJECT EVOLUTION & DEBUGGING JOURNEY (ADDED - CONTEXT PENTING)
+================================================================================
+
+A. PROJECT TIMELINE & EVOLUTION
+
+   Phase 1: Initial Scraping (Provenance)
+   ──────────────────────────────────────
+   • Tujuan: Scrape provenance data dari halaman MetMuseum
+   • Input: 2000 artwork records dalam CSV curated
+   • Output: metmuseum_provenance_final.csv
+   • Status: ✅ BERHASIL - Menghasilkan ~1,900 valid records
+
+
+   Phase 2: CSV Analysis & Debugging (CRITICAL)
+   ──────────────────────────────────────────────
+   • Problem: pandas.errors.ParserError saat load CSV
+   • Investigasi: Mengapa hanya ~1,900 records valid dari ~3,767 expected?
+   • Root Cause Discovery: Embedded newline dalam quoted field (BUKAN semicolon!)
+   • Effort: Deep CSV structure analysis, custom parser development
+   • Result: ✅ Fixed - Proper CSV loading dan column mapping
+
+
+   Phase 3: References Scraping (CURRENT)
+   ──────────────────────────────────────
+   • Tujuan: Scrape references/bibliography dari halaman MetMuseum
+   • Strategy: Gunakan lessons learned dari Phase 2
+   • Input: Same CSV curated (2000 records)
+   • Output: metmuseum_references_final.csv
+   • Status: 🔄 PLANNING - Dokumentasi ini untuk guidance implementation
+
+
+B. KEY LEARNING FROM CSV DEBUGGING
+
+   ❌ Misconception SEBELUMNYA:
+   • "Semicolon delimiter adalah penyebab corruption"
+   • "Banyak row hilang karena salah parsing delimiter"
+   • "Perlu multi-delimiter strategy"
+   
+   ✅ Root Cause SEBENARNYA:
+   • Embedded NEWLINE (\n) dalam quoted field adalah penyebab utama
+   • Row delimiter adalah ENTER, BUKAN semicolon
+   • Semicolon hanya field delimiter antar kolom
+   • CSV parser standar gagal karena tidak handle multiline quoted field dengan baik
+   • Akibatnya: parser memecah 1 physical row menjadi multiple logic rows
+   
+   ✅ Recovery:
+   • Custom parser: read semicolon-delimited (respects multiline in quotes)
+   • Parse field[0] separately sebagai comma-delimited CSV
+   • Validate & reconstruct data dengan proper 3-column structure
+   • Hasil: 1,899 valid records dengan 100% data integrity
+
+
+C. STATISTICS - BEFORE vs AFTER CSV FIX
+
+   Kondisi Sebelum (CSV Parsing Failed):
+   ├─ Total rows di file: 6,763 (including header)
+   ├─ Parser output: 1,736 records (dengan column misalignment)
+   ├─ Actual provenance data: ~1,900 records tersembunyi dalam field[0]
+   └─ Status: ❌ Data corrupt, column mapping salah
+
+   Kondisi Sesudah (CSV Fixed):
+   ├─ Total rows di file: 6,763 (tidak berubah)
+   ├─ Parser output: 1,899 records (✅ correct mapping)
+   ├─ Data distribution:
+   │  ├─ Valid records: 1,899 (28.1%)
+   │  ├─ Empty rows: 2,232 (33.0%)
+   │  ├─ Malformed rows: 1,071 (15.9%)
+   │  └─ Multiline continuations (skipped): 1,561 (23.1%)
+   └─ Status: ✅ Data recovered, proper structure, 100% fill rate
+
+
+D. UPDATE LOGIC EVOLUTION
+
+   Logic Sebelumnya (Provenance):
+   • Hanya update row dengan provenance kosong
+   • Skip row yang sudah ada provenance
+   • Alasan: Ingin preserve existing data, hanya fill gap
+   • Problem: Tidak tahu apakah "existing data" adalah hasil parsing yang benar
+   
+   Logic Terbaru (References & Future Scraping):
+   • Overwrite SEMUA row tanpa pengecekan kosong/terisi
+   • Alasan: Lebih aman, tidak tergantung validasi kolom lama yang mungkin corrupt
+   • Benefit: Fresh scrape menghasilkan data terbaru, menghindari stale data
+   • Implementasi: Always use df.at[idx, 'col'] = new_value (no condition)
 
 
 ================================================================================
@@ -80,6 +168,142 @@ C. OUTPUT DATA STRUCTURE
    503530 | http://www.metmuseum.org/art/collection/search/503530 | Reference D
    
    PENTING: Setiap row = 1 reference (bukan gabungan)
+
+
+================================================================================
+2B. CSV MULTILINE HANDLING - TECHNICAL DEEP DIVE (ADDED - CRITICAL KNOWLEDGE)
+================================================================================
+
+A. UNDERSTANDING CSV DELIMITERS & ROW BOUNDARIES
+
+   CSV menggunakan beberapa konsep penting:
+
+   1. FIELD DELIMITER (Pemisah Kolom/Field)
+      ├─ Character yang memisahkan antar kolom dalam 1 row
+      ├─ Contoh: Comma (,) atau Semicolon (;)
+      ├─ File kami: Semicolon (;) = field delimiter
+      └─ ❌ BUKAN penyebab corruption (ini misconception sebelumnya!)
+
+   2. ROW DELIMITER (Pemisah Baris/Record)
+      ├─ Character yang memisahkan record
+      ├─ Adalah ENTER / NEWLINE (\n atau \r\n)
+      ├─ Parser CSV menggunakan newline untuk detect "end of row"
+      └─ ⚠️ INILAH MASALAH UTAMA dengan data kami!
+
+   3. QUOTED FIELD (Field dibungkus Quote)
+      ├─ Field dapat dibungkus dengan double quote (")
+      ├─ Tujuan: Preserve special character dalam field value
+      ├─ CSV standard: Newline DALAM quoted field diizinkan
+      ├─ Makna: Newline di dalam quotes BUKAN berarti end of row
+      └─ ⚠️ Problem: Parser yang tidak proper sering gagal handle ini
+
+
+B. CONTOH KONKRET - CSV MULTILINE YANG VALID
+
+   Struktur file kami (simplified):
+   ┌─────────────────────────────────────────────────────────┐
+   │ object_id;link_resource;provenance;;;;...;;;;;;;;       │  ← Header
+   │ 503046;http://www...;\"This piano featuring an...      │  ← Line 1
+   │ ...extraordinary marquetry case designed by George     │  ← Line 2 (continuation)
+   │ ...Henry Blake, is one of the finest examples.\";      │  ← Line 3 (continuation)
+   │ 503530;http://www...;\"Inside the ebony case of...    │  ← Line 4 (new row)
+   │ ...this musical clock is extremely rare...\";;...       │  ← Line 5 (continuation)
+   └─────────────────────────────────────────────────────────┘
+   
+   Physical lines: 5
+   Logical rows (dengan PROPER CSV parser): 3
+   ├─ Row 0: Header (19 fields)
+   ├─ Row 1: 503046;http://...;"This piano...\n...marquetry...\n...Henry Blake..."
+   └─ Row 2: 503530;http://...;"Inside...\n...this musical..."
+   
+   Parsing dengan INCORRECT parser (tidak understand quoted multiline):
+   ├─ Read Line 1 → detect \n → "END OF ROW" ❌
+   ├─ Read Line 2 → detect \n → "ANOTHER ROW" ❌
+   ├─ Read Line 3 → detect \n → "ANOTHER ROW" ❌ (3 lines, tapi baru 1 logic row!)
+   └─ Result: Many malformed rows, missing data
+
+
+C. WHY PARSER FAILS - DETAILED BREAKDOWN
+
+   Problem dengan Parser Standard:
+
+   CSV Row Structure (dengan quote):
+   ──────────────────────────────────
+   Field1;Field2;"Field3_dengan_\n_newline";Field4;...
+              ▲                 ▲                    ▲
+         field delimiter    embedded newline   field delimiter
+
+   Correct parsing flow:
+   ├─ Detect ';' → field boundary
+   ├─ Detect '"' → start of quoted field
+   ├─ Inside quoted field, IGNORE all special chars including \n
+   ├─ Wait for closing '"' → end of quoted field
+   ├─ Continue parsing until actual row end (\n outside quotes)
+   └─ Result: ✅ 1 row dengan provenance multiline intact
+
+   Incorrect parsing flow (naive approach):
+   ├─ Split by \n first (sebelum parse)
+   ├─ Untuk tiap line, split by ';' 
+   ├─ Detect line 1: "...provenance\"" → incomplete field
+   ├─ Detect line 2: "...more text..." → bukan valid row structure
+   ├─ Detect line 3: "...end text\";" → ERROR, quote tidak aligned
+   └─ Result: ❌ Multiple malformed rows
+
+
+D. SOLUSI: PROPER CSV READER
+
+   Implementasi BENAR:
+
+   ```python
+   # ✅ CORRECT: Use csv.reader with proper parameters
+   import csv
+   
+   with open(csv_path, 'r', encoding='utf-8-sig') as f:
+       # These parameters handle multiline quoted fields correctly
+       reader = csv.reader(
+           f,
+           delimiter=';',           # Field delimiter (antar kolom)
+           quotechar='"',           # Quote character
+           doublequote=True,        # "" represents escaped quote
+           skipinitialspace=False
+       )
+       
+       for row in reader:
+           # Each iteration = 1 complete logical row
+           # ALL newlines within quoted fields are preserved in values
+           # NO newlines at row boundaries (handled automatically)
+           
+           field_0 = row[0]  # First field (object_id or ID data)
+           field_1 = row[1]  # Second field
+           # field_2 dapat memiliki embedded newlines! ✅ Correctly handled
+   ```
+
+   Key point: csv.reader automatically:
+   - ✅ Respect quote boundaries
+   - ✅ Preserve newlines inside quotes
+   - ✅ Correctly identify row boundaries
+   - ✅ Handle escaped quotes
+
+
+E. IMPACT ON REFERENCES SCRAPING
+
+   Pembelajaran ini krusial untuk References scraping:
+
+   Saat scraping references dari halaman MetMuseum:
+   ├─ References mungkin berisi multiple lines/paragraphs
+   ├─ Contoh: "Christie's, London\n(sale May 1919, lot 115)"
+   ├─ Saat save ke CSV field, newline HARUS dipreserve
+   └─ Parsing later HARUS handle multiline correctly
+
+   Implementation untuk References:
+   
+   ✓ Save CSV dengan csv.writer (bukan pandas to_csv)
+   ✓ Set quoting=csv.QUOTE_ALL (untuk safety)
+   ✓ Use encoding='utf-8-sig' untuk BOM
+   ✓ Jangan custom-split newlines (biarkan csv.writer handle)
+   ✓ Saat load, gunakan csv.reader (not pandas.read_csv)
+   
+   Result: ✅ Multiline references preserved perfectly
 
 
 ================================================================================
@@ -400,7 +624,7 @@ C. DATA ROWS EXAMPLE
    503530,http://www.metmuseum.org/art/collection/search/503530,"Published: Musical Instruments of Europe (Smith, 1975)"
 
 
-D. HANDLING SPECIAL CHARACTERS
+D. HANDLING SPECIAL CHARACTERS & PROPER CSV SAVING
 
    CSV Escaping Rules:
    ─────────────────
@@ -413,10 +637,57 @@ D. HANDLING SPECIAL CHARACTERS
    CSV output: "Reference includes ""quote"" marks"
    → Double quotes untuk escape
 
-   UTF-8 encoding:
-   ────────────────
-   Support untuk: é, ñ, ü, 中文, etc.
-   → Pandas to_csv dengan encoding='utf-8'
+   Original text: Multiline\nreference text
+   CSV output (quoted): "Multiline
+                         reference text"
+   → Newline di dalam quotes adalah VALID dan PRESERVED
+   ⚠️ PENTING: Parser harus handle ini dengan benar
+
+
+   UTF-8 Encoding & BOM:
+   ─────────────────────
+   • Support untuk: é, ñ, ü, 中文, dan special chars
+   • Gunakan encoding='utf-8-sig' (includes BOM)
+   • BOM (Byte Order Mark) membantu kompatibilitas dengan Excel/LibreOffice
+   • Jangan gunakan encoding='utf-8' tanpa -sig
+
+
+   Proper CSV Save Implementation:
+   ──────────────────────────────
+   
+   ✅ BENAR (gunakan csv.writer):
+   ```python
+   import csv
+   
+   with open(output_path, 'w', encoding='utf-8-sig', newline='') as f:
+       writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+       writer.writerow(['met_object_id', 'link_resource', 'references'])
+       for row in data:
+           writer.writerow(row)
+       # csv.writer automatically handles:
+       # - Escaping quotes as ""
+       # - Quoting fields dengan special chars
+       # - Preserving newlines dalam quoted fields
+   ```
+   
+   ✅ ALTERNATIF (pandas dengan proper params):
+   ```python
+   df.to_csv(
+       output_path,
+       index=False,
+       encoding='utf-8-sig',
+       quoting=csv.QUOTE_ALL,
+       lineterminator='\n'      # Konsisten dengan Unix line ending
+   )
+   ```
+   
+   ❌ SALAH (ini penyebab corruption sebelumnya):
+   ```python
+   # DON'T do this:
+   df.to_csv(output_path, encoding='utf-8', quoting=csv.QUOTE_MINIMAL)
+   # Problem: QUOTE_MINIMAL tidak quote semua field
+   #          Newlines dalam field bisa break parser
+   ```
 
 
 E. DATA VALIDATION
@@ -482,22 +753,81 @@ A. SKENARIO REFERENCES TIDAK DITEMUKAN
 
 B. ERROR HANDLING STRATEGY
 
-   Try-Except wrap untuk setiap artwork:
+   Lessons dari Provenance Scraping:
+   ──────────────────────────────────
+   
+   Error yang terjadi sebelumnya:
+   ❌ 'NoneType' object has no attribute 'get'
+      Penyebab: Row parsing gagal → struktur data menjadi None
+      Solution: Gunakan defensive programming (safe_get, safe_access)
+   
+   ❌ pandas.errors.ParserError
+      Penyebab: CSV structure corrupt + embedded newline tidak ditangani
+      Solution: Gunakan custom parser yang proper
+   
+   ❌ KeyError pada column access
+      Penyebab: Column misalignment karena parsing salah
+      Solution: Validate column structure sebelum access
+
+
+   Defensive Programming Pattern (GUNAKAN INI):
+   ─────────────────────────────────────────────
+   
+   ```python
+   # ✅ BENAR: Safe access dengan default fallback
+   def safe_access(row, column_name, default=""):
+       """Safely access row column dengan fallback"""
+       try:
+           if row is None:
+               return default
+           value = row.get(column_name) if hasattr(row, 'get') else row[column_name]
+           return str(value).strip() if value else default
+       except:
+           return default
+   
+   # Gunakan saat extract data:
+   met_object_id = safe_access(row, 'met_object_id', '')
+   link = safe_access(row, 'link_resource', '')
+   ```
+
+
+   Try-Except Per Artwork (JANGAN STOP):
+   ────────────────────────────────────
 
    ```python
-   for each artwork in curated_csv:
+   stats = {
+       'processed': 0,
+       'updated': 0,
+       'failed': 0,
+       'errors': 0
+   }
+   
+   for idx, artwork in enumerate(curated_csv, 1):
        try:
-           met_object_id = artwork['met_object_id']
-           link = artwork['link_resource']
+           met_object_id = safe_access(artwork, 'met_object_id', '')
+           link = safe_access(artwork, 'link_resource', '')
+           
+           if not met_object_id or not link:
+               stats['failed'] += 1
+               continue
            
            # Open page
            driver.get(link)
            
-           # Wait & click tab
-           click_references_tab()
+           # Wait & click tab (dengan timeout)
+           try:
+               click_references_tab()
+           except TimeoutException:
+               logger.error(f"[{idx}] Timeout: References tab not found")
+               stats['failed'] += 1
+               continue
            
            # Extract references
-           references = extract_references()
+           try:
+               references = extract_references()
+           except ElementNotFound:
+               logger.warning(f"[{idx}] References section not found")
+               references = ""  # Allow empty result
            
            # Parse & split by paragraph
            ref_list = parse_references(references)
@@ -506,18 +836,63 @@ B. ERROR HANDLING STRATEGY
            for ref in ref_list:
                write_csv_row(met_object_id, link, ref)
            
-       except ElementNotFound:
-           log_warning(f"References tab not found for {met_object_id}")
+           stats['processed'] += 1
+           stats['updated'] += len(ref_list)
            
-       except TimeoutException:
-           log_error(f"Page timeout for {met_object_id}")
-           
+           # Progress report setiap N row
+           if idx % 50 == 0:
+               logger.info(f"Progress [{idx}] Updated: {stats['updated']}, "
+                          f"Failed: {stats['failed']}")
+       
        except Exception as e:
-           log_error(f"Unexpected error for {met_object_id}: {e}")
+           logger.error(f"[{idx}] Unexpected error: {str(e)[:100]}")
+           stats['errors'] += 1
+           # JANGAN raise exception, lanjut ke artwork berikutnya
        
        finally:
-           # Always proceed to next artwork
+           # Always continue to next artwork
            continue
+   ```
+
+
+   Autosave Berkala:
+   ────────────────
+   
+   ```python
+   # Save output CSV setiap N rows untuk backup
+   autosave_interval = 50
+   
+   if idx % autosave_interval == 0:
+       try:
+           output_df.to_csv(
+               output_path,
+               index=False,
+               encoding='utf-8-sig',
+               quoting=csv.QUOTE_ALL
+           )
+           logger.info(f"Autosaved {idx} rows")
+       except Exception as save_error:
+           logger.error(f"Autosave failed: {save_error}")
+           # Continue scraping (save akan dicoba di akhir)
+   ```
+
+
+   Final Reporting:
+   ────────────────
+   
+   Setelah selesai, show summary:
+   ```
+   ═══════════════════════════════════
+   FINAL STATISTICS
+   ═══════════════════════════════════
+   Total artwork:      2000
+   Processed:          1995
+   References found:   5234
+   Failed:             5
+   Total errors:       0
+   Success rate:       99.8%
+   Avg ref per artwork: 2.6
+   ═══════════════════════════════════
    ```
 
 
@@ -854,8 +1229,10 @@ B. FILE STRUCTURE PROJECT
 11. KEY INSIGHTS & IMPLEMENTATION STRATEGY
 ================================================================================
 
-A. LESSONS LEARNED (dari scraping Provenance)
+A. LESSONS LEARNED (dari scraping Provenance + CSV Debugging)
 
+   SCRAPING INSIGHTS:
+   
    1. React Tab Components
       ✓ Content tidak auto-load dengan page
       ✓ HARUS click tab untuk trigger rendering
@@ -882,9 +1259,66 @@ A. LESSONS LEARNED (dari scraping Provenance)
       ✓ Preserve original text (jangan over-sanitize)
 
 
+   CSV PARSING & HANDLING INSIGHTS:
+   ────────────────────────────────
+   
+   6. CSV Multiline Field Handling ⚠️ CRITICAL
+      ✓ Embedded NEWLINE di quoted field adalah VALID CSV
+      ✓ Parser HARUS respect quote boundaries
+      ✓ Gunakan csv.reader dengan proper parameters
+      ✓ JANGAN split by newline terlebih dahulu
+      ✓ Decode newline hanya SETELAH parse selesai
+      
+      Contoh yang BENAR:
+      csv.reader(f, delimiter=';', quotechar='"', doublequote=True)
+      → Automatically handle multiline quoted fields
+      
+      Contoh yang SALAH:
+      lines = f.read().split('\n')  # ❌ Breaks multiline fields!
+
+   7. Field Delimiter vs Row Delimiter
+      ✓ Field delimiter (;) = pemisah antar kolom
+      ✓ Row delimiter (\n) = pemisah antar records
+      ✓ Jangan bingung antara keduanya
+      ✓ NEWLINE DALAM QUOTES bukan row delimiter
+      
+      Common mistake: Menganggap setiap \n adalah row boundary
+      Correct: \n DALAM quotes bukan boundary (harus ignore)
+
+   8. Defensive Programming untuk Data Access
+      ✓ Gunakan safe_access(row, column, default) pattern
+      ✓ JANGAN direct access tanpa null check
+      ✓ Handle 'NoneType' error dengan fallback default
+      ✓ Validate row structure SEBELUM parsing
+      
+      ❌ BAD: value = row['column'] → KeyError jika column not exist
+      ✅ GOOD: value = safe_access(row, 'column', '')
+
+   9. CSV Save dengan Proper Encoding
+      ✓ Gunakan csv.writer (lebih reliable dari pandas.to_csv)
+      ✓ Set encoding='utf-8-sig' (include BOM)
+      ✓ Set quoting=csv.QUOTE_ALL untuk safety
+      ✓ Set newline='' untuk proper line ending handling
+      
+      Implementasi BENAR:
+      with open(f, 'w', encoding='utf-8-sig', newline='') as f:
+          writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+      
+      Implementasi SALAH:
+      df.to_csv(f, encoding='utf-8', quoting=csv.QUOTE_MINIMAL)
+      → QUOTE_MINIMAL dapat cause corruption untuk multiline
+
+   10. Data Recovery Strategy
+       ✓ Jika parsing gagal, gunakan custom parser
+       ✓ Validate & reconstruct secara bertahap
+       ✓ Preserve original data (jangan truncate)
+       ✓ Track parsing statistics (valid/malformed/skipped)
+       ✓ Log all errors untuk debugging future issues
+
+
 B. REKOMENDASI IMPLEMENTASI SCRAPING REFERENCES
 
-   Berdasarkan success provenance scraping, gunakan strategi:
+   Berdasarkan success provenance scraping + CSV lessons, gunakan strategi:
 
    1. Sama dengan Provenance:
       ✓ Click tab "References"
@@ -898,11 +1332,18 @@ B. REKOMENDASI IMPLEMENTASI SCRAPING REFERENCES
       ✓ Setiap row = 1 reference entry
       ✓ Set display_order berdasarkan parse order
 
-   3. Optimasi:
+   3. CSV Handling (Apply CSV Lessons):
+      ✓ Use csv.writer dengan encoding='utf-8-sig'
+      ✓ Set quoting=csv.QUOTE_ALL untuk multiline references
+      ✓ Handle escaped quotes otomatis (jangan manual replace)
+      ✓ Use csv.reader saat load output (not pandas.read_csv)
+
+   4. Optimasi & Recovery:
       ✓ Gunakan batch processing (500 objects per batch)
       ✓ Fresh WebDriver per batch untuk avoid session issues
       ✓ Implement progress checkpoint (resume dari row X jika fail)
-      ✓ Comprehensive logging untuk debugging
+      ✓ Comprehensive logging dengan separate counters (processed/updated/failed)
+      ✓ Autosave setiap 50 rows sebagai backup
 
 
 ================================================================================
@@ -915,32 +1356,85 @@ A. PEMAHAMAN TEKNIS - CHECKLIST
    ✓ Data source: Curated CSV dengan met_object_id & link_resource
    ✓ Target output: metmuseum_references_final.csv
    ✓ CSV structure: Multi-row per artwork (1 reference per row)
+   ✓ CSV format: Proper encoding (utf-8-sig), quoting (QUOTE_ALL), newline handling
+   ✓ Multiline handling: CSV dapat contain newline dalam quoted field ✅
    ✓ Database integration: Insert to art_work_references table
    ✓ Relasi database: 1 artwork → many references
    ✓ Alur scraping: Open page → Click tab → Extract → Parse → CSV
-   ✓ Error handling: Skip gracefully, continue to next artwork
-   ✓ Data consistency: Preserve urutan, validate structure
+   ✓ Error handling: Safe access patterns, skip gracefully, continue
+   ✓ Data consistency: Preserve urutan, validate structure, autosave berkala
    ✓ Pipeline integration: Phase dalam complete museum database project
+   ✓ Learning integration: Apply CSV lessons dari provenance scraping
 
 
-B. READY FOR IMPLEMENTATION
+B. CRITICAL REMINDERS FOR IMPLEMENTATION
 
-   Segala logika, strategi, dan struktur data sudah mapped out.
+   ⚠️ DO:
+   
+   • Use csv.writer for output (not pandas to_csv with QUOTE_MINIMAL)
+   • Use csv.reader for input (proper multiline handling)
+   • Encoding: always use 'utf-8-sig' (include BOM)
+   • Quoting: always use csv.QUOTE_ALL (safe for multiline)
+   • Safe access: validate row data dengan safe_access() before use
+   • Error handling: try-except per artwork, continue on error (don't crash)
+   • Logging: detailed progress report per 50 rows
+   • Statistics: track processed/updated/failed separately
+   • Autosave: save CSV output setiap 50 rows as backup
+
+
+   ❌ DON'T:
+   
+   • Split by newline terlebih dahulu (breaks quoted multiline)
+   • Direct dict/row access tanpa null check (causes NoneType error)
+   • Use pandas.read_csv untuk load output (use csv.reader)
+   • Use QUOTE_MINIMAL (can break multiline fields)
+   • Use encoding='utf-8' without -sig (lose BOM)
+   • Stop process on single row error (skip dan continue)
+   • Assume column exist (validate first)
+   • Over-sanitize text (preserve original content)
+
+
+C. READY FOR IMPLEMENTATION
+
+   Segala logika, strategi, struktur data, dan CSV best practices sudah mapped out.
 
    Next steps:
+
    1. Create: scrape_references_production.py
-      (Based on proven scrape_provenance strategy)
+      (Based on proven scrape_provenance strategy + CSV lessons)
+      Include: Safe access patterns, proper CSV handling, defensive programming
 
    2. Run: Scrape all 2000 artworks untuk extract references
+      Method: Batch processing with autosave, proper error handling
+      Expected: ~3000-8000 rows dalam output CSV (avg 2-4 refs per artwork)
 
    3. Output: metmuseum_references_final.csv
-      (Multi-row format untuk database import)
+      Format: Proper encoding (utf-8-sig), quoting (QUOTE_ALL), multiline OK
+      Validation: Check structure, row count, sample records
 
-   4. Validate: Check structure, encoding, row count
+   4. Validate: Check structure, encoding, row count, UTF-8 integrity
+      Use: Load dengan csv.reader, validate columns, spot-check multiline refs
 
    5. Import: Laravel command untuk insert ke art_work_references
+      Method: Read CSV dengan csv.reader, validate, batch insert
 
    6. Verify: Query & display references untuk sample artworks
+      Check: Multiline text preserved, display_order correct, no truncation
+
+   7. Full integration: Combine dengan provenance data untuk complete dataset
+
+
+D. EXPECTED OUTCOMES
+
+   After complete implementation:
+
+   ✅ 2000 artwork records (dari curated CSV)
+   ✅ 1900+ provenance records (dari provenance scraping - done)
+   ✅ 3000-8000 reference records (dari references scraping - TBD)
+   ✅ Database fully populated dengan art_work & art_work_references
+   ✅ Museum dataset enriched dengan comprehensive metadata
+   ✅ Scraping pipeline mature dengan error handling & logging
+   ✅ CSV handling best practices established untuk future use
 
 
 ================================================================================

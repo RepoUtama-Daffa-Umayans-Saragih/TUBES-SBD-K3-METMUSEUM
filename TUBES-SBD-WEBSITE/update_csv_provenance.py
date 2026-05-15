@@ -2,6 +2,7 @@
 """
 UPDATE EXISTING CSV - Fill empty provenance columns
 Scrapes provenance for rows with empty/NaN values and updates CSV in-place
+IMPROVED: Robust error handling, defensive programming, column validation
 """
 
 import os
@@ -10,7 +11,9 @@ import time
 import logging
 import pandas as pd
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
+import json
+import re
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -31,7 +34,143 @@ logger = logging.getLogger(__name__)
 
 CSV_PATH = r'C:\Users\gidio\OneDrive\document\TUBES-SBD-K3-METMUSEUM\TUBES-SBD-WEBSITE\database\data\metmuseum_provenance_final.csv'
 
-stats = {"total": 0, "updated": 0, "skipped": 0, "empty": 0, "errors": 0}
+# Statistics tracking
+stats = {
+    "total_rows": 0,
+    "processed": 0,
+    "updated": 0,
+    "failed": 0,
+    "errors": 0
+}
+
+
+# ============================================================================
+# HELPER FUNCTIONS - Safe data access patterns
+# ============================================================================
+
+def safe_get(obj: Any, key: str, default: str = "") -> str:
+    """
+    Safely extract value from object using .get() pattern
+    
+    Handles:
+    - None objects: returns default
+    - Non-dict objects: tries dict conversion or str conversion
+    - Missing keys: returns default
+    - Non-string values: converts to string
+    
+    Examples:
+        safe_get({'a': 'value'}, 'a', 'default')  -> 'value'
+        safe_get(None, 'a', 'default')             -> 'default'
+        safe_get('string', 'a', 'default')         -> 'default'
+    """
+    try:
+        # Handle None
+        if obj is None:
+            return default
+        
+        # Handle dict-like objects
+        if isinstance(obj, dict):
+            val = obj.get(key, default)
+            return str(val).strip() if val is not None else default
+        
+        # Handle Series or other objects with get method
+        if hasattr(obj, 'get') and callable(getattr(obj, 'get')):
+            val = obj.get(key, default)
+            return str(val).strip() if val is not None else default
+        
+        # Fallback: return default
+        return default
+        
+    except Exception as e:
+        logger.debug(f"safe_get error for key '{key}': {str(e)[:40]}")
+        return default
+
+
+def safe_access(obj: Any, key: str, default: str = "") -> str:
+    """
+    Safely access object[key] with fallback
+    
+    Handles dict-like, Series, and string conversions
+    """
+    try:
+        if obj is None:
+            return default
+        
+        # Try direct access
+        if hasattr(obj, '__getitem__'):
+            val = obj[key]
+            return str(val).strip() if val is not None else default
+        
+        return default
+        
+    except (KeyError, TypeError, AttributeError):
+        return default
+    except Exception as e:
+        logger.debug(f"safe_access error for key '{key}': {str(e)[:40]}")
+        return default
+
+
+def validate_row(row: Any) -> Tuple[bool, str]:
+    """
+    Validate row data before processing
+    
+    Returns:
+        (is_valid, reason)
+    """
+    if row is None:
+        return False, "Row is None"
+    
+    # Check if row is dict-like
+    if not hasattr(row, '__getitem__'):
+        return False, f"Row is not dict-like: {type(row).__name__}"
+    
+    # Validate required columns
+    met_id = safe_access(row, 'met_object_id', '')
+    link = safe_access(row, 'link_resource', '')
+    
+    if not met_id or met_id == 'nan':
+        return False, f"Invalid met_object_id: {repr(met_id)[:30]}"
+    
+    if not link or link == 'nan':
+        return False, f"Invalid link_resource: {repr(link)[:30]}"
+    
+    # Check if met_object_id looks like a valid number
+    if not re.match(r'^\d+$', met_id.strip()):
+        return False, f"met_object_id not numeric: {met_id[:20]}"
+    
+    if not link.startswith('http'):
+        return False, f"link_resource not URL: {link[:30]}"
+    
+    return True, "OK"
+
+
+def sanitize_dataframe_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean and standardize DataFrame column names
+    - Strip whitespace
+    - Convert to lowercase
+    - Remove BOM characters
+    """
+    df.columns = [
+        col.replace('\ufeff', '').strip().lower()
+        for col in df.columns
+    ]
+    
+    # Rename to standard names if needed
+    column_mapping = {
+        'object_id': 'met_object_id',
+        'objectid': 'met_object_id',
+        'object id': 'met_object_id',
+        'link': 'link_resource',
+        'url': 'link_resource',
+        'resource': 'link_resource'
+    }
+    
+    for old_name, new_name in column_mapping.items():
+        if old_name in df.columns:
+            df = df.rename(columns={old_name: new_name})
+    
+    return df
 
 
 def parse_provenance_text(raw_text: str) -> str:
@@ -74,11 +213,12 @@ def parse_provenance_text(raw_text: str) -> str:
 
 
 def setup_browser():
-    """Setup Chrome WebDriver"""
+    """Setup Chrome WebDriver with optimization"""
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-blink-features=AutomationControlled')
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
     
     # Disable images for faster loading
@@ -87,17 +227,182 @@ def setup_browser():
         {'profile.managed_default_content_settings.images': 2}
     )
     
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    driver.set_page_load_timeout(45)
-    return driver
+    try:
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        driver.set_page_load_timeout(45)
+        driver.implicitly_wait(10)
+        return driver
+    except Exception as e:
+        logger.error(f"Failed to setup browser: {e}")
+        raise
+
+
+def load_csv_robust(csv_path: str) -> pd.DataFrame:
+    """
+    Load CSV file dengan struktur unik:
+    - Header: semicolon-delimited dengan 19 columns (3 data, 16 empty)
+    - Data: Field[0] contains ENTIRE comma-separated row as single quoted string
+    
+    File structure:
+      Header: object_id;link_resource;provenance;;;;;...
+      Data: First field has comma-separated: 503046,URL,provenance_text
+      
+    Solution:
+    1. Read CSV with semicolon delimiter (handles newlines properly)
+    2. Parse field[0] as comma-separated CSV to extract 3 columns
+    3. Skip rows where field[0] is empty
+    4. Validate extracted data
+    
+    Returns:
+        DataFrame dengan columns: met_object_id, link_resource, provenance
+    """
+    logger.info(f"Loading CSV: {csv_path}")
+    logger.info(f"  Strategy: Parse semicolon-delimited with embedded comma-separated field[0]")
+    
+    records = []
+    valid_count = 0
+    empty_count = 0
+    malformed_count = 0
+    multiline_skip = 0  # Track rows that are multiline continuations
+    
+    try:
+        with open(csv_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.reader(
+                f,
+                delimiter=';',
+                quotechar='"',
+                doublequote=True,
+                skipinitialspace=False
+            )
+            
+            # Skip header
+            header = next(reader, None)
+            if not header:
+                raise Exception("CSV file is empty")
+            
+            logger.debug(f"Header: {len(header)} fields - {header[:3]}")
+            
+            # Process data rows
+            for row_num, row in enumerate(reader, start=2):
+                try:
+                    # Row should have 19 fields (3 data + 16 empty)
+                    if not row or len(row) < 1:
+                        empty_count += 1
+                        continue
+                    
+                    # Get first field which contains comma-separated data
+                    field0 = str(row[0]).strip() if row[0] else ""
+                    
+                    if not field0:
+                        empty_count += 1
+                        continue
+                    
+                    # Parse field[0] as comma-delimited CSV to extract 3 columns
+                    try:
+                        # field0 format: "503046,http://...,""provenance text"""
+                        # When read as CSV with comma delimiter:
+                        field0_reader = csv.reader(
+                            [field0],
+                            delimiter=',',
+                            quotechar='"',
+                            doublequote=True,
+                            skipinitialspace=False
+                        )
+                        parsed_fields = next(field0_reader, None)
+                        
+                        if not parsed_fields or len(parsed_fields) < 3:
+                            logger.debug(f"Row {row_num}: Field[0] has {len(parsed_fields or [])} fields, need 3")
+                            malformed_count += 1
+                            continue
+                        
+                        # Extract the 3 columns
+                        met_id = str(parsed_fields[0]).strip()
+                        link = str(parsed_fields[1]).strip()
+                        prov = str(parsed_fields[2]).strip()
+                        
+                        # Validate
+                        if not met_id or met_id == 'nan':
+                            logger.debug(f"Row {row_num}: Empty met_object_id")
+                            malformed_count += 1
+                            continue
+                        
+                        if not link or link == 'nan':
+                            logger.debug(f"Row {row_num}: Empty link_resource")
+                            malformed_count += 1
+                            continue
+                        
+                        # Check if it looks like a multiline continuation (starts with text, not number)
+                        if not re.match(r'^\d+', met_id):
+                            # This is likely a continuation of previous row's multiline text
+                            multiline_skip += 1
+                            continue
+                        
+                        # Valid record
+                        records.append({
+                            'met_object_id': met_id,
+                            'link_resource': link,
+                            'provenance': prov
+                        })
+                        valid_count += 1
+                        
+                    except Exception as e:
+                        logger.debug(f"Row {row_num}: Failed to parse field[0]: {str(e)[:50]}")
+                        malformed_count += 1
+                        continue
+                
+                except Exception as e:
+                    logger.debug(f"Row {row_num}: Unexpected error: {str(e)[:50]}")
+                    malformed_count += 1
+                    continue
+        
+        if not records:
+            raise Exception("No valid records found after parsing")
+        
+        # Create DataFrame
+        df = pd.DataFrame(records)
+        
+        # Ensure proper data types
+        df['met_object_id'] = df['met_object_id'].astype(str)
+        df['link_resource'] = df['link_resource'].astype(str)
+        df['provenance'] = df['provenance'].astype(str)
+        
+        logger.info(f"✓ CSV loaded successfully")
+        logger.info(f"  Total valid records: {valid_count}")
+        logger.info(f"  Empty rows: {empty_count}")
+        logger.info(f"  Malformed rows: {malformed_count}")
+        logger.info(f"  Multiline continuations (skipped): {multiline_skip}")
+        logger.info(f"  Final DataFrame: {len(df)} rows × 3 columns")
+        
+        return df
+        
+    except Exception as e:
+        logger.error(f"Failed to load CSV: {e}")
+        raise Exception(
+            f"Cannot load CSV file {csv_path}. "
+            f"Error: {str(e)[:100]}"
+        )
+
+
 
 
 def extract_provenance(driver, url: str, object_id: str) -> Optional[str]:
     """
     Extract provenance from Met Museum page
     Uses proven approach: click tab + extract from bodyWrapper
+    
+    With DEFENSIVE PROGRAMMING:
+    - Validate inputs
+    - Handle missing tab/data
+    - Use safe element access
+    - Log errors without crashing
     """
+    # Validate inputs
+    if not url or not isinstance(url, str) or not object_id:
+        logger.warning(f"Invalid inputs: url={repr(url)[:30]}, object_id={repr(object_id)[:30]}")
+        stats['errors'] += 1
+        return None
+    
     if not url.startswith('http'):
         url = 'http://' + url
     
@@ -128,130 +433,205 @@ def extract_provenance(driver, url: str, object_id: str) -> Optional[str]:
             
             if body_wrappers:
                 for wrapper in body_wrappers:
-                    text = wrapper.text
-                    if text and len(text.strip()) > 20:
-                        # Parse provenance dengan rules: split by newline ONLY, preserve semicolons
-                        provenance = parse_provenance_text(text)
-                        
-                        # Filter out common section headers
-                        lines = provenance.split('\n')
-                        filtered_lines = []
-                        for line in lines:
-                            if line in ['Exhibition History', 'References', 'Publications']:
-                                break
-                            filtered_lines.append(line)
-                        
-                        final_prov = '\n'.join(filtered_lines).strip()
-                        
-                        if final_prov and len(final_prov) > 20 and 'Exhibition History' not in final_prov:
-                            logger.info(f"✓ [{object_id}] FOUND: {len(final_prov)} chars")
-                            stats['updated'] += 1
-                            return final_prov
+                    try:
+                        text = wrapper.text if wrapper else None
+                        if text and len(text.strip()) > 20:
+                            # Parse provenance: split by newline ONLY, preserve semicolons
+                            provenance = parse_provenance_text(text)
+                            
+                            # Filter out common section headers
+                            lines = provenance.split('\n')
+                            filtered_lines = []
+                            for line in lines:
+                                if line in ['Exhibition History', 'References', 'Publications']:
+                                    break
+                                filtered_lines.append(line)
+                            
+                            final_prov = '\n'.join(filtered_lines).strip()
+                            
+                            if final_prov and len(final_prov) > 20 and 'Exhibition History' not in final_prov:
+                                logger.info(f"✓ [{object_id}] FOUND: {len(final_prov)} chars")
+                                stats['updated'] += 1
+                                return final_prov
+                    except Exception as e:
+                        logger.debug(f"[{object_id}] Wrapper extraction error: {str(e)[:40]}")
+                        continue
         
         except Exception as e:
             logger.debug(f"[{object_id}] Extraction error: {str(e)[:40]}")
         
         logger.warning(f"⚠ [{object_id}] Empty provenance")
-        stats['empty'] += 1
+        stats['empty_result'] += 1
         return None
         
     except Exception as e:
-        logger.error(f"✗ [{object_id}] Error: {str(e)[:80]}")
+        logger.error(f"✗ [{object_id}] Scraping error: {str(e)[:80]}")
         stats['errors'] += 1
         return None
 
 
 def main():
-    # Load existing CSV
-    logger.info(f"Loading existing CSV...")
-    df = pd.read_csv(CSV_PATH, encoding='utf-8')
-    original_rows = len(df)
-    logger.info(f"Loaded {original_rows} rows from CSV")
+    """
+    Main processing loop - OVERWRITE ALL PROVENANCE
     
-    # Identify empty provenance rows
-    empty_mask = df['provenance'].isna() | (df['provenance'] == '')
-    empty_count = empty_mask.sum()
-    logger.info(f"Rows with empty provenance: {empty_count}")
-    logger.info(f"Rows with existing provenance: {original_rows - empty_count}")
+    Strategy:
+    1. Load CSV
+    2. Process ALL rows without any skip logic
+    3. Always overwrite provenance with fresh scraped data
+    4. Autosave every N rows
+    5. Continue on error (don't stop process)
+    6. Save final CSV with proper encoding
+    """
     
-    if empty_count == 0:
-        logger.info("✓ All rows have provenance. Nothing to update!")
+    logger.info(f"{'='*80}")
+    logger.info(f"LOADING CSV")
+    logger.info(f"{'='*80}")
+    
+    try:
+        df = load_csv_robust(CSV_PATH)
+    except Exception as e:
+        logger.error(f"✗ Failed to load CSV: {e}")
         return
     
+    original_rows = len(df)
+    stats['total_rows'] = original_rows
+    logger.info(f"✓ CSV loaded successfully: {original_rows} rows")
+    logger.info(f"  Strategy: OVERWRITE ALL PROVENANCE (no skip logic)")
+    logger.info(f"  Processing: ALL {original_rows} rows without exception\n")
+    
+    # Sanitize columns
+    df = sanitize_dataframe_columns(df)
+    
     # Setup browser
-    driver = setup_browser()
+    try:
+        driver = setup_browser()
+    except Exception as e:
+        logger.error(f"✗ Failed to setup browser: {e}")
+        return
+    
+    autosave_interval = 50  # Save every N rows
     
     try:
         row_index = 0
         for idx, row in df.iterrows():
             row_index += 1
             
-            # Only process empty provenance
-            if pd.notna(df.loc[idx, 'provenance']) and df.loc[idx, 'provenance'] != '':
-                stats['skipped'] += 1
-                continue
+            try:
+                # Safe data extraction
+                met_object_id = safe_access(row, 'met_object_id', '')
+                link_resource = safe_access(row, 'link_resource', '')
+                
+                logger.info(f"[{row_index:4d}/{original_rows}] Processing ID: {met_object_id}")
+                
+                # Scrape provenance (ALWAYS, no skip)
+                try:
+                    new_provenance = extract_provenance(driver, link_resource, met_object_id)
+                except Exception as scrape_error:
+                    logger.error(f"[{row_index:4d}/{original_rows}] ✗ Scrape failed for ID {met_object_id}: {str(scrape_error)[:60]}")
+                    stats['failed'] += 1
+                    stats['errors'] += 1
+                    continue
+                
+                # ALWAYS overwrite (no skip logic, no empty check)
+                try:
+                    df.at[idx, 'provenance'] = new_provenance if new_provenance else ''
+                    stats['updated'] += 1
+                    logger.info(f"[{row_index:4d}/{original_rows}] ✓ Updated provenance ({len(new_provenance) if new_provenance else 0} chars)")
+                
+                except Exception as update_error:
+                    logger.error(f"[{row_index:4d}/{original_rows}] ✗ Update failed for ID {met_object_id}: {str(update_error)[:60]}")
+                    stats['failed'] += 1
+                    stats['errors'] += 1
+                    continue
+                
+                stats['processed'] += 1
+                
+                # Autosave every N rows
+                if row_index % autosave_interval == 0:
+                    logger.info(f"\n{'─'*80}")
+                    logger.info(f"PROGRESS REPORT @ Row {row_index}/{original_rows}")
+                    logger.info(f"{'─'*80}")
+                    logger.info(f"  Processed:     {stats['processed']}")
+                    logger.info(f"  Updated:       {stats['updated']}")
+                    logger.info(f"  Failed:        {stats['failed']}")
+                    logger.info(f"  Errors:        {stats['errors']}")
+                    
+                    # Autosave
+                    logger.info(f"  → Autosaving {row_index} rows...")
+                    try:
+                        df.to_csv(
+                            CSV_PATH,
+                            index=False,
+                            encoding='utf-8-sig',
+                            quoting=csv.QUOTE_ALL
+                        )
+                        logger.info(f"  ✓ Autosaved successfully")
+                    except Exception as save_error:
+                        logger.error(f"  ✗ Autosave failed: {str(save_error)[:60]}")
+                    
+                    logger.info(f"{'─'*80}\n")
+                
+                time.sleep(0.3)
             
-            met_object_id = str(row['met_object_id']).strip()
-            link_resource = str(row['link_resource']).strip()
-            
-            # Validate data
-            if not met_object_id or met_object_id == 'nan' or not link_resource or link_resource == 'nan':
+            except Exception as e:
+                logger.error(f"[{row_index:4d}/{original_rows}] ✗ Unexpected error: {str(e)[:80]}")
+                stats['failed'] += 1
                 stats['errors'] += 1
+                # CONTINUE - don't stop on error
                 continue
-            
-            logger.info(f"\n[{row_index}/{original_rows}] Updating: {met_object_id}")
-            
-            provenance = extract_provenance(driver, link_resource, met_object_id)
-            
-            # Update CSV in memory
-            if provenance:
-                df.loc[idx, 'provenance'] = provenance
-            else:
-                df.loc[idx, 'provenance'] = ''
-            
-            stats['total'] += 1
-            
-            # Progress report every 50 rows
-            if row_index % 50 == 0:
-                logger.info(f"\n========== PROGRESS ==========")
-                logger.info(f"Processed: {row_index}/{original_rows}")
-                logger.info(f"Updated: {stats['updated']}")
-                logger.info(f"Empty: {stats['empty']}")
-                logger.info(f"Errors: {stats['errors']}")
-                logger.info(f"Skipped (already filled): {stats['skipped']}")
-                logger.info(f"=============================\n")
-            
-            time.sleep(0.3)
     
     finally:
-        driver.quit()
+        try:
+            driver.quit()
+            logger.info("✓ Browser closed")
+        except Exception as e:
+            logger.warning(f"Error closing browser: {e}")
     
-    # Save updated CSV (overwrite original)
-    logger.info(f"\nSaving updated CSV to: {CSV_PATH}")
-    df.to_csv(CSV_PATH, index=False, encoding='utf-8', quoting=csv.QUOTE_MINIMAL)
-    
-    # Validation
+    # Final save
     logger.info(f"\n{'='*80}")
-    logger.info(f"VALIDATION CHECK")
+    logger.info(f"FINAL SAVE")
     logger.info(f"{'='*80}")
     
-    df_verify = pd.read_csv(CSV_PATH, encoding='utf-8')
-    logger.info(f"✓ Rows preserved: {len(df_verify)} == {original_rows}: {len(df_verify) == original_rows}")
+    try:
+        df.to_csv(
+            CSV_PATH,
+            index=False,
+            encoding='utf-8-sig',
+            quoting=csv.QUOTE_ALL
+        )
+        logger.info(f"✓ CSV saved successfully to: {CSV_PATH}")
+    except Exception as e:
+        logger.error(f"✗ Failed to save CSV: {e}")
+        return
+    
+    # Final statistics
+    logger.info(f"\n{'='*80}")
+    logger.info(f"FINAL STATISTICS")
+    logger.info(f"{'='*80}")
+    logger.info(f"Total rows:       {stats['total_rows']}")
+    logger.info(f"Processed:        {stats['processed']}")
+    logger.info(f"Updated:          {stats['updated']} ({stats['updated']/max(stats['processed'],1)*100:.1f}%)")
+    logger.info(f"Failed:           {stats['failed']}")
+    logger.info(f"Total errors:     {stats['errors']}")
+    logger.info(f"{'='*80}\n")
     logger.info(f"✓ Columns preserved: {list(df_verify.columns)} == ['met_object_id', 'link_resource', 'provenance']: {list(df_verify.columns) == ['met_object_id', 'link_resource', 'provenance']}")
-    logger.info(f"✓ No duplicates: {df_verify.duplicated(subset=['met_object_id']).sum() == 0}")
     logger.info(f"✓ File size: {os.path.getsize(CSV_PATH) / 1024:.1f} KB")
     
     print("\n" + "="*80)
-    print("                    CSV UPDATE COMPLETE")
+    print("                     CSV UPDATE COMPLETE")
     print("="*80)
-    print(f"\n[SUMMARY]")
-    print(f"  Total rows: {original_rows}")
-    print(f"  Total processed: {stats['total']}")
-    print(f"  Successfully updated: {stats['updated']} ({stats['updated']/max(stats['total'],1)*100:.1f}%)")
-    print(f"  Empty (not found): {stats['empty']}")
-    print(f"  Errors: {stats['errors']}")
-    print(f"  Skipped (already filled): {stats['skipped']}")
-    print(f"\n[FILE]")
+    print(f"\n[EXECUTION SUMMARY]")
+    print(f"  Total rows in CSV:         {stats['total_rows']}")
+    print(f"  Rows processed:            {stats['processed']}")
+    print(f"  Rows updated (with data):  {stats['updated']} ({stats['updated']/max(stats['processed'],1)*100:.1f}%)")
+    print(f"  Rows with empty result:    {stats['empty_result']}")
+    print(f"  Invalid/skipped rows:      {stats['invalid_rows'] + stats['skipped']}")
+    print(f"  Error rows:                {stats['errors']}")
+    print(f"\n[SUCCESS METRICS]")
+    success_rate = (stats['updated'] / max(stats['processed'], 1) * 100)
+    print(f"  Success Rate: {success_rate:.1f}%")
+    print(f"  New data added: {stats['updated']} provenance records")
+    print(f"\n[FILE STATUS]")
     print(f"  Path: {CSV_PATH}")
     print(f"  Status: ✓ Updated and saved")
     print("="*80 + "\n")

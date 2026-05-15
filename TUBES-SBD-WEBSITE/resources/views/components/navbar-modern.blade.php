@@ -78,6 +78,10 @@
 
                     @if(Auth::check() || session()->has('guest_id'))
                         @auth
+                            <a href="{{ route('account.index') }}"
+                                class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
+                                Account
+                            </a>
                             <a href="{{ route('order.show') }}"
                                 class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
                                 Orders

@@ -21,8 +21,12 @@ return new class extends Migration
             $table->foreign('art_work_id')->references('art_work_id')->on('art_works');
         });
 
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            DB::statement("CREATE UNIQUE INDEX art_work_images_one_primary_per_artwork ON art_work_images (art_work_id, is_primary) WHERE is_primary = 1");
+        if (!in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'])) {
+            DB::statement("
+                CREATE UNIQUE INDEX art_work_images_one_primary_per_artwork
+                ON art_work_images (art_work_id, is_primary)
+                WHERE is_primary = 1
+            ");
         }
     }
 

@@ -7,8 +7,14 @@
 @endpush
 <div class="booking-page">
     <div class="booking-header">
-        <h1 class="booking-title">Booking Confirmed</h1>
-        <p class="booking-subtitle">Your order has been created successfully. Please keep your QR codes safe for check-in.</p>
+        <h1 class="booking-title">{{ $order->payment?->payment_method === 'Membership' ? 'Membership Confirmed' : 'Booking Confirmed' }}</h1>
+        <p class="booking-subtitle">
+            @if($order->payment?->payment_method === 'Membership')
+                Your membership payment has been received.
+            @else
+                Your order has been created successfully. Please keep your QR codes safe for check-in.
+            @endif
+        </p>
     </div>
 
     @if(session('success'))
@@ -42,25 +48,50 @@
             </div>
         </div>
 
-        <div class="success-grid">
-            @foreach($order->tickets as $ticket)
-                <div class="success-ticket">
-                    <div class="booking-card-title">{{ $ticket->ticketAvailability->ticketType->name ?? 'Ticket' }}</div>
-                    <div class="booking-card-meta">{{ $ticket->ticketAvailability->visitSchedule->location->name ?? '-' }} · {{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
-                    <div class="booking-card-meta">Status: <span class="status-badge {{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
-                    <div class="qr-box">
-                        <div style="margin-bottom: 15px; display: flex; justify-content: center;">
-                            {!! QrCode::size(140)->generate($ticket->qr_code) !!}
-                        </div>
-                        {{ $ticket->qr_code }}
+        @if($order->payment?->payment_method === 'Membership')
+            <div class="booking-card">
+                <div class="booking-card-title">Membership information</div>
+                <div class="summary-list">
+                    <div class="summary-row">
+                        <div class="summary-title-line">Level</div>
+                        <div class="summary-subline">Membership</div>
+                    </div>
+                    <div class="summary-row">
+                        <div class="summary-title-line">Type</div>
+                        <div class="summary-subline">Standard membership</div>
+                    </div>
+                    <div class="summary-row">
+                        <div class="summary-title-line">Status</div>
+                        <div class="summary-subline">Paid</div>
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </div>
+        @else
+            <div class="success-grid">
+                @foreach($order->tickets as $ticket)
+                    <div class="success-ticket">
+                        <div class="booking-card-title">{{ $ticket->ticketAvailability->ticketType->name ?? 'Ticket' }}</div>
+                        <div class="booking-card-meta">{{ $ticket->ticketAvailability->visitSchedule->location->name ?? '-' }} · {{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
+                        <div class="booking-card-meta">Status: <span class="status-badge {{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
+                        <div class="qr-box">
+                            <div style="margin-bottom: 15px; display: flex; justify-content: center;">
+                                {!! QrCode::size(140)->generate($ticket->qr_code) !!}
+                            </div>
+                            {{ $ticket->qr_code }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         <div class="booking-actions">
-            <a href="{{ route('ticket.admission') }}" class="booking-btn">Book another ticket</a>
-            <a href="{{ route('order.show') }}" class="booking-btn-outline">View My Orders</a>
+            @if($order->payment?->payment_method === 'Membership')
+                <a href="{{ route('membership.index') }}" class="booking-btn">Explore memberships</a>
+                <a href="{{ route('order.show') }}" class="booking-btn-outline">View My Orders</a>
+            @else
+                <a href="{{ route('ticket.admission') }}" class="booking-btn">Book another ticket</a>
+                <a href="{{ route('order.show') }}" class="booking-btn-outline">View My Orders</a>
+            @endif
         </div>
     </div>
 </div>

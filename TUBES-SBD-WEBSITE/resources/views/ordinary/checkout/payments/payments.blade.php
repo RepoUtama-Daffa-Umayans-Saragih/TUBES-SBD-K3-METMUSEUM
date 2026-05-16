@@ -115,27 +115,47 @@
                 </div>
             </div>
 
-            <!-- Tickets / QR Codes if Paid -->
+            <!-- Tickets / Membership state if Paid -->
             @if($order->payment && $order->payment->payment_status === 'Paid')
-                <div class="payments-card">
-                    <h2 class="section-title">Your Tickets</h2>
-                    <div class="qr-grid">
-                        @foreach($order->tickets as $ticket)
-                            <div class="qr-card">
-                                <div class="item-name" style="font-weight: 700; color: #1a1a1a;">{{ $ticket->ticketAvailability->ticketType->name ?? 'Admission' }}</div>
-                                <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ $ticket->ticketAvailability->visitSchedule->location->name }}</div>
-                                <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
-                                <div class="item-meta" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Status: <span class="status-badge status-{{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
-                                <div class="qr-code-text">
-                                    <div style="margin-bottom: 10px; display: flex; justify-content: center;">
-                                        {!! QrCode::size(120)->generate($ticket->qr_code) !!}
-                                    </div>
-                                    {{ $ticket->qr_code }}
-                                </div>
+                @if($order->payment?->payment_method === 'Membership')
+                    <div class="payments-card">
+                        <h2 class="section-title">Membership Status</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Level</span>
+                                <span class="info-value">Membership</span>
                             </div>
-                        @endforeach
+                            <div class="info-item">
+                                <span class="info-label">Type</span>
+                                <span class="info-value">Standard</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status</span>
+                                <span class="info-value">Paid</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                @else
+                    <div class="payments-card">
+                        <h2 class="section-title">Your Tickets</h2>
+                        <div class="qr-grid">
+                            @foreach($order->tickets as $ticket)
+                                <div class="qr-card">
+                                    <div class="item-name" style="font-weight: 700; color: #1a1a1a;">{{ $ticket->ticketAvailability->ticketType->name ?? 'Admission' }}</div>
+                                    <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ $ticket->ticketAvailability->visitSchedule->location->name }}</div>
+                                    <div class="item-meta" style="font-size: 0.9rem; color: #666;">{{ optional($ticket->ticketAvailability->visitSchedule->visit_date)->format('F j, Y') }}</div>
+                                    <div class="item-meta" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Status: <span class="status-badge status-{{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
+                                    <div class="qr-code-text">
+                                        <div style="margin-bottom: 10px; display: flex; justify-content: center;">
+                                            {!! QrCode::size(120)->generate($ticket->qr_code) !!}
+                                        </div>
+                                        {{ $ticket->qr_code }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             @endif
         </div>
 
@@ -149,25 +169,35 @@
                     </div>
                 @endif
                 <div class="summary-list">
-                    @php
-                        $groupedTickets = $order->tickets->groupBy('ticket_availability_id');
-                    @endphp
-                    @foreach($groupedTickets as $availabilityId => $tickets)
-                        @php
-                            $firstTicket = $tickets->first();
-                            $availability = $firstTicket->ticketAvailability;
-                            $quantity = $tickets->count();
-                            $price = $availability->ticketType->base_price;
-                            $itemTotal = $price * $quantity;
-                        @endphp
+                    @if($order->payment?->payment_method === 'Membership')
                         <div class="summary-item">
                             <div class="item-info">
-                                <span class="item-name">{{ $availability->ticketType->name }}</span>
-                                <span class="item-meta">Qty: {{ $quantity }} × ${{ number_format($price, 2) }}</span>
+                                <span class="item-name">Membership</span>
+                                <span class="item-meta">Standard membership</span>
                             </div>
-                            <span class="item-price">${{ number_format($itemTotal, 2) }}</span>
+                            <span class="item-price">${{ number_format($order->total_amount, 2) }}</span>
                         </div>
-                    @endforeach
+                    @else
+                        @php
+                            $groupedTickets = $order->tickets->groupBy('ticket_availability_id');
+                        @endphp
+                        @foreach($groupedTickets as $availabilityId => $tickets)
+                            @php
+                                $firstTicket = $tickets->first();
+                                $availability = $firstTicket->ticketAvailability;
+                                $quantity = $tickets->count();
+                                $price = $availability->ticketType->base_price;
+                                $itemTotal = $price * $quantity;
+                            @endphp
+                            <div class="summary-item">
+                                <div class="item-info">
+                                    <span class="item-name">{{ $availability->ticketType->name }}</span>
+                                    <span class="item-meta">Qty: {{ $quantity }} × ${{ number_format($price, 2) }}</span>
+                                </div>
+                                <span class="item-price">${{ number_format($itemTotal, 2) }}</span>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
 
                 <div class="total-section">

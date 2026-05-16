@@ -178,7 +178,7 @@ class CheckoutController extends Controller
         }
 
         $billing = null;
-        if (! auth()->check()) {
+        if (! Auth::check()) {
             $request->validate([
                 'first_name'  => 'required',
                 'last_name'   => 'required',
@@ -203,8 +203,9 @@ class CheckoutController extends Controller
         try {
             $userId  = $order->user_id;
             $guestId = $order->guest_id;
+            $isMembershipOrder = $order->payment?->payment_method === 'Membership';
 
-            DB::transaction(function () use ($order, $userId, $guestId) {
+            DB::transaction(function () use ($order, $userId, $guestId, $isMembershipOrder) {
                 $payment = Payment::where('order_id', $order->order_id)
                     ->lockForUpdate()
                     ->first();
@@ -217,6 +218,10 @@ class CheckoutController extends Controller
                     'payment_status' => 'Paid',
                     'paid_at'        => now(),
                 ]);
+
+                if ($isMembershipOrder) {
+                    return;
+                }
 
                 // Idempotency: DO NOT create again if tickets already exist
                 if ($order->tickets()->exists()) {
@@ -261,30 +266,18 @@ class CheckoutController extends Controller
             return redirect()->back()->with('error', 'Payment failed to process: ' . $e->getMessage());
         }
 
+        if ($order->payment?->payment_method === 'Membership') {
+            $order->load(['guest']);
+
+            return redirect()->route('ticket.checkout.success', $order->order_id)
+                ->with('success', 'Membership payment successful.');
+        }
+
         // STEP 1: Load Order Relations
         $order->load([
             'tickets.ticketAvailability.ticketType',
             'guest',
         ]);
-
-        // STEP 2: Determine Email Target
-        $email = auth()->user()->email ?? optional($order->guest)->email;
-
-        if ($email) {
-            // STEP 3: Send Email Fail-Safe
-            try {
-                Mail::to($email)->send(new OrderSuccessMail($order, $billing));
-            } catch (\Exception $e) {
-                Log::error('Email sending failed', [
-                    'order_id' => $order->order_id,
-                    'error'    => $e->getMessage(),
-                ]);
-            }
-        } else {
-            Log::error('Email sending failed: No email found for order', [
-                'order_id' => $order->order_id,
-            ]);
-        }
 
         return redirect()->route('ticket.checkout.success', $order->order_id)
             ->with('success', 'Payment successful! Your tickets have been generated.');

@@ -31,6 +31,7 @@
         {{-- Form --}}
         <form action="{{ route('member.add-member.submit') }}" method="POST" id="membershipForm" class="mem-form" novalidate>
             @csrf
+            <input type="hidden" name="membership_id" value="{{ old('membership_id', 1) }}">
 
             {{-- === SECTION: Is This A Gift? === --}}
             <section class="mem-card mem-card--gift" aria-labelledby="giftSectionTitle">

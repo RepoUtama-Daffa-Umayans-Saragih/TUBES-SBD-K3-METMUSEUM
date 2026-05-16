@@ -90,7 +90,7 @@
         $selectedObjectTypes = $normalizeList(request()->input('object_type', []));
         $selectedMediums = $normalizeList(request()->input('medium', []));
         $selectedLocations = $normalizeList(request()->input('location', []));
-        $selectedDepartments = $normalizeList(request()->input('department', []));
+        $selectedDepartments = $normalizeList($selected_departments ?? request()->input('department', []));
 
         $showOnlyCount = (int) $selectedHighlights + (int) $selectedOnView;
         $imagesCount = (int) $selectedHasImage + (int) $selectedOpenAccess + (int) $selectedHas3d;
@@ -215,12 +215,12 @@
             <input type="hidden" name="field" id="selectedFieldInput" value="{{ $currentField ?? 'all' }}">
 
             <!-- Search Input -->
-            <input type="text" 
-                   class="search-input" 
+            <input type="text"
+                   class="search-input"
                    id="searchInput"
-                   placeholder="Search all fields" 
+                   placeholder="Search all fields"
                    value="{{ request('q', '') }}">
-            
+
             <!-- Search Button -->
             <button type="button" class="search-btn" id="searchBtn">
                 🔍
@@ -233,29 +233,29 @@
                 Filters
                 <span class="filters-arrow">▼</span>
             </button>
-            
+
             <div class="filter-checkboxes">
                 <label class="checkbox-label">
                     <input type="checkbox" name="highlights" {{ request('highlights') || request('highlights_adv') ? 'checked' : '' }}>
                     <span>Highlights</span>
                 </label>
-                
+
                 <label class="checkbox-label">
                     <input type="checkbox" name="on_view" {{ request('on_view') || request('on_view_adv') ? 'checked' : '' }}>
                     <span>On view</span>
                 </label>
-                
+
                 <label class="checkbox-label">
                     <input type="checkbox" name="has_image" {{ request('has_image') ? 'checked' : '' }}>
                     <span>Has image</span>
                 </label>
-                
+
                 <label class="checkbox-label">
                     <input type="checkbox" name="open_access" {{ request('open_access') ? 'checked' : '' }}>
                     <span>Has Open Access image</span>
                     <span class="info-icon" title="Open Access images">ⓘ</span>
                 </label>
-                
+
                 <label class="checkbox-label">
                     <input type="checkbox" name="has_3d" {{ request('has_3d') ? 'checked' : '' }}>
                     <span>Has 3D image</span>
@@ -392,7 +392,7 @@
                 <div class="filter-options scrollable-filter">
                     @forelse(($departments ?? []) as $department)
                         <label class="filter-option">
-                            <input type="checkbox" name="department[]" value="{{ $department->department_name }}" {{ in_array((string) $department->department_name, array_map('strval', request('department', []))) ? 'checked' : '' }}>
+                            <input type="checkbox" name="department[]" value="{{ $department->department_name }}" {{ in_array((string) $department->department_name, $selectedDepartments, true) ? 'checked' : '' }}>
                             <span>{{ $department->department_name }}</span>
                         </label>
                     @empty
@@ -403,7 +403,7 @@
 
         </div>
         </div>
-        
+
         <!-- Results Area -->
         <div class="results-area">
             @if(!empty($activeFilterChips))
@@ -426,7 +426,7 @@
                 <div class="results-count">
                     1-42 of {{ number_format($totalResults ?? 534724) }} results
                 </div>
-                
+
                 <div class="sort-wrapper">
                     <label for="sortBy">Sort by:</label>
                     <select id="sortBy" class="sort-select">
@@ -444,7 +444,7 @@
         @forelse($artworks ?? [] as $artwork)
             <a href="{{ route('artwork.show', $artwork->slug) }}" class="art-card">
                 <div class="art-image-wrapper">
-                    <img src="{{ $artwork->image_url ?? asset('images/placeholder.jpg') }}" 
+                    <img src="{{ $artwork->image_url ?? asset('images/placeholder.jpg') }}"
                          alt="{{ $artwork->title }}"
                          class="art-image">
                 </div>
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fieldDropdownMenu = document.getElementById('fieldDropdownMenu');
     const selectedField = document.getElementById('selectedField');
     const searchInput = document.getElementById('searchInput');
-    
+
     fieldDropdownToggle.addEventListener('click', function(e) {
         e.stopPropagation();
         fieldDropdownMenu.classList.toggle('show');
@@ -493,26 +493,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Field Selection
     const dropdownItems = document.querySelectorAll('.dropdown-item');
     const selectedFieldInput = document.getElementById('selectedFieldInput');
-    
+
     dropdownItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
             const field = this.dataset.field;
             const text = this.textContent;
-            
+
             // Update UI
             selectedField.textContent = text;
             searchInput.placeholder = `Search ${text.toLowerCase()}`;
-            
+
             // Update Hidden Input
             if (selectedFieldInput) {
                 selectedFieldInput.value = field;
             }
-            
+
             // Update Active State
             dropdownItems.forEach(i => i.classList.remove('active'));
             this.classList.add('active');
-            
+
             // Close Menu
             fieldDropdownMenu.classList.remove('show');
             fieldDropdownToggle.classList.remove('active');
@@ -531,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const filtersToggle = document.getElementById('filtersToggle');
     const filtersPanel = document.getElementById('filtersPanel');
     const filtersArrow = document.querySelector('.filters-arrow');
-    
+
     filtersToggle.addEventListener('click', function() {
         filtersPanel.classList.toggle('show');
         filtersArrow.classList.toggle('rotated');
@@ -544,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
         title.addEventListener('click', function() {
             const section = this.parentElement;
             const arrow = this.querySelector('.section-arrow');
-            
+
             section.classList.toggle('expanded');
             if (arrow) {
                 arrow.classList.toggle('rotated');
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
             url.searchParams.delete('year_end');
         }
     }
-    
+
     searchBtn.addEventListener('click', function() {
         performSearch();
     });
@@ -616,16 +616,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function performSearch() {
         const query = searchInput.value.trim();
         const field = selectedFieldInput ? selectedFieldInput.value : 'all';
-        
+
         const url = new URL(window.location.href);
-        
+
         // Update Query
         if (query) {
             url.searchParams.set('q', query);
         } else {
             url.searchParams.delete('q');
         }
-        
+
         // Update Field
         if (field && field !== 'all') {
             url.searchParams.set('field', field);
@@ -634,10 +634,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         applyFiltersToUrl(url);
-        
+
         // Reset pagination on new search
         url.searchParams.delete('page');
-        
+
         window.location.href = url.toString();
     }
 

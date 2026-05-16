@@ -9,7 +9,7 @@
   <!-- BREADCRUMB -->
   <div class="w-full border-b border-[#e5e5e5] bg-white">
     <div class="max-w-[1600px] mx-auto px-16 h-[84px] flex items-center gap-4">
-      
+
       <!-- HOME ICON -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@
 
     <!-- SEARCH -->
     <form action="{{ route('art.search') }}" method="GET" class="flex items-center w-full border border-[#cfcfcf]  bg-white h-[58px] rounded-md">
-      
+
       <input
         type="text"
         name="q"
@@ -98,7 +98,7 @@
 
     <!-- QUICK LINKS -->
     <div class="flex items-center gap-3 mt-7 flex-wrap">
-      
+
       <a
         href="{{ route('art.search') }}"
         class="flex items-center gap-2 text-[16px] text-[#111] font-medium hover:underline"
@@ -134,290 +134,7 @@
     </h3>
 
     <!-- GRID -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 mb-20">
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/african-wings.jpg') }}"
-            alt="African Art"
-            class="w-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          African Art in The Michael C. Rockefeller Wing
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/american-wing.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          The American Wing
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/ancient-american.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Ancient American Art in The Michael C. Rockefeller Wing
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/ancient-westAsian.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Ancient West Asian Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/arms-and-armor.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Arms and Armor
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/asian-art.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Asian Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/costume-institute.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          The Costume Institute
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/drawing-and-prints.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-         Drawings and Prints
-        </h4>
-      </div>
-
-      <!-- SECOND ROW -->
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/egyptian-art.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Egyptian Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/europhean-painting.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          European Paintings
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/european-sculpture.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          European Sculpture and Decorative Arts
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/greek-and-roman.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Greek and Roman Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/islamic-art.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Islamic Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/robert-lehman.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          The Robert Lehman Collection
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/thomas-j-watson.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Thomas j. Watson Library
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/medieval-art.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-          Medieval Art and The Cloisters
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/modern-contemporary.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-         Modern and Contemporary Art
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/musical-instrument.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-       Musical instruments
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/oceanic-art.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-       Oceanic Art in The Michael C. Rokcefeller Wing
-        </h4>
-      </div>
-
-      <div class="group cursor-pointer" onclick="window.location='{{ route('art.index') }}'">
-        <div class="overflow-hidden">
-          <img
-            src="{{ asset('images/photographs.jpg') }}"
-            alt=""
-            class="-full h-[200px] object-cover transition duration-500"
-          />
-        </div>
-
-        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
-       Photographs
-        </h4>
-      </div>
-
-    </div>
+    <x-department-navigation-grid :items="$departmentNavigationItems ?? []" />
 
   </div>
 

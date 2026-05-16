@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/tickets/index.css')
 @endpush
 
-@section('title', 'Tickets')
+@section('admin-title')
+    Tickets
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--tickets admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Ticket Management',

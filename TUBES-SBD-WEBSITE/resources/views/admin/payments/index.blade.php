@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/payments/index.css')
 @endpush
 
-@section('title', 'Payments')
+@section('admin-title')
+    Payments
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--payments admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Payment Monitoring',

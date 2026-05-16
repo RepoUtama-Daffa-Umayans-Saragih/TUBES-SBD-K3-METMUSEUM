@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/exhibitions/index.css')
 @endpush
 
-@section('title', 'Exhibitions')
+@section('admin-title')
+    Exhibitions
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--exhibitions admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Exhibition Management',

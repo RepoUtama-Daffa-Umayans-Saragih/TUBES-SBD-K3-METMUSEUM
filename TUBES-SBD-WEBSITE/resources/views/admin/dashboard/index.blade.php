@@ -1,12 +1,14 @@
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/dashboard/index.css')
 @endpush
 
-@section('title', 'Dashboard')
+@section('admin-title')
+    Dashboard
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-dashboard admin-page">
     @include('admin.components.toolbar.page-toolbar', [
         'title' => 'Dashboard',

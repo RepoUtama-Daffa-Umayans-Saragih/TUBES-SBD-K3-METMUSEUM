@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/reports/index.css')
 @endpush
 
-@section('title', 'Reports')
+@section('admin-title')
+    Reports
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--reports admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Reports',

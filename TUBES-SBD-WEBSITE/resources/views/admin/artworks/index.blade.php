@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/artworks/index.css')
 @endpush
 
-@section('title', 'Artworks')
+@section('admin-title')
+    Artworks
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--artworks admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Artwork Management',

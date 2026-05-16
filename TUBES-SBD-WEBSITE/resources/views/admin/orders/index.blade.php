@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/orders/index.css')
 @endpush
 
-@section('title', 'Orders')
+@section('admin-title')
+    Orders
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--orders admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'Order Monitoring',

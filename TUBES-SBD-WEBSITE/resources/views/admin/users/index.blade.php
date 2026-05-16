@@ -1,13 +1,15 @@
 
-@extends('admin.layouts.admin-layout')
+@extends('admin.layout.layout')
 
 @push('styles')
 @vite('resources/css/admin/users/index.css')
 @endpush
 
-@section('title', 'Users')
+@section('admin-title')
+    Users
+@endsection
 
-@section('content')
+@section('admin-content')
 <section class="admin-section admin-section--users admin-page">
 	@include('admin.components.toolbar.page-toolbar', [
 		'title' => 'User Management',

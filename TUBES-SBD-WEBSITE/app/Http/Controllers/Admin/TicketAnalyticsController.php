@@ -1,19 +1,18 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
-use App\Models\Order;
-use App\Models\Ticket;
-use App\Models\TicketType;
-use App\Models\VisitSchedule;
-use App\Models\TicketAvailability;
-use App\Models\User;
 use App\Models\Guest;
+use App\Models\Order;
+use App\Models\Payment;
+use App\Models\Ticket;
+use App\Models\TicketAvailability;
+use App\Models\TicketType;
+use App\Models\User;
+use App\Models\VisitSchedule;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class TicketAnalyticsController extends Controller
 {
@@ -24,14 +23,14 @@ class TicketAnalyticsController extends Controller
     {
         // Get date range from request (default: last 30 days)
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
-        $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        $dateFrom = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
-        $dateTo = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
+        $endDate   = $request->get('end_date', now()->format('Y-m-d'));
+        $dateFrom  = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
+        $dateTo    = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
 
         // ==========================================
         // 1. OVERVIEW ANALYTICS
         // ==========================================
-        
+
         // Total Revenue Today
         $totalRevenueToday = Payment::where('payment_status', 'Paid')
             ->whereDate('created_at', today())
@@ -53,9 +52,9 @@ class TicketAnalyticsController extends Controller
             ->join('tickets', 'orders.order_id', '=', 'tickets.order_id')
             ->where('tickets.status', '!=', 'cancelled')
             ->whereBetween('tickets.created_at', [$dateFrom, $dateTo])
-            ->select(DB::raw('COUNT(DISTINCT CASE 
-                WHEN orders.user_id IS NOT NULL THEN orders.user_id 
-                WHEN orders.guest_id IS NOT NULL THEN orders.guest_id 
+            ->select(DB::raw('COUNT(DISTINCT CASE
+                WHEN orders.user_id IS NOT NULL THEN orders.user_id
+                WHEN orders.guest_id IS NOT NULL THEN orders.guest_id
                 END) as total'))
             ->value('total') ?? 0;
 
@@ -65,7 +64,7 @@ class TicketAnalyticsController extends Controller
             ->count();
 
         // Conversion Rate (tickets sold / total orders)
-        $totalOrders = Order::whereBetween('created_at', [$dateFrom, $dateTo])->count();
+        $totalOrders     = Order::whereBetween('created_at', [$dateFrom, $dateTo])->count();
         $completedOrders = Order::where('status', 'completed')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->count();
@@ -84,28 +83,28 @@ class TicketAnalyticsController extends Controller
         // ==========================================
         // 2. REVENUE ANALYTICS
         // ==========================================
-        
+
         // Revenue Trend (daily for last 30 days)
         $revenueTrend = collect(range(29, 0))->map(function ($day) use ($dateFrom) {
-            $date = $dateFrom->clone()->addDays($day);
+            $date    = $dateFrom->clone()->addDays($day);
             $revenue = Payment::where('payment_status', 'Paid')
                 ->whereDate('created_at', $date)
                 ->sum('amount');
             return [
-                'date' => $date->format('M d'),
+                'date'   => $date->format('M d'),
                 'amount' => $revenue,
             ];
         })->values();
 
         // Monthly Revenue Comparison (last 12 months)
         $monthlyRevenue = collect(range(11, 0))->map(function ($month) {
-            $date = now()->subMonths($month);
+            $date    = now()->subMonths($month);
             $revenue = Payment::where('payment_status', 'Paid')
                 ->whereMonth('created_at', $date->month)
                 ->whereYear('created_at', $date->year)
                 ->sum('amount');
             return [
-                'month' => $date->format('M Y'),
+                'month'  => $date->format('M Y'),
                 'amount' => $revenue,
             ];
         })->values();
@@ -121,7 +120,7 @@ class TicketAnalyticsController extends Controller
         // ==========================================
         // 3. TICKET SALES ANALYTICS
         // ==========================================
-        
+
         // Best Selling Tickets (by ticket type)
         $bestSellingTickets = Ticket::whereHas('order', function ($query) use ($dateFrom, $dateTo) {
             $query->whereBetween('created_at', [$dateFrom, $dateTo]);
@@ -143,20 +142,20 @@ class TicketAnalyticsController extends Controller
                     ->sum('amount');
 
                 return [
-                    'type_name' => $ticket->ticketAvailability->ticketType->name ?? 'Unknown',
+                    'type_name'  => $ticket->ticketAvailability->ticketType->name ?? 'Unknown',
                     'total_sold' => $ticket->total_sold,
-                    'revenue' => $typeRevenue,
+                    'revenue'    => $typeRevenue,
                 ];
             });
 
         // Ticket Sales Trend
         $ticketSalesTrend = collect(range(6, 0))->map(function ($day) {
-            $date = now()->subDays($day);
+            $date  = now()->subDays($day);
             $sales = Ticket::whereDate('created_at', $date)
                 ->where('status', '!=', 'cancelled')
                 ->count();
             return [
-                'date' => $date->format('D'),
+                'date'  => $date->format('D'),
                 'sales' => $sales,
             ];
         })->values();
@@ -172,8 +171,8 @@ class TicketAnalyticsController extends Controller
             ->get()
             ->map(function ($type) {
                 return [
-                    'name' => $type->name,
-                    'count' => $type->count,
+                    'name'       => $type->name,
+                    'count'      => $type->count,
                     'percentage' => 0,
                 ];
             })
@@ -191,7 +190,7 @@ class TicketAnalyticsController extends Controller
         // ==========================================
         // 4. CAPACITY & VISITOR ANALYTICS
         // ==========================================
-        
+
         // Capacity Overview (all scheduled sessions)
         $capacityOverview = VisitSchedule::where('visit_date', '>=', now()->subDays(30))
             ->with(['ticketAvailabilities', 'location'])
@@ -200,32 +199,32 @@ class TicketAnalyticsController extends Controller
             ->map(function ($schedule) {
                 $totalTickets = 0;
                 foreach ($schedule->ticketAvailabilities as $availability) {
-                    $ticketCount = Ticket::where('ticket_availability_id', $availability->ticket_availability_id)
+                    $ticketCount  = Ticket::where('ticket_availability_id', $availability->ticket_availability_id)
                         ->where('status', '!=', 'cancelled')
                         ->count();
                     $totalTickets += $ticketCount;
                 }
                 $capacity = 500;
                 return [
-                    'date' => $schedule->visit_date->format('Y-m-d'),
-                    'location' => optional($schedule->location)->name ?? 'N/A',
-                    'capacity' => $capacity,
-                    'sold' => $totalTickets,
-                    'remaining' => max(0, $capacity - $totalTickets),
+                    'date'           => $schedule->visit_date->format('Y-m-d'),
+                    'location'       => optional($schedule->location)->name ?? 'N/A',
+                    'capacity'       => $capacity,
+                    'sold'           => $totalTickets,
+                    'remaining'      => max(0, $capacity - $totalTickets),
                     'occupancy_rate' => round(($totalTickets / $capacity) * 100, 2),
-                    'is_sold_out' => $totalTickets >= $capacity,
+                    'is_sold_out'    => $totalTickets >= $capacity,
                 ];
             });
 
         // ==========================================
         // 5. VISITOR ANALYTICS
         // ==========================================
-        
+
         // Repeat Visitors (count of visitors with more than 1 order)
         $repeatVisitors = DB::table('orders')
             ->join('tickets', 'orders.order_id', '=', 'tickets.order_id')
             ->whereBetween('tickets.created_at', [$dateFrom, $dateTo])
-            ->select(DB::raw('CASE 
+            ->select(DB::raw('CASE
                 WHEN orders.user_id IS NOT NULL THEN CONCAT("user_", orders.user_id)
                 WHEN orders.guest_id IS NOT NULL THEN CONCAT("guest_", orders.guest_id)
                 END as visitor_key'),
@@ -241,9 +240,9 @@ class TicketAnalyticsController extends Controller
             ->where('tickets.status', '!=', 'cancelled')
             ->select(
                 DB::raw("CASE WHEN orders.user_id IS NOT NULL THEN 'registered' ELSE 'guest' END as type"),
-                DB::raw('COUNT(DISTINCT CASE 
-                    WHEN orders.user_id IS NOT NULL THEN orders.user_id 
-                    WHEN orders.guest_id IS NOT NULL THEN orders.guest_id 
+                DB::raw('COUNT(DISTINCT CASE
+                    WHEN orders.user_id IS NOT NULL THEN orders.user_id
+                    WHEN orders.guest_id IS NOT NULL THEN orders.guest_id
                     END) as count')
             )
             ->groupBy('type')
@@ -252,7 +251,7 @@ class TicketAnalyticsController extends Controller
         // ==========================================
         // 6. QR TICKET VALIDATION ANALYTICS
         // ==========================================
-        
+
         // Ticket Status Breakdown
         $ticketStatusBreakdown = Ticket::whereBetween('created_at', [$dateFrom, $dateTo])
             ->select('status', DB::raw('COUNT(*) as count'))
@@ -271,9 +270,9 @@ class TicketAnalyticsController extends Controller
         // ==========================================
         // 7. LATEST TRANSACTIONS
         // ==========================================
-        
+
         // Latest Transactions
-        $latestTransactions = Order::with(['user', 'payment', 'tickets.ticketAvailability.ticketType'])
+        $latestTransactions = Order::with(['user', 'guest', 'payment', 'tickets.ticketAvailability.ticketType'])
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->orderBy('created_at', 'desc')
             ->limit(10)
@@ -281,14 +280,14 @@ class TicketAnalyticsController extends Controller
             ->map(function ($order) {
                 $ticketCount = $order->tickets->where('status', '!=', 'cancelled')->count();
                 return [
-                    'order_id' => $order->order_id,
-                    'user_name' => $order->user?->name ?? ($order->guest?->name ?? 'Guest'),
-                    'user_email' => $order->user?->email ?? ($order->guest?->email ?? 'N/A'),
-                    'ticket_count' => $ticketCount,
-                    'total_amount' => $order->total_amount,
+                    'order_id'       => $order->order_id,
+                    'user_name'      => $order->user?->name ?? ($order->guest?->name ?? 'Guest'),
+                    'user_email'     => $order->user?->email ?? ($order->guest?->email ?? 'N/A'),
+                    'ticket_count'   => $ticketCount,
+                    'total_amount'   => $order->total_amount,
                     'payment_status' => $order->payment?->payment_status ?? 'pending',
-                    'order_status' => $order->status,
-                    'created_at' => $order->created_at,
+                    'order_status'   => $order->status,
+                    'created_at'     => $order->created_at,
                 ];
             });
 
@@ -300,64 +299,64 @@ class TicketAnalyticsController extends Controller
             ->get()
             ->map(function ($payment) {
                 return [
-                    'id' => $payment->payment_id,
-                    'order_id' => $payment->order_id,
-                    'user_name' => $payment->order?->user?->name ?? ($payment->order?->guest?->name ?? 'Guest'),
-                    'amount' => $payment->amount,
-                    'status' => $payment->payment_status,
-                    'method' => $payment->payment_method ?? 'N/A',
+                    'id'         => $payment->payment_id,
+                    'order_id'   => $payment->order_id,
+                    'user_name'  => $payment->order?->user?->name ?? ($payment->order?->guest?->name ?? 'Guest'),
+                    'amount'     => $payment->amount,
+                    'status'     => $payment->payment_status,
+                    'method'     => $payment->payment_method ?? 'N/A',
                     'created_at' => $payment->created_at,
                 ];
             });
 
         // Return view with all analytics
         return view('admin.ticket-analytics.index', [
-            'title' => 'Ticket Sales Analytics',
-            'subtitle' => 'Comprehensive museum ticketing analytics and insights',
-            'activeNav' => 'ticket-analytics',
-            'breadcrumbs' => [
+            'title'                  => 'Ticket Sales Analytics',
+            'subtitle'               => 'Comprehensive museum ticketing analytics and insights',
+            'activeNav'              => 'ticket-analytics',
+            'breadcrumbs'            => [
                 ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
                 ['label' => 'Ticket Analytics', 'isCurrent' => true],
             ],
-            
+
             // Overview
-            'totalRevenueToday' => $totalRevenueToday,
-            'totalRevenueMonth' => $totalRevenueMonth,
-            'ticketsSoldToday' => $ticketsSoldToday,
-            'totalVisitors' => $totalVisitors,
-            'pendingPayments' => $pendingPayments,
-            'conversionRate' => $conversionRate,
-            'activeVisitSessions' => $activeVisitSessions,
-            'soldOutSessions' => $soldOutSessions,
-            
+            'totalRevenueToday'      => $totalRevenueToday,
+            'totalRevenueMonth'      => $totalRevenueMonth,
+            'ticketsSoldToday'       => $ticketsSoldToday,
+            'totalVisitors'          => $totalVisitors,
+            'pendingPayments'        => $pendingPayments,
+            'conversionRate'         => $conversionRate,
+            'activeVisitSessions'    => $activeVisitSessions,
+            'soldOutSessions'        => $soldOutSessions,
+
             // Revenue
-            'revenueTrend' => $revenueTrend,
-            'monthlyRevenue' => $monthlyRevenue,
+            'revenueTrend'           => $revenueTrend,
+            'monthlyRevenue'         => $monthlyRevenue,
             'paymentStatusBreakdown' => $paymentStatusBreakdown,
-            
+
             // Tickets
-            'bestSellingTickets' => $bestSellingTickets,
-            'ticketSalesTrend' => $ticketSalesTrend,
+            'bestSellingTickets'     => $bestSellingTickets,
+            'ticketSalesTrend'       => $ticketSalesTrend,
             'ticketTypeDistribution' => $ticketTypeDistribution,
-            
+
             // Capacity
-            'capacityOverview' => $capacityOverview,
-            
+            'capacityOverview'       => $capacityOverview,
+
             // Visitors
-            'repeatVisitors' => $repeatVisitors,
-            'visitorTypes' => $visitorTypes,
-            
+            'repeatVisitors'         => $repeatVisitors,
+            'visitorTypes'           => $visitorTypes,
+
             // Validation
-            'ticketStatusBreakdown' => $ticketStatusBreakdown,
-            'validationSuccessRate' => $validationSuccessRate,
-            
+            'ticketStatusBreakdown'  => $ticketStatusBreakdown,
+            'validationSuccessRate'  => $validationSuccessRate,
+
             // Transactions
-            'latestTransactions' => $latestTransactions,
-            'latestPayments' => $latestPayments,
-            
+            'latestTransactions'     => $latestTransactions,
+            'latestPayments'         => $latestPayments,
+
             // Date range
-            'startDate' => $startDate,
-            'endDate' => $endDate,
+            'startDate'              => $startDate,
+            'endDate'                => $endDate,
         ]);
     }
 
@@ -367,19 +366,19 @@ class TicketAnalyticsController extends Controller
     public function getAnalyticsData(Request $request)
     {
         $startDate = $request->get('start_date', now()->subDays(30)->format('Y-m-d'));
-        $endDate = $request->get('end_date', now()->format('Y-m-d'));
-        $dateFrom = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
-        $dateTo = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
+        $endDate   = $request->get('end_date', now()->format('Y-m-d'));
+        $dateFrom  = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
+        $dateTo    = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
 
         // Get revenue trend
         $revenueTrend = collect(range(29, 0))->map(function ($day) use ($dateFrom) {
-            $date = $dateFrom->clone()->addDays($day);
+            $date    = $dateFrom->clone()->addDays($day);
             $revenue = Payment::where('payment_status', 'Paid')
                 ->whereDate('created_at', $date)
                 ->sum('amount');
             return [
-                'date' => $date->format('M d'),
-                'amount' => (float)$revenue,
+                'date'   => $date->format('M d'),
+                'amount' => (float) $revenue,
             ];
         });
 

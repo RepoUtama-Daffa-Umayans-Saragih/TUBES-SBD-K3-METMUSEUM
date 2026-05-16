@@ -17,6 +17,13 @@ return new class extends Migration
             $table->dateTime('order_date');
             $table->dateTime('expired_at')->nullable();
             $table->decimal('total_amount', 15, 2);
+            $table->enum('order_status', [
+                'pending_payment',
+                'paid',
+                'completed',
+                'expired',
+                'cancelled'
+            ])->default('pending_payment');
             $table->softDeletes();
             $table->timestamps(); // FINAL SCHEMA: created_at & updated_at
 

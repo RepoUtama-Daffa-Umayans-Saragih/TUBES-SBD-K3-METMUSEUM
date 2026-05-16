@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketAvailability;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -15,11 +16,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
 {
+    private const PAYMENT_TIMEOUT_MINUTES = 20;
 
     public function checkout(Request $request): RedirectResponse
     {
@@ -89,7 +92,7 @@ class CheckoutController extends Controller
                     'user_id'      => $userId,
                     'guest_id'     => $guestId,
                     'order_date'   => now(),
-                    'expired_at'   => now()->addMinutes(30),
+                    'expired_at'   => now()->addMinutes(self::PAYMENT_TIMEOUT_MINUTES),
                     'total_amount' => $orderTotalAmount,
                 ]);
 
@@ -112,7 +115,7 @@ class CheckoutController extends Controller
         return redirect()->route('checkout.payments', $order->order_id);
     }
 
-    public function paymentPage(Order $order): View
+    public function paymentPage(Order $order): View | RedirectResponse
     {
         // Ownership validation
         \Illuminate\Support\Facades\Gate::authorize('view', $order);
@@ -130,9 +133,29 @@ class CheckoutController extends Controller
                 ->with('info', 'This order has already been paid.');
         }
 
+        // Enforce timeout using backend time and persist cancellation when needed.
+        $this->expireOrderIfTimedOut($order);
+
+        $order->refresh();
+        $order->load([
+            'payment',
+            'tickets.ticketAvailability.visitSchedule.location',
+            'tickets.ticketAvailability.ticketType',
+            'user',
+            'guest',
+        ]);
+
+        $isExpired  = $this->isOrderExpiredState($order);
+        $deadlineAt = null;
+        if (! $isExpired && $order->payment && $order->payment->payment_status === 'Pending') {
+            $deadlineAt = $this->paymentDeadlineAt($order);
+        }
+
         return view('ordinary.checkout.payments.payments', [
-            'order' => $order,
-            'title' => 'Payment Confirmation',
+            'order'             => $order,
+            'title'             => 'Payment Confirmation',
+            'paymentDeadlineAt' => $deadlineAt,
+            'isExpired'         => $isExpired,
         ]);
     }
 
@@ -140,6 +163,14 @@ class CheckoutController extends Controller
     {
         // Ownership validation
         \Illuminate\Support\Facades\Gate::authorize('view', $order);
+
+        $this->expireOrderIfTimedOut($order);
+        $order->refresh();
+        $order->load('payment');
+
+        if ($this->isOrderExpiredState($order)) {
+            return redirect()->route('home')->with('error', 'Cart expired');
+        }
 
         if ($order->payment && $order->payment->payment_status === 'Paid') {
             return redirect()->route('ticket.checkout.success', $order->order_id)
@@ -360,5 +391,80 @@ class CheckoutController extends Controller
         }
 
         return 'We could not complete checkout right now. Please try again.';
+    }
+
+    private function paymentStartAt(Order $order): Carbon
+    {
+        if ($order->payment?->created_at) {
+            return $order->payment->created_at->copy();
+        }
+
+        if ($order->order_date) {
+            return $order->order_date->copy();
+        }
+
+        return $order->created_at ? $order->created_at->copy() : now();
+    }
+
+    private function paymentDeadlineAt(Order $order): Carbon
+    {
+        return $this->paymentStartAt($order)->addMinutes(self::PAYMENT_TIMEOUT_MINUTES);
+    }
+
+    private function isOrderExpiredState(Order $order): bool
+    {
+        $paymentStatus = $order->payment?->payment_status;
+
+        if ($paymentStatus === 'Failed') {
+            return true;
+        }
+
+        if ($paymentStatus === 'Pending' && now()->greaterThanOrEqualTo($this->paymentDeadlineAt($order))) {
+            return true;
+        }
+
+        if (Schema::hasColumn('orders', 'status')) {
+            $status = strtolower((string) ($order->status ?? ''));
+            if ($status === 'cancelled') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function expireOrderIfTimedOut(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $lockedOrder = Order::with('payment')
+                ->lockForUpdate()
+                ->find($order->order_id);
+
+            if (! $lockedOrder || ! $lockedOrder->payment) {
+                return;
+            }
+
+            if ($lockedOrder->payment->payment_status !== 'Pending') {
+                return;
+            }
+
+            if (now()->lt($this->paymentDeadlineAt($lockedOrder))) {
+                return;
+            }
+
+            $lockedOrder->payment->update([
+                'payment_status' => 'Failed',
+            ]);
+
+            $orderUpdates = [
+                'expired_at' => now(),
+            ];
+
+            if (Schema::hasColumn('orders', 'status')) {
+                $orderUpdates['status'] = 'cancelled';
+            }
+
+            $lockedOrder->update($orderUpdates);
+        });
     }
 }

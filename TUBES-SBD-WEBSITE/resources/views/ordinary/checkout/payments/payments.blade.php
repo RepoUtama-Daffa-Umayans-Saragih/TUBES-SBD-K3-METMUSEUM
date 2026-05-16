@@ -19,7 +19,18 @@
         <div class="alert-banner error" style="margin-bottom: 20px; padding: 15px; background: #ffebee; color: #c62828; border-radius: 8px;">{{ session('error') }}</div>
     @endif
 
-    @if($order->payment && $order->payment->payment_status === 'Pending')
+    @if(!empty($isExpired))
+        <div class="alert-banner error" style="margin-bottom: 20px; padding: 15px; background: #ffebee; color: #c62828; border-radius: 8px;">
+            Cart expired
+        </div>
+        <script>
+            setTimeout(function () {
+                window.location.href = "{{ route('home') }}";
+            }, 800);
+        </script>
+    @endif
+
+    @if($order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired))
     <form action="{{ route('ticket.checkout.pay', $order->order_id) }}" method="POST">
         @csrf
     @else
@@ -29,7 +40,7 @@
     <div class="payments-layout">
         <div class="payments-main">
 
-            @if(!auth()->check() && $order->payment && $order->payment->payment_status === 'Pending')
+            @if(!auth()->check() && $order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired))
             <div class="payments-card card-section" style="margin-bottom: 30px;">
                 <h2 class="section-title">Billing Address</h2>
                 <div class="billing-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -132,6 +143,11 @@
         <aside class="summary-box">
             <div class="payments-card">
                 <h2 class="section-title">Order Summary</h2>
+                @if($order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired) && !empty($paymentDeadlineAt))
+                    <div class="alert-banner" style="margin-bottom: 15px; padding: 12px; background: #fff4e5; color: #8a4b00; border-radius: 8px;">
+                        Complete payment in <strong id="payment-countdown">20:00</strong>
+                    </div>
+                @endif
                 <div class="summary-list">
                     @php
                         $groupedTickets = $order->tickets->groupBy('ticket_availability_id');
@@ -160,7 +176,7 @@
                         <span class="total-amount">${{ number_format($order->total_amount, 2) }}</span>
                     </div>
 
-                    @if($order->payment && $order->payment->payment_status === 'Pending')
+                    @if($order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired))
                         <button type="submit" class="btn-checkout">
                             Checkout ${{ number_format($order->total_amount, 2) }}
                         </button>
@@ -174,10 +190,45 @@
         </aside>
     </div>
 
-    @if($order->payment && $order->payment->payment_status === 'Pending')
+    @if($order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired))
     </form>
     @else
     </div>
     @endif
 </div>
+
+@if($order->payment && $order->payment->payment_status === 'Pending' && empty($isExpired) && !empty($paymentDeadlineAt))
+<script>
+    (function () {
+        var countdownEl = document.getElementById('payment-countdown');
+        if (!countdownEl) {
+            return;
+        }
+
+        var deadline = new Date("{{ $paymentDeadlineAt->toIso8601String() }}").getTime();
+
+        function redirectExpired() {
+            window.location.href = "{{ route('checkout.payments', $order->order_id) }}";
+        }
+
+        function render() {
+            var now = Date.now();
+            var remaining = Math.floor((deadline - now) / 1000);
+
+            if (remaining <= 0) {
+                countdownEl.textContent = '00:00';
+                redirectExpired();
+                return;
+            }
+
+            var minutes = Math.floor(remaining / 60);
+            var seconds = remaining % 60;
+            countdownEl.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+        }
+
+        render();
+        setInterval(render, 1000);
+    })();
+</script>
+@endif
 @endsection

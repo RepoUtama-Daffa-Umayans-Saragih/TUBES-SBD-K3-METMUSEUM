@@ -81,22 +81,6 @@
     </div>
   </div>
 
-  <!-- LANGUAGE BAR -->
-  <div class="border-t border-[#dfdfdf]">
-    <div class="max-w-[1500px] mx-auto px-6 md:px-16 py-8 flex justify-center flex-wrap gap-x-6 gap-y-4 text-[14px] md:text-[16px] text-[#666]">
-      <a href="#" class="underline text-[#444]">English</a>
-      <a href="#" class="hover:underline">Español</a>
-      <a href="#" class="hover:underline">Português</a>
-      <a href="#" class="hover:underline">Français</a>
-      <a href="#" class="hover:underline">Italiano</a>
-      <a href="#" class="hover:underline">Deutsch</a>
-      <a href="#" class="hover:underline">日本語</a>
-      <a href="#" class="hover:underline">한국어</a>
-      <a href="#" class="hover:underline">中文 (简体)</a>
-      <a href="#" class="hover:underline">Русский</a>
-    </div>
-  </div>
-
   <!-- BOTTOM -->
   <div class="border-t border-[#dfdfdf]">
     <div class="max-w-[1500px] mx-auto px-6 md:px-16 py-8 flex flex-col md:flex-row items-center justify-between gap-6 text-[14px] md:text-[15px] text-[#555] text-center md:text-left">

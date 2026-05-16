@@ -3,8 +3,6 @@
 // =========================
 // IMPORTS (ALL AT TOP)
 // =========================
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\ArtworkController as AdminArtworkController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -13,8 +11,8 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
-use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\TicketAnalyticsController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ArtController;
 use App\Http\Controllers\ArtWorkController;
@@ -25,12 +23,14 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\GuestCheckoutController;
 use App\Http\Controllers\GuestLoginController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\VisitController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // =========================
 // HOME ROUTES
@@ -41,7 +41,6 @@ Route::get('/', function () {
 Route::get('/about', function () {
     return view('ordinary.about.about');
 })->name('about');
-
 
 // =========================
 // ART COLLECTION ROUTES
@@ -79,7 +78,7 @@ Route::prefix('account')->group(function () {
     // Reset password routes (must be accessible even if logged in as another user)
     Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-    
+
     // Logout route (accessible to both authenticated and guest users)
     Route::post('/logout', [AuthController::class, 'logout'])->name('account.logout');
     // Protected routes (only for authenticated users)
@@ -134,6 +133,16 @@ Route::post('/members/membership/purchase', [MembershipController::class, 'purch
     ->middleware('auth')
     ->name('membership.purchase');
 
+Route::prefix('member')->group(function () {
+    Route::get('/add-member', [MembershipController::class, 'addMember'])
+        ->middleware(['no.cache', 'user.or.guest'])
+        ->name('member.add-member');
+
+    Route::post('/add-member', [MembershipController::class, 'purchase'])
+        ->middleware('user.or.guest')
+        ->name('member.add-member.submit');
+});
+
 // =========================
 // LEGACY COMPATIBILITY ROUTES
 // =========================
@@ -157,13 +166,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
-    
+
     // Ticket Analytics Dashboard
     Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
         Route::get('/', [TicketAnalyticsController::class, 'index'])->name('index');
         Route::get('/data', [TicketAnalyticsController::class, 'getAnalyticsData'])->name('data');
     });
-    
+
     // Payment Management Dashboard
     Route::prefix('payment')->name('payment.')->group(function () {
         Route::get('/', [AdminPaymentController::class, 'index'])->name('index');

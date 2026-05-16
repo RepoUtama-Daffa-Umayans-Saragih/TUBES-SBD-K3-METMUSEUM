@@ -2,9 +2,38 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MembershipController extends Controller
 {
+    /**
+     * Display the membership add-member form.
+     */
+    public function addMember()
+    {
+        $authUser = Auth::user();
+        $profile  = $authUser?->profile;
+
+        $user = (object) [
+            'first_name' => $profile?->first_name ?? '',
+            'last_name'  => $profile?->last_name ?? '',
+            'email'      => $authUser?->email ?? '',
+        ];
+
+        return view('ordinary.member.add-member.add-member', [
+            'user'  => $user,
+            'title' => 'Membership Information',
+        ]);
+    }
+
+    /**
+     * Backward-compatible alias for existing references.
+     */
+    public function information()
+    {
+        return $this->addMember();
+    }
+
     /**
      * Display membership tiers and details
      */

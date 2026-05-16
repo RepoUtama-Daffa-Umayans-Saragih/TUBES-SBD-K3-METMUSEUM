@@ -5,32 +5,32 @@
 
 /* ── Tokens ─────────────────────────────────────────────────── */
 :root {
-    --met-red:        #e4002b;
-    --met-red-dark:   #b8001f;
-    --met-red-dim:    rgba(228, 0, 43, 0.10);
-    --met-red-ring:   rgba(228, 0, 43, 0.18);
+    --met-red: #e4002b;
+    --met-red-dark: #b8001f;
+    --met-red-dim: rgba(228, 0, 43, 0.1);
+    --met-red-ring: rgba(228, 0, 43, 0.18);
 
-    --ink:            #111111;
-    --ink-mid:        #3d3d3d;
-    --ink-mute:       #717171;
-    --ink-rule:       rgba(17, 17, 17, 0.08);
+    --ink: #111111;
+    --ink-mid: #3d3d3d;
+    --ink-mute: #717171;
+    --ink-rule: rgba(17, 17, 17, 0.08);
 
-    --surface:        #ffffff;
+    --surface: #ffffff;
     --surface-raised: #fafafa;
-    --bg:             #f5f4f1;           /* warm off-white, museum-paper feel */
+    --bg: #f5f4f1; /* warm off-white, museum-paper feel */
 
-    --radius-sm:      0.625rem;          /* 10px */
-    --radius-md:      1rem;             /* 16px */
-    --radius-lg:      1.375rem;          /* 22px */
-    --radius-pill:    999px;
+    --radius-sm: 0.625rem; /* 10px */
+    --radius-md: 1rem; /* 16px */
+    --radius-lg: 1.375rem; /* 22px */
+    --radius-pill: 999px;
 
-    --shadow-card:    0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
-    --shadow-hover:   0 4px 24px rgba(0,0,0,.10);
-    --shadow-avatar:  0 6px 24px rgba(228, 0, 43, 0.22);
+    --shadow-card:
+        0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 4px 24px rgba(0, 0, 0, 0.1);
+    --shadow-avatar: 0 6px 24px rgba(228, 0, 43, 0.22);
 
-    --transition:     180ms cubic-bezier(.4, 0, .2, 1);
+    --transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 /* ── Reset scope ─────────────────────────────────────────────── */
 .acc-root *,
@@ -39,16 +39,16 @@
     box-sizing: border-box;
 }
 
-.acc-root address { font-style: normal; }
-
+.acc-root address {
+    font-style: normal;
+}
 
 /* ── Root shell ──────────────────────────────────────────────── */
 .acc-root {
     background-color: var(--bg);
     min-height: calc(100vh - 200px);
-    font-family: 'Georgia', 'Times New Roman', serif;   /* editorial base */
+    font-family: "Georgia", "Times New Roman", serif; /* editorial base */
 }
-
 
 /* ── Container ───────────────────────────────────────────────── */
 .acc-container {
@@ -57,7 +57,6 @@
     margin-inline: auto;
     padding-inline: 1.5rem;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    PAGE HEADER
@@ -92,10 +91,9 @@
     background: linear-gradient(90deg, var(--met-red) 0%, transparent 100%);
 }
 
-
 /* ── Eyebrow ─────────────────────────────────────────────────── */
 .acc-eyebrow {
-    font-family: 'Arial', 'Helvetica Neue', sans-serif;
+    font-family: "Arial", "Helvetica Neue", sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -110,11 +108,10 @@
     margin-bottom: 0.35rem;
 }
 
-
 /* ── Main heading ────────────────────────────────────────────── */
 .acc-heading {
     font-size: clamp(2.2rem, 4vw, 3.25rem);
-    font-weight: 400;                    /* Georgia serif — let the typeface do the work */
+    font-weight: 400; /* Georgia serif — let the typeface do the work */
     line-height: 1.06;
     letter-spacing: -0.01em;
     color: var(--ink);
@@ -122,14 +119,13 @@
 }
 
 .acc-subheading {
-    font-family: 'Arial', 'Helvetica Neue', sans-serif;
+    font-family: "Arial", "Helvetica Neue", sans-serif;
     font-size: 0.95rem;
     color: var(--ink-mute);
     margin: 0;
     max-width: 50ch;
     line-height: 1.6;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    LAYOUT  —  sidebar + content two-column
@@ -144,7 +140,6 @@
     gap: 1.5rem;
     align-items: start;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    PANEL  (shared card surface)
@@ -210,7 +205,6 @@
     top: 1.5rem;
 }
 
-
 /* ════════════════════════════════════════════════════════════════
    AVATAR
    ════════════════════════════════════════════════════════════════ */
@@ -223,7 +217,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -245,13 +239,12 @@
 }
 
 .acc-profile__email {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.82rem;
     color: var(--ink-mute);
     margin: 0;
     word-break: break-word;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    META LIST  (sidebar summary rows)
@@ -288,7 +281,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.03em;
@@ -297,7 +290,7 @@
 }
 
 .acc-meta-item__value {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.82rem;
     font-weight: 600;
     color: var(--ink);
@@ -322,7 +315,6 @@
     text-transform: uppercase;
 }
 
-
 /* ════════════════════════════════════════════════════════════════
    BUTTONS
    ════════════════════════════════════════════════════════════════ */
@@ -331,7 +323,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    font-family: 'Arial', 'Helvetica Neue', sans-serif;
+    font-family: "Arial", "Helvetica Neue", sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -340,9 +332,12 @@
     border-radius: var(--radius-pill);
     padding: 0.65rem 1.25rem;
     cursor: pointer;
-    transition: background var(--transition), color var(--transition),
-                border-color var(--transition), box-shadow var(--transition),
-                transform var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
     white-space: nowrap;
     line-height: 1;
 }
@@ -394,13 +389,14 @@
 }
 
 /* Size variants */
-.acc-btn--full { width: 100%; }
+.acc-btn--full {
+    width: 100%;
+}
 
 .acc-btn--sm {
     font-size: 0.78rem;
     padding: 0.5rem 1rem;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    SECTION HEADER
@@ -427,7 +423,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -440,7 +436,6 @@
     white-space: nowrap;
     flex-shrink: 0;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    INFO GRID  (personal details)
@@ -481,7 +476,7 @@
 
 .acc-info-cell__label {
     display: block;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -491,7 +486,7 @@
 }
 
 .acc-info-cell__value {
-    font-family: 'Georgia', serif;
+    font-family: "Georgia", serif;
     font-size: 0.97rem;
     color: var(--ink);
     line-height: 1.45;
@@ -501,7 +496,6 @@
 .acc-info-cell__value--break {
     word-break: break-all;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    ADDRESS BLOCK
@@ -516,7 +510,7 @@
 }
 
 .acc-address-text {
-    font-family: 'Georgia', serif;
+    font-family: "Georgia", serif;
     font-size: 0.97rem;
     color: var(--ink);
     line-height: 1.65;
@@ -524,20 +518,19 @@
 }
 
 .acc-address-empty {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.9rem;
     color: var(--ink-mute);
     margin: 0;
     font-style: italic;
 }
 
-
 /* ── Notice box ──────────────────────────────────────────────── */
 .acc-notice {
     display: flex;
     align-items: flex-start;
     gap: 0.6rem;
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.83rem;
     color: var(--ink-mute);
     border: 1px dashed rgba(228, 0, 43, 0.28);
@@ -556,7 +549,6 @@
 .acc-notice--modal {
     margin-bottom: 1.25rem;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    QUICK ACTIONS GRID
@@ -578,8 +570,11 @@
     border-radius: var(--radius-md);
     text-decoration: none;
     color: var(--ink);
-    transition: transform var(--transition), box-shadow var(--transition),
-                border-color var(--transition), background var(--transition);
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition),
+        background var(--transition);
     position: relative;
 }
 
@@ -596,7 +591,7 @@
 }
 
 .acc-quick-card__label {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--ink);
@@ -612,7 +607,9 @@
     color: var(--ink-mute);
     opacity: 0;
     transform: translateX(-4px);
-    transition: opacity var(--transition), transform var(--transition);
+    transition:
+        opacity var(--transition),
+        transform var(--transition);
 }
 
 .acc-quick-card:hover {
@@ -627,14 +624,13 @@
     transform: translateX(0);
 }
 
-
 /* ════════════════════════════════════════════════════════════════
    MODAL
    ════════════════════════════════════════════════════════════════ */
 .acc-modal {
     border-radius: var(--radius-lg);
     border: 1px solid var(--ink-rule);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
     overflow: hidden;
 }
 
@@ -667,7 +663,9 @@
     flex-shrink: 0;
 }
 
-.acc-modal__close:hover { color: var(--ink); }
+.acc-modal__close:hover {
+    color: var(--ink);
+}
 
 .acc-modal__body {
     padding: 1.5rem 1.75rem;
@@ -683,7 +681,6 @@
     padding-top: 1.25rem;
 }
 
-
 /* ── Form field ──────────────────────────────────────────────── */
 .acc-field {
     display: flex;
@@ -692,7 +689,7 @@
 }
 
 .acc-field__label {
-    font-family: 'Arial', sans-serif;
+    font-family: "Arial", sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -701,17 +698,19 @@
 }
 
 .acc-field__textarea {
-    font-family: 'Georgia', serif;
+    font-family: "Georgia", serif;
     font-size: 0.95rem;
     color: var(--ink);
     background: var(--surface-raised);
-    border: 1px solid rgba(0,0,0,0.12);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: var(--radius-md);
     padding: 0.9rem 1rem;
     resize: vertical;
     width: 100%;
     line-height: 1.65;
-    transition: border-color var(--transition), box-shadow var(--transition);
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition);
 }
 
 .acc-field__textarea:focus {
@@ -719,7 +718,6 @@
     border-color: var(--met-red);
     box-shadow: 0 0 0 3px var(--met-red-ring);
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    RESPONSIVE

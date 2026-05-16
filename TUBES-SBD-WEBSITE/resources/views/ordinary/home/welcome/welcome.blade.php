@@ -513,7 +513,7 @@
                                 with Weekend Member Mornings and special Evening Viewings. Join by June 28 for a chance to
                                 win the
                                 ultimate keepsake: a curator-signed exhibition catalogue.</p>
-                            <a href="{{ route('membership.index') }}"
+                            <a href="{{ route('member.membership') }}"
                                 class="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-gray-900 hover:text-red-600">
                                 Join now
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"

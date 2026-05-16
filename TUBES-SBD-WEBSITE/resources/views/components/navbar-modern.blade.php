@@ -102,7 +102,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('membership.index') }}"
+                    <a href="{{ route('member.membership') }}"
                         class="rounded-full border border-white/200 px-4 py-2 text-white/90 hover:text-white hover:border-white transition">
                         Membership
                     </a>

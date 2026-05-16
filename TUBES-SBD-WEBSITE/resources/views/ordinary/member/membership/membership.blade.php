@@ -36,9 +36,9 @@
                         educate and inspire millions each year through the power of art.
                     </p>
                     
-                     <div class="faq-btn-wrapper mt-8">
+                     <a a href = "{{ route('member.add-member') }}" class="faq-btn-wrapper mt-8">
                         <button class="btn-faq-red">Become a Member!</button>
-                    </div>
+                    </a>
                     
                 </div>
                 <div class="flex-1">

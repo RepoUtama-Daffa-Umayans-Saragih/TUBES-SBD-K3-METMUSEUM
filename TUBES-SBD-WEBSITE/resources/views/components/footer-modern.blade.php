@@ -2,25 +2,9 @@
   <!-- TOP NEWSLETTER BAR -->
   <div class="w-full bg-[#e4002b]">
     <!-- Responsivitas: flex-col di mobile, flex-row di desktop -->
-    <div class="max-w-[1400px] mx-auto px-6 md:px-16 py-8 md:py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10">
-      
-      <h2 class="text-white text-[24px] md:text-[32px] font-semibold leading-tight tracking-[-0.5px]">
-        Bring some culture to your inbox
-      </h2>
+   
 
       <!-- Responsivitas: Hilangkan fixed width, ganti ke w-full -->
-      <div class="flex items-center bg-white w-full md:max-w-[620px] h-[48px] border border-transparent">
-        <input
-          type="email"
-          placeholder="Enter your email to sign up."
-          class="w-full h-full px-5 text-[14px] md:text-[16px] text-[#666] outline-none bg-transparent"
-        />
-        <button class="w-[52px] h-full flex items-center justify-center text-[#666] hover:bg-gray-100 transition border-l border-gray-200">
-          →
-        </button>
-      </div>
-
-    </div>
   </div>
 
   <!-- MAIN FOOTER -->
@@ -74,11 +58,11 @@
       <div>
         <h3 class="font-semibold text-[18px] md:text-[20px] mb-5">About The Met</h3>
         <ul class="space-y-4 md:space-y-5 text-[16px] md:text-[18px] text-[#555]">
-          <li><a href="#" class="hover:underline">Mission and History</a></li>
+      
           <li><a href="{{ route('art.curatorial-areas') }}" class="hover:underline">Collection Areas</a></li>
           <li><a href="#" class="hover:underline">Conservation Departments</a></li>
           <li><a href="{{ route('visit.accessibility') }}" class="hover:underline">Accessibility</a></li>
-          <li><a href="#" class="hover:underline">Press</a></li>
+         
         </ul>
       </div>
 
@@ -87,43 +71,12 @@
         <h3 class="font-semibold text-[18px] md:text-[20px] mb-5">Support</h3>
         <ul class="space-y-4 md:space-y-5 text-[16px] md:text-[18px] text-[#555]">
           <li><a href="{{ route('membership.index') }}" class="hover:underline">Membership</a></li>
-          <li><a href="#" class="hover:underline">Host an Event</a></li>
-          <li><a href="#" class="hover:underline">Corporate Support</a></li>
+          
         </ul>
       </div>
 
-      <!-- OPPORTUNITIES + MINI NEWSLETTER -->
-      <div class="flex flex-col gap-10">
-        <div>
-          <h3 class="font-semibold text-[18px] md:text-[20px] mb-5">Opportunities</h3>
-          <ul class="space-y-4 md:space-y-5 text-[16px] md:text-[18px] text-[#555]">
-            <li><a href="#" class="hover:underline">Careers</a></li>
-            <li><a href="#" class="hover:underline">Volunteers</a></li>
-            <li><a href="#" class="hover:underline">Fellowships</a></li>
-            <li><a href="#" class="hover:underline">Internships</a></li>
-          </ul>
-        </div>
-
-        <!-- NEWSLETTER BOX (Hanya muncul jika layar cukup besar atau diatur khusus) -->
-        <div class="border border-[#d94157] bg-[#fffafa] p-6 md:p-8 w-full">
-          <h4 class="text-[#b6001f] text-[16px] md:text-[18px] font-semibold leading-tight mb-4">
-            Bring some culture to your inbox.
-          </h4>
-          <p class="text-[14px] md:text-[15px] text-[#555] leading-relaxed mb-6">
-            Sign up for the latest news on exhibitions and events.
-          </p>
-          <div class="flex items-stretch w-full">
-            <input
-              type="email"
-              placeholder="Email address"
-              class="flex-1 h-[48px] border border-[#d8d8d8] border-r-0 px-4 text-[14px] outline-none bg-white min-w-0"
-            />
-            <button class="w-[48px] h-[48px] bg-[#b6001f] text-white text-[24px] flex items-center justify-center shrink-0 hover:bg-[#980019] transition">
-              →
-            </button>
-          </div>
-        </div>
-      </div>
+       
+      
 
     </div>
   </div>

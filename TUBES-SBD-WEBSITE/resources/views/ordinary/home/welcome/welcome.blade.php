@@ -4,7 +4,7 @@
 
 @section('content')
     <section class="relative min-h-[calc(100vh-6rem)] flex items-center justify-center bg-cover bg-center bg-no-repeat"
-        style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('{{ asset('images/WhatsApp Image 2026-05-09 at 02.03.14.jpeg')}}');">
+        style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('{{ asset('images/WhatsApp Image 2026-05-09 at 02.03.14.jpg')}}');">
 
         <div class="w-full max-w-4xl px-6 py-24 text-center relative z-10">
             <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-tight text-white leading-tight">

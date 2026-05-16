@@ -65,7 +65,7 @@ class TicketAnalyticsController extends Controller
 
         // Conversion Rate (tickets sold / total orders)
         $totalOrders     = Order::whereBetween('created_at', [$dateFrom, $dateTo])->count();
-        $completedOrders = Order::where('status', 'completed')
+        $completedOrders = Order::where('order_status', 'completed')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->count();
         $conversionRate = $totalOrders > 0 ? round(($completedOrders / $totalOrders) * 100, 2) : 0;
@@ -286,7 +286,7 @@ class TicketAnalyticsController extends Controller
                     'ticket_count'   => $ticketCount,
                     'total_amount'   => $order->total_amount,
                     'payment_status' => $order->payment?->payment_status ?? 'pending',
-                    'order_status'   => $order->status,
+                    'order_status'   => $order->order_status,
                     'created_at'     => $order->created_at,
                 ];
             });

@@ -32,7 +32,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-CSV_PATH = r'C:\Users\gidio\OneDrive\document\TUBES-SBD-K3-METMUSEUM\TUBES-SBD-WEBSITE\database\data\metmuseum_provenance_final.csv'
+BASE_DIR = Path(__file__).resolve().parent
+
+CSV_PATH = BASE_DIR / 'database' / 'data' / 'metmuseum_provenance_final.csv'
 
 # Statistics tracking
 stats = {
@@ -614,7 +616,7 @@ def main():
     logger.info(f"Failed:           {stats['failed']}")
     logger.info(f"Total errors:     {stats['errors']}")
     logger.info(f"{'='*80}\n")
-    logger.info(f"✓ Columns preserved: {list(df_verify.columns)} == ['met_object_id', 'link_resource', 'provenance']: {list(df_verify.columns) == ['met_object_id', 'link_resource', 'provenance']}")
+    # logger.info(f"✓ Columns preserved: {list(df_verify.columns)} == ['met_object_id', 'link_resource', 'provenance']: {list(df_verify.columns) == ['met_object_id', 'link_resource', 'provenance']}")
     logger.info(f"✓ File size: {os.path.getsize(CSV_PATH) / 1024:.1f} KB")
     
     print("\n" + "="*80)

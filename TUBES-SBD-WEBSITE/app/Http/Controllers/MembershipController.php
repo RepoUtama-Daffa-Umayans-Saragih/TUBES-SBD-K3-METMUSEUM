@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+use Throwable;
 
 class MembershipController extends Controller
 {
@@ -84,10 +86,20 @@ class MembershipController extends Controller
             ],
         ];
 
-        return view('ordinary.membership.membership', [
-            'memberships' => $memberships,
-            'title'       => 'Membership',
-        ]);
+        $viewName = 'ordinary.member.membership.membership';
+
+        if (!View::exists($viewName)) {
+            return redirect('/member/add-member');
+        }
+
+        try {
+            return view($viewName, [
+                'memberships' => $memberships,
+                'title'       => 'Membership',
+            ]);
+        } catch (Throwable $exception) {
+            return redirect('/member/add-member');
+        }
     }
 
     /**

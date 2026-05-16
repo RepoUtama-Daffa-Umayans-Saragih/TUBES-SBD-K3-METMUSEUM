@@ -8,6 +8,7 @@ use App\Models\ObjectType;
 use App\Models\Constituent;
 use App\Models\Tag;
 use App\Models\Medium;
+use Database\Seeders\CuratedMetMuseumSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -142,6 +143,138 @@ class CanonicalIngestionTest extends TestCase
 
         $this->assertEquals(0, $inserted);
         $this->assertEquals(1, DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->count());
+    }
+
+    public function test_curated_seeder_splits_mediums_by_comma_and_preserves_order()
+    {
+        $department = Department::create(['department_name' => 'Curatorial']);
+        $type = ObjectType::create(['object_type_name' => 'Painting']);
+
+        $location = DB::table('locations')->insertGetId(['location_name' => 'Test Location']);
+        $repository = DB::table('repositories')->insertGetId(['repository_name' => 'Test Repository']);
+
+        $artwork = ArtWork::create([
+            'met_object_id' => 1002,
+            'accession_number' => '1990.2',
+            'title' => 'Comma Split Medium Test',
+            'slug' => 'comma-split-medium-test',
+            'department_id' => $department->department_id,
+            'type_id' => $type->type_id,
+            'location_id' => $location,
+            'repository_id' => $repository,
+        ]);
+
+        $seeder = new CuratedMetMuseumSeeder();
+        $reflection = new \ReflectionMethod(CuratedMetMuseumSeeder::class, 'seedMediums');
+        $reflection->setAccessible(true);
+        $reflection->invoke($seeder, $artwork->art_work_id, 'Satinwood veneer, oak, spruce, iron, steel');
+
+        $this->assertSame(5, DB::table('mediums')->count());
+        $this->assertSame(5, DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->count());
+        $this->assertSame(
+            ['Satinwood veneer', 'oak', 'spruce', 'iron', 'steel'],
+            DB::table('mediums')->orderBy('medium_id')->pluck('medium_name')->all()
+        );
+        $this->assertSame(
+            [1, 2, 3, 4, 5],
+            DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->orderBy('display_order')->pluck('display_order')->all()
+        );
+    }
+
+    public function test_curated_seeder_preserves_commas_inside_parentheses()
+    {
+        $department = Department::create(['department_name' => 'Curatorial']);
+        $type = ObjectType::create(['object_type_name' => 'Painting']);
+
+        $location = DB::table('locations')->insertGetId(['location_name' => 'Test Location']);
+        $repository = DB::table('repositories')->insertGetId(['repository_name' => 'Test Repository']);
+
+        $artwork = ArtWork::create([
+            'met_object_id' => 1003,
+            'accession_number' => '1990.3',
+            'title' => 'Parentheses Medium Test',
+            'slug' => 'parentheses-medium-test',
+            'department_id' => $department->department_id,
+            'type_id' => $type->type_id,
+            'location_id' => $location,
+            'repository_id' => $repository,
+        ]);
+
+        $seeder = new CuratedMetMuseumSeeder();
+        $reflection = new \ReflectionMethod(CuratedMetMuseumSeeder::class, 'seedMediums');
+        $reflection->setAccessible(true);
+        $reflection->invoke($seeder, $artwork->art_work_id, 'silk (warp, 10 per cm.), wool (156–190 per sq. in.)');
+
+        $this->assertSame(2, DB::table('mediums')->count());
+        $this->assertSame(
+            ['silk (warp, 10 per cm.)', 'wool (156–190 per sq. in.)'],
+            DB::table('mediums')->orderBy('medium_id')->pluck('medium_name')->all()
+        );
+        $this->assertSame(2, DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->count());
+        $this->assertSame(
+            [1, 2],
+            DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->orderBy('display_order')->pluck('display_order')->all()
+        );
+    }
+
+    public function test_curated_seeder_splits_last_token_on_and_outside_parentheses()
+    {
+        $department = Department::create(['department_name' => 'Curatorial']);
+        $type = ObjectType::create(['object_type_name' => 'Painting']);
+
+        $location = DB::table('locations')->insertGetId(['location_name' => 'Test Location']);
+        $repository = DB::table('repositories')->insertGetId(['repository_name' => 'Test Repository']);
+
+        $artwork = ArtWork::create([
+            'met_object_id' => 1004,
+            'accession_number' => '1990.4',
+            'title' => 'And Split Medium Test',
+            'slug' => 'and-split-medium-test',
+            'department_id' => $department->department_id,
+            'type_id' => $type->type_id,
+            'location_id' => $location,
+            'repository_id' => $repository,
+        ]);
+
+        $seeder = new CuratedMetMuseumSeeder();
+        $reflection = new \ReflectionMethod(CuratedMetMuseumSeeder::class, 'seedMediums');
+        $reflection->setAccessible(true);
+        $reflection->invoke($seeder, $artwork->art_work_id, 'gold, silver, enamel and pearls');
+
+        $this->assertSame(4, DB::table('mediums')->count());
+        $this->assertSame(['gold', 'silver', 'enamel', 'pearls'], DB::table('mediums')->orderBy('medium_id')->pluck('medium_name')->all());
+        $this->assertSame(4, DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->count());
+        $this->assertSame([1, 2, 3, 4], DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->orderBy('display_order')->pluck('display_order')->all());
+    }
+
+    public function test_curated_seeder_does_not_split_and_inside_parentheses()
+    {
+        $department = Department::create(['department_name' => 'Curatorial']);
+        $type = ObjectType::create(['object_type_name' => 'Painting']);
+
+        $location = DB::table('locations')->insertGetId(['location_name' => 'Test Location']);
+        $repository = DB::table('repositories')->insertGetId(['repository_name' => 'Test Repository']);
+
+        $artwork = ArtWork::create([
+            'met_object_id' => 1005,
+            'accession_number' => '1990.5',
+            'title' => 'Parentheses And Test',
+            'slug' => 'parentheses-and-test',
+            'department_id' => $department->department_id,
+            'type_id' => $type->type_id,
+            'location_id' => $location,
+            'repository_id' => $repository,
+        ]);
+
+        $seeder = new CuratedMetMuseumSeeder();
+        $reflection = new \ReflectionMethod(CuratedMetMuseumSeeder::class, 'seedMediums');
+        $reflection->setAccessible(true);
+        $reflection->invoke($seeder, $artwork->art_work_id, 'gold (hammered and engraved)');
+
+        $this->assertSame(1, DB::table('mediums')->count());
+        $this->assertSame(['gold (hammered and engraved)'], DB::table('mediums')->pluck('medium_name')->all());
+        $this->assertSame(1, DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->count());
+        $this->assertSame([1], DB::table('art_work_mediums')->where('art_work_id', $artwork->art_work_id)->pluck('display_order')->all());
     }
 
     public function test_ingestion_preserves_raw_sim_text()

@@ -84,7 +84,36 @@
                 @if($artwork->mediums->isNotEmpty())
                     <div class="meta-item">
                         <span class="meta-label">Medium</span>
-                        <span class="meta-value">{{ $artwork->mediums->pluck('name')->join(', ') }}</span>
+                            @php
+                                $formatNaturalList = function ($values) {
+                                    $values = collect($values)->map(function ($value) {
+                                        if (is_object($value)) {
+                                            return $value->medium_name ?? $value->name ?? '';
+                                        }
+
+                                        return (string) $value;
+                                    })->filter()->values()->all();
+
+                                    $count = count($values);
+
+                                    if ($count === 0) {
+                                        return '';
+                                    }
+
+                                    if ($count === 1) {
+                                        return $values[0];
+                                    }
+
+                                    if ($count === 2) {
+                                        return $values[0] . ' and ' . $values[1];
+                                    }
+
+                                    $lastValue = array_pop($values);
+
+                                    return implode(', ', $values) . ' and ' . $lastValue;
+                                };
+                            @endphp
+                            <span class="meta-value">{{ $formatNaturalList($artwork->mediums->pluck('medium_name')) }}</span>
                     </div>
                 @endif
 

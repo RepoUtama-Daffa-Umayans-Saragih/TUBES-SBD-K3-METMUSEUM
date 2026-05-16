@@ -148,8 +148,8 @@ class CuratedMetMuseumSeeder extends Seeder
             $this->seedPivots($artWorkId, $row[$headerMap['Reign']], 'reigns', 'reign_name', 'reign_id', 'art_work_reigns');
             $this->seedPivots($artWorkId, $row[$headerMap['Portfolio']], 'portfolios', 'portfolio_name', 'portfolio_id', 'art_work_portfolios');
             
-            // Seed mediums
-            $this->seedPivots($artWorkId, $row[$headerMap['Medium']] ?? '', 'mediums', 'medium_name', 'medium_id', 'art_work_mediums');
+            // Seed mediums as comma-separated canonical rows
+            $this->seedMediums($artWorkId, $row[$headerMap['Medium']] ?? '');
 
             // Materials (from Object Type and Classification as fallback for filter coverage)
             $materials = array_filter([$typeNameCsv, $classNameCsv]);
@@ -362,6 +362,130 @@ class CuratedMetMuseumSeeder extends Seeder
                 ]);
             }
         }
+    }
+
+    private function seedMediums($artWorkId, $valueStr)
+    {
+        if (!$valueStr) return;
+
+        $items = $this->splitMediums($valueStr);
+
+        if (!empty($items)) {
+            $lastIndex = count($items) - 1;
+            $lastItems = $this->splitMediumTail($items[$lastIndex]);
+
+            if (count($lastItems) > 1) {
+                array_splice($items, $lastIndex, 1, $lastItems);
+            }
+        }
+
+        foreach ($items as $index => $mediumName) {
+            $mediumId = $this->getGeoId('mediums', $mediumName, 'medium_name', 'medium_id');
+
+            if ($mediumId) {
+                DB::table('art_work_mediums')->insertOrIgnore([
+                    'art_work_id' => $artWorkId,
+                    'medium_id' => $mediumId,
+                    'display_order' => $index + 1,
+                ]);
+            }
+        }
+    }
+
+    private function splitMediums($valueStr)
+    {
+        $items = [];
+        $current = '';
+        $depth = 0;
+
+        $length = strlen($valueStr);
+        for ($i = 0; $i < $length; $i++) {
+            $char = $valueStr[$i];
+
+            if ($char === '(') {
+                $depth++;
+                $current .= $char;
+                continue;
+            }
+
+            if ($char === ')') {
+                if ($depth > 0) {
+                    $depth--;
+                }
+                $current .= $char;
+                continue;
+            }
+
+            if ($char === ',' && $depth === 0) {
+                $token = trim($current);
+                if ($token !== '') {
+                    $items[] = $token;
+                }
+                $current = '';
+                continue;
+            }
+
+            $current .= $char;
+        }
+
+        $token = trim($current);
+        if ($token !== '') {
+            $items[] = $token;
+        }
+
+        return array_values(array_filter($items, fn ($item) => $item !== ''));
+    }
+
+    private function splitMediumTail($valueStr)
+    {
+        $valueStr = trim($valueStr);
+        if ($valueStr === '') {
+            return [];
+        }
+
+        $items = [];
+        $current = '';
+        $depth = 0;
+        $length = strlen($valueStr);
+        $delimiter = ' and ';
+        $delimiterLength = strlen($delimiter);
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $valueStr[$i];
+
+            if ($char === '(') {
+                $depth++;
+                $current .= $char;
+                continue;
+            }
+
+            if ($char === ')') {
+                if ($depth > 0) {
+                    $depth--;
+                }
+                $current .= $char;
+                continue;
+            }
+
+            if ($depth === 0 && substr($valueStr, $i, $delimiterLength) === $delimiter) {
+                $token = trim($current);
+                if ($token !== '') {
+                    $items[] = $token;
+                }
+                $current = '';
+                $i += $delimiterLength - 1;
+                continue;
+            }
+
+            $current .= $char;
+        }
+
+        $token = trim($current);
+        if ($token !== '') {
+            $items[] = $token;
+        }
+
+        return array_values(array_filter($items, fn ($item) => $item !== ''));
     }
 
     private function getConstituent($metId, $name, $bio, $sort, $begin, $end, $gender, $ulan, $wiki)

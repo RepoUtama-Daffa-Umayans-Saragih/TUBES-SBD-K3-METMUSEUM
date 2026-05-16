@@ -20,6 +20,170 @@
     <!-- Header -->
     <h1 class="page-title">Search for Art</h1>
 
+    @php
+        $searchQuery = request('q');
+        $queryParams = request()->query();
+
+        $normalizeList = function ($value) {
+            return array_values(array_filter(array_map('strval', (array) $value), function ($item) {
+                return trim($item) !== '';
+            }));
+        };
+
+        $removeKeys = function (array $params, array $keys) {
+            foreach ($keys as $key) {
+                unset($params[$key]);
+            }
+
+            return $params;
+        };
+
+        $removeValue = function (array $params, string $key, $value) {
+            $current = $params[$key] ?? [];
+
+            if (!is_array($current)) {
+                $current = [$current];
+            }
+
+            $current = array_values(array_filter($current, function ($item) use ($value) {
+                return (string) $item !== (string) $value;
+            }));
+
+            if (empty($current)) {
+                unset($params[$key]);
+            } else {
+                $params[$key] = $current;
+            }
+
+            return $params;
+        };
+
+        $buildSearchUrl = function (array $params) use ($searchQuery) {
+            $params = array_filter($params, function ($value) {
+                if (is_array($value)) {
+                    return !empty($value);
+                }
+
+                return $value !== null && $value !== '';
+            });
+
+            $params['q'] = $searchQuery;
+            $params = array_filter($params, function ($value, $key) {
+                if ($key === 'q') {
+                    return $value !== null && $value !== '';
+                }
+
+                return true;
+            }, ARRAY_FILTER_USE_BOTH);
+
+            return url('/art/collection/search') . (empty($params) ? '' : '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986));
+        };
+
+        $selectedHighlights = request()->boolean('highlights') || request()->boolean('highlights_adv');
+        $selectedOnView = request()->boolean('on_view') || request()->boolean('on_view_adv');
+        $selectedHasImage = request()->boolean('has_image');
+        $selectedOpenAccess = request()->boolean('open_access');
+        $selectedHas3d = request()->boolean('has_3d');
+        $selectedYearStart = request()->filled('year_start');
+        $selectedYearEnd = request()->filled('year_end');
+
+        $selectedObjectTypes = $normalizeList(request()->input('object_type', []));
+        $selectedMediums = $normalizeList(request()->input('medium', []));
+        $selectedLocations = $normalizeList(request()->input('location', []));
+        $selectedDepartments = $normalizeList(request()->input('department', []));
+
+        $showOnlyCount = (int) $selectedHighlights + (int) $selectedOnView;
+        $imagesCount = (int) $selectedHasImage + (int) $selectedOpenAccess + (int) $selectedHas3d;
+        $dateCount = (int) ($selectedYearStart || $selectedYearEnd);
+        $objectCount = count($selectedObjectTypes) + count($selectedMediums);
+        $locationCount = count($selectedLocations);
+        $departmentCount = count($selectedDepartments);
+
+        $activeFilterChips = [];
+
+        foreach ($selectedObjectTypes as $value) {
+            $activeFilterChips[] = [
+                'label' => $value,
+                'href' => $buildSearchUrl($removeValue($removeKeys($queryParams, ['page']), 'object_type', $value)),
+            ];
+        }
+
+        foreach ($selectedLocations as $value) {
+            $activeFilterChips[] = [
+                'label' => $value,
+                'href' => $buildSearchUrl($removeValue($removeKeys($queryParams, ['page']), 'location', $value)),
+            ];
+        }
+
+        foreach ($selectedDepartments as $value) {
+            $activeFilterChips[] = [
+                'label' => $value,
+                'href' => $buildSearchUrl($removeValue($removeKeys($queryParams, ['page']), 'department', $value)),
+            ];
+        }
+
+        foreach ($selectedMediums as $value) {
+            $activeFilterChips[] = [
+                'label' => $value,
+                'href' => $buildSearchUrl($removeValue($removeKeys($queryParams, ['page']), 'medium', $value)),
+            ];
+        }
+
+        if ($selectedHighlights) {
+            $activeFilterChips[] = [
+                'label' => 'Highlights',
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'highlights', 'highlights_adv'])),
+            ];
+        }
+
+        if ($selectedOnView) {
+            $activeFilterChips[] = [
+                'label' => 'On view',
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'on_view', 'on_view_adv'])),
+            ];
+        }
+
+        if ($selectedHasImage) {
+            $activeFilterChips[] = [
+                'label' => 'Has image',
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'has_image'])),
+            ];
+        }
+
+        if ($selectedOpenAccess) {
+            $activeFilterChips[] = [
+                'label' => 'Has Open Access image',
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'open_access'])),
+            ];
+        }
+
+        if ($selectedHas3d) {
+            $activeFilterChips[] = [
+                'label' => 'Has 3D image',
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'has_3d'])),
+            ];
+        }
+
+        if ($selectedYearStart || $selectedYearEnd) {
+            $yearParts = [];
+
+            if ($selectedYearStart) {
+                $yearParts[] = request('year_start');
+            }
+
+            if ($selectedYearEnd) {
+                $yearParts[] = request('year_end');
+            }
+
+            $activeFilterChips[] = [
+                'label' => 'Year: ' . implode(' - ', $yearParts),
+                'href' => $buildSearchUrl($removeKeys($queryParams, ['page', 'year_start', 'year_end'])),
+            ];
+        }
+
+        $clearAllUrl = $buildSearchUrl(['q' => $searchQuery]);
+    @endphp
+
     <!-- Search Bar -->
     <div class="search-bar-wrapper">
         <div class="search-bar">
@@ -72,12 +236,12 @@
             
             <div class="filter-checkboxes">
                 <label class="checkbox-label">
-                    <input type="checkbox" name="highlights" {{ request('highlights') ? 'checked' : '' }}>
+                    <input type="checkbox" name="highlights" {{ request('highlights') || request('highlights_adv') ? 'checked' : '' }}>
                     <span>Highlights</span>
                 </label>
                 
                 <label class="checkbox-label">
-                    <input type="checkbox" name="on_view" {{ request('on_view') ? 'checked' : '' }}>
+                    <input type="checkbox" name="on_view" {{ request('on_view') || request('on_view_adv') ? 'checked' : '' }}>
                     <span>On view</span>
                 </label>
                 
@@ -107,17 +271,20 @@
         <div class="filters-sidebar">
             <div class="filter-section expanded">
                 <h3 class="filter-section-title">
-                    Show only
+                    <span>Show only</span>
+                    @if($showOnlyCount > 0)
+                        <span class="filter-count-badge">({{ $showOnlyCount }})</span>
+                    @endif
                     <span class="section-arrow rotated">▼</span>
                 </h3>
                 <div class="filter-options">
                     <label class="filter-option">
-                        <input type="checkbox" name="highlights_adv" value="1">
+                        <input type="checkbox" name="highlights_adv" value="1" {{ request('highlights') || request('highlights_adv') ? 'checked' : '' }}>
                         <span>Highlights</span>
                         <span class="count">(2,804)</span>
                     </label>
                     <label class="filter-option">
-                        <input type="checkbox" name="on_view_adv" value="1">
+                        <input type="checkbox" name="on_view_adv" value="1" {{ request('on_view') || request('on_view_adv') ? 'checked' : '' }}>
                         <span>On view</span>
                         <span class="count">(45,500)</span>
                     </label>
@@ -126,7 +293,10 @@
 
             <div class="filter-section">
                 <h3 class="filter-section-title">
-                    Images
+                    <span>Images</span>
+                    @if($imagesCount > 0)
+                        <span class="filter-count-badge">({{ $imagesCount }})</span>
+                    @endif
                     <span class="section-arrow">▼</span>
                 </h3>
                 <div class="filter-options">
@@ -150,7 +320,10 @@
 
             <div class="filter-section">
                 <h3 class="filter-section-title">
-                    Date
+                    <span>Date</span>
+                    @if($dateCount > 0)
+                        <span class="filter-count-badge">({{ $dateCount }})</span>
+                    @endif
                     <span class="section-arrow">▼</span>
                 </h3>
                 <div class="filter-options">
@@ -170,98 +343,84 @@
 
             <div class="filter-section">
                 <h3 class="filter-section-title">
-                    Object type / material
+                    <span>Object type / material</span>
+                    @if($objectCount > 0)
+                        <span class="filter-count-badge">({{ $objectCount }})</span>
+                    @endif
                     <span class="section-arrow">▼</span>
                 </h3>
                 <div class="filter-options scrollable-filter">
-                    @foreach(['Prints', 'Books', 'Illustrations', 'Relief prints', 'Lithographs', 'Planographic prints', 'Woodcuts', 'Drawings', 'Paper', 'Engraving', 'Metal', 'Posters', 'Bark cloth', 'Metalwork', 'Silver', 'Color lithographs', 'Lithography', 'Offset lithography', 'Textiles', 'Offset lithographs', 'Costume', 'Photographs', 'Wood engravings', 'Paintings', 'Parchment', 'Sculpture', 'Vellum', 'Bamboo', 'Ceremonial masks', 'Gilt', 'Grass', 'Masks', 'Vessels', 'Jugs', 'Photomechanical reproductions', 'Printing blocks', 'Wood blocks', 'Albumen silver prints', 'Bone', 'Ephemera', 'Ink', 'Ivory', 'Photolithographs', 'Salvers', 'Wood', 'Card photographs', 'Cartes-de-visite', 'Etching', 'Photoengraving', 'Stipple engraving'] as $item)
+                    @forelse(($objectFilters ?? []) as $option)
                         <label class="filter-option">
-                            <input type="checkbox" name="object_type[]" value="{{ $item }}" {{ is_array(request('object_type')) && in_array($item, request('object_type')) ? 'checked' : '' }}>
-                            <span>{{ $item }}</span>
+                            <input type="checkbox" name="object_type[]" value="{{ $option['value'] }}" {{ in_array((string) $option['value'], array_map('strval', request('object_type', []))) ? 'checked' : '' }}>
+                            <span>{{ $option['label'] }}</span>
                         </label>
-                    @endforeach
+                    @empty
+                        <p class="text-xs text-gray-500">No object types or materials available.</p>
+                    @endforelse
                 </div>
             </div>
 
             <div class="filter-section">
                 <h3 class="filter-section-title">
-                    Geographic location
+                    <span>Geographic location</span>
+                    @if($locationCount > 0)
+                        <span class="filter-count-badge">({{ $locationCount }})</span>
+                    @endif
                     <span class="section-arrow">▼</span>
                 </h3>
                 <div class="filter-options scrollable-filter">
-                    @foreach(['Africa', 'Akron', 'Asia', 'Audrain', 'Augsburg', 'Austria', 'Bavaria', 'Beijing', 'Boston', 'Bristol', 'Buffalo', 'Chicago', 'China', 'East New Britain', 'England', 'Europe', 'France', 'Germany', 'Illinois', 'Iran', 'London', 'Martinsburg', 'Massachusetts', 'Mexico', 'Missouri', 'New Britain', 'New Jersey', 'New York', 'Newark', 'North and Central America', 'Nuremberg', 'Oceania', 'Ohio', 'Papua New Guinea', 'Roman Empire', 'Scottish', 'United Kingdom', 'United States', 'Washington'] as $item)
+                    @forelse(($locations ?? []) as $location)
                         <label class="filter-option">
-                            <input type="checkbox" name="location[]" value="{{ $item }}" {{ is_array(request('location')) && in_array($item, request('location')) ? 'checked' : '' }}>
-                            <span>{{ $item }}</span>
+                            <input type="checkbox" name="location[]" value="{{ $location->location_name }}" {{ in_array((string) $location->location_name, array_map('strval', request('location', []))) ? 'checked' : '' }}>
+                            <span>{{ $location->location_name }}</span>
                         </label>
-                    @endforeach
+                    @empty
+                        <p class="text-xs text-gray-500">No locations available.</p>
+                    @endforelse
                 </div>
             </div>
 
             <div class="filter-section">
                 <h3 class="filter-section-title">
-                    Department
+                    <span>Department</span>
+                    @if($departmentCount > 0)
+                        <span class="filter-count-badge">({{ $departmentCount }})</span>
+                    @endif
                     <span class="section-arrow">▼</span>
                 </h3>
                 <div class="filter-options scrollable-filter">
-                    @php
-                        $departments = [
-                            'African Art in The Michael C. Rockefeller Wing',
-                            'The American Wing',
-                            'Ancient American Art in The Michael C. Rockefeller Wing',
-                            'Ancient West Asian Art',
-                            'Arms and Armor',
-                            'Asian Art',
-                            'The Costume Institute',
-                            'Drawings and Prints',
-                            'Egyptian Art',
-                            'European Paintings',
-                            'European Sculpture and Decorative Arts',
-                            'Greek and Roman Art',
-                            'Islamic Art',
-                            'Medieval Art and The Cloisters',
-                            'The Michael C. Rockefeller Wing',
-                            'Modern and Contemporary Art',
-                            'Musical Instruments',
-                            'Oceanic Art in The Michael C. Rockefeller Wing',
-                            'Photographs',
-                            'The Robert Lehman Collection',
-                            'Thomas J. Watson Library'
-                        ];
-                    @endphp
-                    @foreach($departments as $item)
+                    @forelse(($departments ?? []) as $department)
                         <label class="filter-option">
-                            <input type="checkbox" name="department[]" value="{{ $item }}" {{ is_array(request('department')) && in_array($item, request('department')) ? 'checked' : '' }}>
-                            <span>{{ $item }}</span>
+                            <input type="checkbox" name="department[]" value="{{ $department->department_name }}" {{ in_array((string) $department->department_name, array_map('strval', request('department', []))) ? 'checked' : '' }}>
+                            <span>{{ $department->department_name }}</span>
                         </label>
-                    @endforeach
+                    @empty
+                        <p class="text-xs text-gray-500">No departments available.</p>
+                    @endforelse
                 </div>
             </div>
 
-            <div class="filter-section">
-                <h3 class="filter-section-title">
-                    Geographic location
-                    <span class="section-arrow">▼</span>
-                </h3>
-                <div class="filter-options">
-                    <p class="text-xs text-gray-500">Select locations...</p>
-                </div>
-            </div>
-
-            <div class="filter-section">
-                <h3 class="filter-section-title">
-                    Department
-                    <span class="section-arrow">▼</span>
-                </h3>
-                <div class="filter-options">
-                    <p class="text-xs text-gray-500">Select departments...</p>
-                </div>
-            </div>
         </div>
         </div>
         
         <!-- Results Area -->
         <div class="results-area">
+            @if(!empty($activeFilterChips))
+                <div class="active-filters-bar">
+                    <div class="active-filters-label">Selected filters</div>
+                    <div class="active-filter-chips">
+                        @foreach($activeFilterChips as $chip)
+                            <a href="{{ $chip['href'] }}" class="active-filter-chip">
+                                <span>{{ $chip['label'] }}</span>
+                                <span aria-hidden="true">×</span>
+                            </a>
+                        @endforeach
+                    </div>
+                    <a href="{{ $clearAllUrl }}" class="clear-all-link">Clear all</a>
+                </div>
+            @endif
+
             <!-- Results Info -->
             <div class="results-info">
                 <div class="results-count">
@@ -396,6 +555,52 @@ document.addEventListener('DOMContentLoaded', function() {
     // Search Form Submission
     const searchBtn = document.getElementById('searchBtn');
     const searchForm = document.querySelector('.search-bar');
+    const filterParamMap = {
+        highlights: 'highlights',
+        highlights_adv: 'highlights',
+        on_view: 'on_view',
+        on_view_adv: 'on_view',
+        has_image: 'has_image',
+        open_access: 'open_access',
+        has_3d: 'has_3d'
+    };
+
+    function applyFiltersToUrl(url) {
+        Object.values(filterParamMap).forEach((param) => {
+            url.searchParams.delete(param);
+        });
+
+        Object.entries(filterParamMap).forEach(([inputName, paramName]) => {
+            const checkboxes = document.querySelectorAll(`input[name="${inputName}"]`);
+            const isChecked = Array.from(checkboxes).some((checkbox) => checkbox.checked);
+
+            if (isChecked) {
+                url.searchParams.set(paramName, '1');
+            }
+        });
+
+        ['object_type[]', 'medium[]', 'department[]', 'location[]'].forEach((inputName) => {
+            url.searchParams.delete(inputName);
+            document.querySelectorAll(`input[name="${inputName}"]:checked`).forEach((checkbox) => {
+                url.searchParams.append(inputName, checkbox.value);
+            });
+        });
+
+        const yearStart = document.querySelector('input[name="year_start"]');
+        const yearEnd = document.querySelector('input[name="year_end"]');
+
+        if (yearStart && yearStart.value.trim()) {
+            url.searchParams.set('year_start', yearStart.value.trim());
+        } else {
+            url.searchParams.delete('year_start');
+        }
+
+        if (yearEnd && yearEnd.value.trim()) {
+            url.searchParams.set('year_end', yearEnd.value.trim());
+        } else {
+            url.searchParams.delete('year_end');
+        }
+    }
     
     searchBtn.addEventListener('click', function() {
         performSearch();
@@ -427,6 +632,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             url.searchParams.delete('field');
         }
+
+        applyFiltersToUrl(url);
         
         // Reset pagination on new search
         url.searchParams.delete('page');
@@ -439,6 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
     sortBy.addEventListener('change', function() {
         const url = new URL(window.location.href);
         url.searchParams.set('sort', this.value);
+        applyFiltersToUrl(url);
         window.location.href = url.toString();
     });
 });

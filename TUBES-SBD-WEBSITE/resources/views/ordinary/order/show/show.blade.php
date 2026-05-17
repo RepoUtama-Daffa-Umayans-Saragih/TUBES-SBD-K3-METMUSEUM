@@ -14,7 +14,7 @@
             {{ session('success') }}
         </div>
     @endif
-    
+
     @if(session('error'))
         <div class="alert-error">
             {{ session('error') }}
@@ -101,7 +101,7 @@
                         <span class="label">Total:</span>
                         <span class="value">${{ number_format($order->total_amount, 2) }}</span>
                     </div>
-                    
+
                     @if(($order->payment?->payment_status ?? 'Pending') === 'Pending')
                         <form action="{{ route('ticket.checkout.pay', $order->order_id) }}" method="POST" style="margin-top: 15px;">
                             @csrf

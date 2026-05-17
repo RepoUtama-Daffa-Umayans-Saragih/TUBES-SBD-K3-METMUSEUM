@@ -94,7 +94,7 @@ class OrderController extends Controller
 
     public function index()
     {
-        $userId = Auth::id();
+        $userId  = Auth::id();
         $guestId = session('guest_id');
 
         if (! $userId && ! $guestId) {
@@ -117,7 +117,7 @@ class OrderController extends Controller
 
         return view('ordinary.order.show.show', [
             'orders' => $orders,
-            'mode' => 'list'
+            'mode'   => 'list',
         ]);
     }
 
@@ -134,7 +134,7 @@ class OrderController extends Controller
 
         return view('ordinary.order.show.show', [
             'order' => $order,
-            'mode' => 'detail'
+            'mode'  => 'detail',
         ]);
     }
 }

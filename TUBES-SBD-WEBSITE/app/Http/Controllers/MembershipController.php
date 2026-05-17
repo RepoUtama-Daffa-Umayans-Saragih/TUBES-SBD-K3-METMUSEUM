@@ -1,11 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Membership;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Services\MembershipService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -42,14 +40,44 @@ class MembershipController extends Controller
         $memberships = [
             [
                 'id'       => 1,
-                'name'     => 'MET Membership',
+                'name'     => 'Individual',
                 'price'    => 99,
-                'duration' => '/month',
-                'featured' => true,
+                'duration' => '/year',
+                'featured' => false,
                 'features' => [
                     'Unlimited admission',
-                    'Activation after email or gift claim',
-                    'One membership plan for all members',
+                    'Member events',
+                    '10% gift shop discount',
+                    'Member magazine',
+                ],
+            ],
+            [
+                'id'       => 2,
+                'name'     => 'Family',
+                'price'    => 199,
+                'duration' => '/year',
+                'featured' => true,
+                'features' => [
+                    'Unlimited admission for 2 adults + 1 child',
+                    'Member events',
+                    '15% gift shop discount',
+                    'Member magazine',
+                    'Priority access to exhibitions',
+                ],
+            ],
+            [
+                'id'       => 3,
+                'name'     => 'Patron',
+                'price'    => 500,
+                'duration' => '/year',
+                'featured' => false,
+                'features' => [
+                    'Unlimited admission + up to 4 guests',
+                    'VIP events access',
+                    '20% gift shop discount',
+                    'Member magazine',
+                    'Priority access to exhibitions',
+                    'Exclusive Patron benefits',
                 ],
             ],
         ];
@@ -91,7 +119,7 @@ class MembershipController extends Controller
             'email'              => ['required', 'email', 'max:255'],
             'gift_first_name'    => ['nullable', 'string', 'max:100'],
             'gift_last_name'     => ['nullable', 'string', 'max:100'],
-            'gift_email'         => ['nullable', 'email', 'max:255', 'required_if:is_gift,1'],
+            'gift_email'         => ['nullable', 'email', 'max:255'],
             'street_address'     => ['nullable', 'string', 'max:255'],
             'apartment'          => ['nullable', 'string', 'max:255'],
             'city'               => ['nullable', 'string', 'max:100'],
@@ -108,98 +136,35 @@ class MembershipController extends Controller
             abort(403, 'User or guest identity not found.');
         }
 
-        $isGift         = (bool) ($validated['is_gift'] ?? false);
-        $isAutoRenewal  = (bool) ($validated['auto_renewal'] ?? false);
-        $recipientEmail = $isGift
-            ? strtolower(trim((string) $validated['gift_email']))
-            : strtolower(trim((string) (Auth::user()?->email ?? $validated['email'])));
-        $membershipPrice = 99.00;
-        $discountAmount  = $isAutoRenewal ? round($membershipPrice * 0.10, 2) : 0.00;
-        $totalAmount     = round($membershipPrice - $discountAmount, 2);
+        $membershipId = (int) ($validated['membership_id'] ?? 1);
+        $membershipCatalog = [
+            1 => ['name' => 'Individual', 'price' => 99.00],
+            2 => ['name' => 'Family', 'price' => 199.00],
+            3 => ['name' => 'Patron', 'price' => 500.00],
+        ];
 
-        $order = DB::transaction(function () use ($request, $userId, $guestId, $isGift, $recipientEmail, $isAutoRenewal, $totalAmount) {
+        $membership = $membershipCatalog[$membershipId] ?? $membershipCatalog[1];
+
+        $order = DB::transaction(function () use ($userId, $guestId, $membership) {
             $order = Order::create([
                 'order_code'   => (string) Str::uuid(),
                 'user_id'      => $userId,
                 'guest_id'     => $guestId,
                 'order_date'   => now(),
                 'expired_at'   => now()->addMinutes(20),
-                'total_amount' => $totalAmount,
-                'order_type'   => 'membership',
+                'total_amount' => $membership['price'],
             ]);
 
             Payment::create([
                 'order_id'       => $order->order_id,
                 'payment_method' => 'Membership',
-                'amount'         => $totalAmount,
+                'amount'         => $membership['price'],
                 'payment_status' => 'Pending',
-            ]);
-
-            $request->session()->put("membership_checkout_meta.{$order->order_id}", [
-                'is_gift'         => $isGift,
-                'auto_renewal'    => $isAutoRenewal,
-                'recipient_email' => $recipientEmail,
             ]);
 
             return $order;
         });
 
         return redirect()->route('checkout.payments', $order->order_id);
-    }
-
-    public function activate(string $token): RedirectResponse
-    {
-        $membership = Membership::where('activation_token', $token)->firstOrFail();
-
-        if ($membership->is_gift) {
-            abort(404);
-        }
-
-        if ($membership->token_expires_at && $membership->token_expires_at->isPast()) {
-            abort(403, 'Activation token has expired.');
-        }
-
-        if (! Auth::check()) {
-            return redirect()->route('account.login')->with('info', 'Please log in to activate your membership.');
-        }
-
-        $user = Auth::user();
-
-        if (strtolower((string) $user->email) !== strtolower((string) $membership->recipient_email)) {
-            abort(403, 'Unauthorized.');
-        }
-
-        app(MembershipService::class)->activateMembership($membership, $user);
-
-        return redirect()->route('account.index')->with('success', 'Membership activated successfully.');
-    }
-
-    public function claimGift(string $token): RedirectResponse
-    {
-        $membership = Membership::where('activation_token', $token)->firstOrFail();
-
-        if (! $membership->is_gift) {
-            abort(404);
-        }
-
-        if ($membership->token_expires_at && $membership->token_expires_at->isPast()) {
-            abort(403, 'Gift claim token has expired.');
-        }
-
-        if (! Auth::check()) {
-            return redirect()->route('account.login')->with('info', 'Please log in to claim your gift membership.');
-        }
-
-        $user = Auth::user();
-
-        if (strtolower((string) $user->email) !== strtolower((string) $membership->recipient_email)) {
-            abort(403, 'Unauthorized.');
-        }
-
-        /** @var MembershipService $membershipService */
-        $membershipService = app(MembershipService::class);
-        $result            = $membershipService->claimGiftMembership($membership, $user);
-
-        return redirect()->route('account.index')->with('success', $result['message']);
     }
 }

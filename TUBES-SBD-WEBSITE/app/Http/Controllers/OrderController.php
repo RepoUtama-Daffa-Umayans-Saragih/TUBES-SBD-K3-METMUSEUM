@@ -127,6 +127,7 @@ class OrderController extends Controller
 
         $order->load([
             'payment',
+            'membership.user',
             'tickets.ticketAvailability.ticketType',
             'tickets.ticketAvailability.visitSchedule.location',
         ]);

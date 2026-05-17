@@ -48,7 +48,7 @@ class GuestLoginController extends Controller
         // Migrate any anonymous session cart to this guest's DB cart
         CartController::migrateSessionCartToDb(null, $guest->guest_id);
 
-        return redirect()->intended(route('ticket.checkout.process'))
+        return redirect()->route('ticket.admission')
             ->with('success', 'You are continuing as a guest.');
     }
 }

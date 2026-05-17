@@ -1,13 +1,13 @@
 <?php
 namespace App\Http\Controllers;
 
-use App\Mail\OrderSuccessMail;
 use App\Models\Cart;
 use App\Models\Guest;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketAvailability;
+use App\Services\MembershipService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +15,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -201,8 +200,8 @@ class CheckoutController extends Controller
         }
 
         try {
-            $userId  = $order->user_id;
-            $guestId = $order->guest_id;
+            $userId            = $order->user_id;
+            $guestId           = $order->guest_id;
             $isMembershipOrder = $order->payment?->payment_method === 'Membership';
 
             DB::transaction(function () use ($order, $userId, $guestId, $isMembershipOrder) {
@@ -267,7 +266,13 @@ class CheckoutController extends Controller
         }
 
         if ($order->payment?->payment_method === 'Membership') {
-            $order->load(['guest']);
+            $order->load(['user', 'guest']);
+
+            $meta       = session()->pull("membership_checkout_meta.{$order->order_id}", []);
+            $membership = app(MembershipService::class)->createPendingMembership($order, $meta);
+
+            return redirect()->route('ticket.checkout.success', $order->order_id)
+                ->with('success', 'Membership payment successful.');
 
             return redirect()->route('ticket.checkout.success', $order->order_id)
                 ->with('success', 'Membership payment successful.');

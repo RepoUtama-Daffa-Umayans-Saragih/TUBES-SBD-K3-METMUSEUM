@@ -141,6 +141,12 @@ Route::prefix('member')->group(function () {
     Route::post('/add-member', [MembershipController::class, 'purchase'])
         ->middleware('user.or.guest')
         ->name('member.add-member.submit');
+
+    Route::get('/activate/{token}', [MembershipController::class, 'activate'])
+        ->name('member.activate');
+
+    Route::get('/gift/claim/{token}', [MembershipController::class, 'claimGift'])
+        ->name('member.gift.claim');
 });
 
 // =========================

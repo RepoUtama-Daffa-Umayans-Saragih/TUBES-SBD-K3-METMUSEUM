@@ -33,7 +33,7 @@ class GuestCheckoutController extends Controller
             'guest_name' => $guest->first_name,
         ]);
 
-        return redirect()->intended(route('ticket.checkout'))
+        return redirect()->route('ticket.admission')
             ->with('success', 'Guest profile saved successfully.');
     }
 }

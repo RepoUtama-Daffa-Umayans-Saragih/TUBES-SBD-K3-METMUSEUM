@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\MembershipService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,6 +57,8 @@ class LoginController extends Controller
 
         // Migrate any anonymous session cart to the authenticated user's DB cart
         CartController::migrateSessionCartToDb(Auth::id(), null);
+
+        app(MembershipService::class)->expireMembershipsForUser($user);
 
         return redirect()->intended(route('account.index'))
             ->with('success', 'Welcome back! You have logged in successfully.');

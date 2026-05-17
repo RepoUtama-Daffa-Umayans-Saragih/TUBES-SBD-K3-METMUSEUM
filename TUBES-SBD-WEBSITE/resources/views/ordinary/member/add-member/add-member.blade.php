@@ -66,41 +66,62 @@
                 </div>
             </section>
 
+            {{-- === SECTION: Automatic Renewal === --}}
+            <section class="mem-card mem-card--renewal" aria-labelledby="renewalTitle" data-membership-price="99.00" data-discount-rate="0.10">
+                <div class="mem-renewal-card">
+                    <div class="mem-renewal-icon" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    </div>
+
+                    <div class="mem-renewal-content">
+                        <div class="mem-renewal-copy">
+                            <h2 class="mem-card__title" id="renewalTitle">Automatic Renewal</h2>
+                            <p class="mem-renewal-subtitle">Save 10% on every membership renewal.</p>
+                            <p class="mem-renewal-description">Choose automatic renewal and keep your membership active with a built-in 10% discount on the membership price.</p>
+                        </div>
+
+                        <div class="mem-renewal-options" role="radiogroup" aria-labelledby="renewalTitle">
+                            <label class="mem-radio-label mem-radio-label--compact">
+                                <input type="radio" name="auto_renewal" value="0" class="mem-radio-input" {{ old('auto_renewal', '0') == '0' ? 'checked' : '' }}>
+                                <span class="mem-radio-custom" aria-hidden="true"></span>
+                                <span class="mem-radio-text">No, thanks. Please remind me to renew.</span>
+                            </label>
+                            <label class="mem-radio-label mem-radio-label--compact">
+                                <input type="radio" name="auto_renewal" value="1" class="mem-radio-input" {{ old('auto_renewal') == '1' ? 'checked' : '' }}>
+                                <span class="mem-radio-custom" aria-hidden="true"></span>
+                                <span class="mem-radio-text">Yes, renew my support automatically.</span>
+                            </label>
+                        </div>
+
+                        <div class="mem-price-summary" aria-live="polite">
+                            <div class="mem-price-summary__header">Live Price Summary</div>
+                            <div class="mem-price-summary__rows">
+                                <div class="mem-price-row">
+                                    <span>Membership Price</span>
+                                    <strong data-price-base>$99.00</strong>
+                                </div>
+                                <div class="mem-price-row mem-price-row--discount" data-discount-row hidden>
+                                    <span>Auto Renewal Discount</span>
+                                    <strong data-price-discount>-10%</strong>
+                                </div>
+                                <div class="mem-price-row mem-price-row--savings" data-savings-row hidden>
+                                    <span>You Save</span>
+                                    <strong data-price-savings>$9.90</strong>
+                                </div>
+                                <div class="mem-price-row mem-price-row--total">
+                                    <span>Total</span>
+                                    <strong data-price-total>$99.00</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {{-- ===================================================== --}}
             {{-- STATE 1: NOT A GIFT (default shown) --}}
             {{-- ===================================================== --}}
             <div id="stateNotGift" class="mem-state mem-state--active">
-
-                {{-- Auto-Renewal Card --}}
-                <section class="mem-card mem-card--renewal" aria-labelledby="renewalTitle">
-                    <div class="mem-card__accent-bar"></div>
-                    <div class="mem-card__inner">
-                        <div class="mem-renewal-icon" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                        </div>
-                        <div class="mem-renewal-body">
-                            <h2 class="mem-card__title" id="renewalTitle">
-                                Save <span class="mem-highlight">10%</span> when you sign up for Automatic Renewal!
-                            </h2>
-                            <div class="mem-renewal-desc">
-                                <p>The 10% Membership discount is applicable online only with coupon code <strong>AUTO10</strong> and limited to Global, Individual, Dual, Family, Enthusiast, and Ambassador level Memberships.</p>
-                                <p>This 10% discount is a <em>one-time</em> sign up discount. Subsequent autorenewals will charge the then current full Membership level dues of the respective Membership level. Only applicable to Members who are not currently enrolled in the Membership autorenewal program.</p>
-                            </div>
-                            <div class="mem-radio-group mem-radio-group--stacked" role="radiogroup" aria-label="Automatic renewal options">
-                                <label class="mem-radio-label">
-                                    <input type="radio" name="auto_renewal" value="0" class="mem-radio-input" checked>
-                                    <span class="mem-radio-custom" aria-hidden="true"></span>
-                                    <span class="mem-radio-text">No, thanks. Please remind me to renew.</span>
-                                </label>
-                                <label class="mem-radio-label">
-                                    <input type="radio" name="auto_renewal" value="1" class="mem-radio-input">
-                                    <span class="mem-radio-custom" aria-hidden="true"></span>
-                                    <span class="mem-radio-text">Yes, renew my support automatically.</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
                 {{-- Primary Member --}}
                 <section class="mem-card" aria-labelledby="primaryMemberTitle">
@@ -426,6 +447,55 @@
     var giftYes     = document.getElementById('giftYes');
     var stateNo     = document.getElementById('stateNotGift');
     var stateYes    = document.getElementById('stateIsGift');
+    var renewalCard = document.querySelector('.mem-card--renewal');
+
+    function formatMoney(amount) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(amount);
+    }
+
+    function updateRenewalSummary() {
+        if (!renewalCard) {
+            return;
+        }
+
+        var membershipPrice = parseFloat(renewalCard.getAttribute('data-membership-price') || '99');
+        var discountRate = parseFloat(renewalCard.getAttribute('data-discount-rate') || '0.10');
+        var selectedRadio = renewalCard.querySelector('input[name="auto_renewal"]:checked');
+        var autoRenewalEnabled = selectedRadio && selectedRadio.value === '1';
+        var discountAmount = autoRenewalEnabled ? (membershipPrice * discountRate) : 0;
+        var totalAmount = membershipPrice - discountAmount;
+
+        var priceBaseEl = renewalCard.querySelector('[data-price-base]');
+        var priceTotalEl = renewalCard.querySelector('[data-price-total]');
+        var priceSavingsEl = renewalCard.querySelector('[data-price-savings]');
+        var discountRow = renewalCard.querySelector('[data-discount-row]');
+        var savingsRow = renewalCard.querySelector('[data-savings-row]');
+
+        if (priceBaseEl) {
+            priceBaseEl.textContent = formatMoney(membershipPrice);
+        }
+
+        if (priceTotalEl) {
+            priceTotalEl.textContent = formatMoney(totalAmount);
+        }
+
+        if (priceSavingsEl) {
+            priceSavingsEl.textContent = formatMoney(discountAmount);
+        }
+
+        if (discountRow) {
+            discountRow.hidden = !autoRenewalEnabled;
+        }
+
+        if (savingsRow) {
+            savingsRow.hidden = !autoRenewalEnabled;
+        }
+
+        renewalCard.classList.toggle('mem-card--renewal-active', autoRenewalEnabled);
+    }
 
     function switchState(isGift) {
         if (isGift) {
@@ -450,6 +520,13 @@
     giftYes.addEventListener('change', function () {
         if (this.checked) switchState(true);
     });
+
+    if (renewalCard) {
+        renewalCard.querySelectorAll('input[name="auto_renewal"]').forEach(function (radio) {
+            radio.addEventListener('change', updateRenewalSummary);
+        });
+        updateRenewalSummary();
+    }
 
     // Init: ensure correct state on page load (handles back-button / old() value)
     if (giftYes.checked) {

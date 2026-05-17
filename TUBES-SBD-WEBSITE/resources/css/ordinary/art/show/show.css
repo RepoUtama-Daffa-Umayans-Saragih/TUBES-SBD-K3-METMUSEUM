@@ -388,35 +388,228 @@
   margin: 0;
 }
 
-/* Provenance */
-.met-prose {
-  font-family: var(--met-sans);
-  font-size: 14.5px;
-  line-height: 1.8;
-  color: #333;
-}
-
-/* Exhibition list */
-.met-exlist { list-style: none; margin: 0; padding: 0; }
-.met-exitem {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-.met-exitem:last-child { border-bottom: none; }
-.met-exitem__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--met-black);
-}
-.met-exitem__venue,
-.met-exitem__dates,
-.met-exitem__notes {
+/* ── Section subtitle ── */
+.met-section-subtitle {
   font-size: 13px;
   color: var(--met-gray);
-  line-height: 1.5;
+  margin: 0 0 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── Helper link ── */
+.met-dl__link {
+  color: var(--met-black);
+  word-break: break-all;
+  font-size: 13px;
+}
+.met-dl__link:hover { color: var(--met-red); }
+
+/* ════════════ SIM ════════════ */
+.met-sim-section { display: flex; flex-direction: column; gap: 32px; }
+.met-sim-group__heading {
+  font-family: var(--met-sans);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--met-gray-dark);
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--met-border);
+}
+.met-sim-entry {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+.met-sim-entry:last-child { border-bottom: none; }
+.met-sim-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.met-sim-badge--signature  { background: #f0e6d0; color: #7a4f1a; border: 1px solid #d4b896; }
+.met-sim-badge--inscription { background: #e6edf5; color: #1a3d6b; border: 1px solid #a0bcd8; }
+.met-sim-badge--marking     { background: #e8f0e6; color: #2a5a24; border: 1px solid #9cbf96; }
+.met-sim-text {
+  font-family: var(--met-sans);
+  font-size: 14px;
+  line-height: 1.75;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ════════════ PROVENANCE ════════════ */
+.met-provenance-wrap { display: flex; flex-direction: column; gap: 0; }
+.met-provenance-note {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--met-gray);
+  font-style: italic;
+  margin: 0 0 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--met-border);
+}
+.met-provenance-body {
+  max-height: 220px;
+  overflow: hidden;
+  position: relative;
+  transition: max-height .4s ease;
+}
+.met-provenance-body::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+  transition: opacity .3s;
+}
+.met-provenance-body--open {
+  max-height: 2000px;
+}
+.met-provenance-body--open::after { opacity: 0; }
+.met-provenance-pre {
+  font-family: var(--met-sans);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.met-provenance-toggle {
+  align-self: flex-start;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--met-sans);
+  color: var(--met-black);
+  text-decoration: underline;
+  text-decoration-color: #bbb;
+  text-underline-offset: 2px;
+}
+.met-provenance-toggle:hover { color: var(--met-red); }
+
+/* ════════════ EXHIBITION TIMELINE ════════════ */
+.met-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 2px solid var(--met-border);
+  margin-left: 8px;
+}
+.met-timeline__item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 0 0 28px 0;
+  position: relative;
+}
+.met-timeline__item:last-child { padding-bottom: 0; }
+.met-timeline__dot {
+  position: absolute;
+  left: -9px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--met-white);
+  border: 2px solid var(--met-red);
+  flex-shrink: 0;
+}
+.met-timeline__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 22px;
+}
+.met-timeline__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--met-black);
+  line-height: 1.4;
+}
+.met-timeline__venue {
+  font-size: 13px;
+  color: var(--met-gray-dark);
+}
+.met-timeline__date {
+  font-size: 12.5px;
+  color: var(--met-gray);
+  font-style: italic;
+}
+.met-timeline__cat {
+  font-size: 12px;
+  color: var(--met-gray);
+  background: var(--met-gray-lt);
+  padding: 1px 7px;
+  display: inline-block;
+  border-radius: 2px;
+  width: fit-content;
+}
+
+/* ════════════ REFERENCES BIBLIOGRAPHY ════════════ */
+.met-biblist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: bibcounter;
+}
+.met-biblist__item {
+  counter-increment: bibcounter;
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+.met-biblist__item:last-child { border-bottom: none; }
+.met-biblist__item::before {
+  content: counter(bibcounter);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--met-black);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-top: 2px;
+  font-family: var(--met-sans);
+}
+.met-biblist__text {
+  font-family: var(--met-sans);
+  font-size: 14px;
+  line-height: 1.75;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
 }
 
 /* Empty state */
@@ -424,6 +617,7 @@
   font-size: 14px;
   color: var(--met-gray);
   margin: 0;
+  padding: 8px 0;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -527,4 +721,8 @@
   .met-section-title { font-size: 1.25rem; }
   .met-more-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .met-thumb { width: 54px; height: 54px; }
+  .met-sim-entry { flex-direction: column; gap: 8px; }
+  .met-sim-badge { align-self: flex-start; }
+  .met-timeline__body { padding-left: 16px; }
+  .met-biblist__item { gap: 10px; }
 }

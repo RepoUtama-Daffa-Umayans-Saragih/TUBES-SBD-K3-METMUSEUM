@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArtWork;
+use App\Models\Classification;
 use App\Models\Department;
 use App\Models\Location;
 use App\Models\Material;
@@ -22,6 +23,13 @@ class ArtController extends Controller
                     'value' => $item->object_type_name,
                     'label' => $item->object_type_name,
                     'group' => 'Object type',
+                ];
+            }))
+            ->merge(Classification::orderBy('classification_name')->get(['classification_id', 'classification_name'])->map(function ($item) {
+                return [
+                    'value' => $item->classification_name,
+                    'label' => $item->classification_name,
+                    'group' => 'Classification',
                 ];
             }))
             ->merge(Material::orderBy('material_name')->get(['material_id', 'material_name'])->map(function ($item) {
@@ -68,17 +76,25 @@ class ArtController extends Controller
     }
 
     /**
-     * Display a specific artwork detail page
+     * Display a specific artwork detail page.
+     * Eager-loads every relationship needed by the detail view.
      */
     public function show($id)
     {
-        $artwork = ArtWork::with(['department', 'objectType', 'location', 'images'])
+        $artwork = ArtWork::with([
+            'department', 'objectType', 'location', 'classification', 'creditLine',
+            'images',
+            'constituents', 'cultures', 'mediums', 'measurements',
+            'exhibitionHistories',
+            'references',
+            'artWorkSims',
+        ])
             ->where('art_work_id', $id)
             ->firstOrFail();
 
         return view('ordinary.art.show.show', [
             'artwork' => $artwork,
-            'title'   => 'Artwork Detail',
+            'title'   => $artwork->title,
         ]);
     }
 
@@ -177,6 +193,9 @@ class ArtController extends Controller
                     })
                     ->orWhereHas('mediums', function ($relation) use ($selectedObjectTerms) {
                         $relation->whereIn('medium_name', $selectedObjectTerms->all());
+                    })
+                    ->orWhereHas('classification', function ($relation) use ($selectedObjectTerms) {
+                        $relation->whereIn('classification_name', $selectedObjectTerms->all());
                     });
             });
         }

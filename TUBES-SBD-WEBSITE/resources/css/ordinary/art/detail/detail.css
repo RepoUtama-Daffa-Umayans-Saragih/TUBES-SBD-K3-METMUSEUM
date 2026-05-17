@@ -8,6 +8,8 @@
 =============================================================
 */
 
+@import '../../../art/show.css';
+
 /* ============================================================
    DESIGN TOKENS
 ============================================================ */
@@ -888,4 +890,231 @@
 .met-page .col,
 .met-page [class*="col-"] {
   padding: 0 !important;
+}
+
+/* ============================================================
+   NEW MUSEUM-GRADE SECTIONS (Description, Provenance, SIM, Exhibition, References)
+============================================================ */
+
+/* ── Section subtitle ── */
+.met-section-subtitle {
+  font-size: var(--size-small);
+  color: var(--met-gray);
+  margin: 0 0 20px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ════════════ SIM ════════════ */
+.met-sim-section { display: flex; flex-direction: column; gap: 32px; padding-top: 8px;}
+.met-sim-group__heading {
+  font-family: var(--font-sans);
+  font-size: var(--size-small);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--met-gray);
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--met-border);
+}
+.met-sim-entry {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--met-row-border);
+}
+.met-sim-entry:last-child { border-bottom: none; }
+.met-sim-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.met-sim-badge--signature  { background: #f0e6d0; color: #7a4f1a; border: 1px solid #d4b896; }
+.met-sim-badge--inscription { background: #e6edf5; color: #1a3d6b; border: 1px solid #a0bcd8; }
+.met-sim-badge--marking     { background: #e8f0e6; color: #2a5a24; border: 1px solid #9cbf96; }
+.met-sim-text {
+  font-family: var(--font-sans);
+  font-size: var(--size-meta);
+  line-height: var(--lh-body);
+  color: var(--met-near-black);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ════════════ PROVENANCE & DESCRIPTION ════════════ */
+.met-collapsible-wrap { display: flex; flex-direction: column; gap: 0; }
+.met-provenance-note {
+  font-size: var(--size-small);
+  line-height: var(--lh-meta);
+  color: var(--met-gray);
+  font-style: italic;
+  margin: 0 0 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--met-border);
+}
+.met-collapsible-body {
+  max-height: 220px;
+  overflow: hidden;
+  position: relative;
+  transition: max-height .4s ease;
+}
+.met-collapsible-body::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 64px;
+  background: linear-gradient(to bottom, transparent, var(--met-bg));
+  pointer-events: none;
+  transition: opacity .3s;
+}
+.met-collapsible-body--open {
+  max-height: 2000px;
+}
+.met-collapsible-body--open::after { opacity: 0; }
+.met-collapsible-pre {
+  font-family: var(--font-sans);
+  font-size: var(--size-body);
+  line-height: var(--lh-body);
+  color: var(--met-near-black);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+}
+.met-collapsible-toggle {
+  align-self: flex-start;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: var(--size-small);
+  font-family: var(--font-sans);
+  color: var(--met-black);
+  text-decoration: underline;
+  text-decoration-color: #bbb;
+  text-underline-offset: 2px;
+}
+.met-collapsible-toggle:hover { color: var(--met-red); }
+
+/* ════════════ EXHIBITION TIMELINE ════════════ */
+.met-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-left: 2px solid var(--met-border);
+  margin-left: 8px;
+}
+.met-timeline__item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 0 0 28px 0;
+  position: relative;
+}
+.met-timeline__item:last-child { padding-bottom: 0; }
+.met-timeline__dot {
+  position: absolute;
+  left: -9px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--met-white);
+  border: 2px solid var(--met-red);
+  flex-shrink: 0;
+}
+.met-timeline__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 22px;
+}
+.met-timeline__title {
+  font-size: var(--size-meta);
+  font-weight: 600;
+  color: var(--met-black);
+  line-height: 1.4;
+}
+.met-timeline__venue {
+  font-size: var(--size-small);
+  color: var(--met-gray);
+}
+.met-timeline__date {
+  font-size: 12.5px;
+  color: var(--met-gray);
+  font-style: italic;
+}
+.met-timeline__cat {
+  font-size: 12px;
+  color: var(--met-gray);
+  background: var(--met-light-gray);
+  padding: 1px 7px;
+  display: inline-block;
+  border-radius: 2px;
+  width: fit-content;
+}
+
+/* ════════════ REFERENCES BIBLIOGRAPHY ════════════ */
+.met-biblist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: bibcounter;
+}
+.met-biblist__item {
+  counter-increment: bibcounter;
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--met-row-border);
+  align-items: flex-start;
+}
+.met-biblist__item:last-child { border-bottom: none; }
+.met-biblist__item::before {
+  content: counter(bibcounter);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--met-black);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-top: 2px;
+  font-family: var(--font-sans);
+}
+.met-biblist__text {
+  font-family: var(--font-sans);
+  font-size: var(--size-meta);
+  line-height: var(--lh-body);
+  color: var(--met-near-black);
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .met-sim-entry { flex-direction: column; gap: 8px; }
+  .met-sim-badge { align-self: flex-start; }
+  .met-timeline__body { padding-left: 16px; }
+  .met-biblist__item { gap: 10px; }
 }

@@ -9,8 +9,8 @@
 
 @php
     /* ── Images ─────────────────────────────────────────── */
-    $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
-    $allImages    = $artwork->images ?? collect();
+    $allImages    = ($artwork->images ?? collect())->sortBy('display_order')->values();
+    $primaryImage = $allImages->firstWhere('is_primary', true) ?? $allImages->first();
 
     /* ── Resolve image URL ── */
     $resolveUrl = function($img) {
@@ -224,9 +224,10 @@
 
                 @if($allImages->count() > 1)
                     <div class="met-thumbs">
+                        @php $primaryUrl = $resolveUrl($primaryImage); @endphp
                         @foreach($allImages as $img)
                             @php $u = $resolveUrl($img); @endphp
-                            <button class="met-thumb" onclick="metSetImg('{{ $u }}')" type="button" data-url="{{ $u }}">
+                            <button class="met-thumb {{ $u === $primaryUrl ? 'met-thumb--on' : '' }}" onclick="metSetImg('{{ $u }}')" type="button" data-url="{{ $u }}">
                                 <img src="{{ $u }}" alt="">
                             </button>
                         @endforeach

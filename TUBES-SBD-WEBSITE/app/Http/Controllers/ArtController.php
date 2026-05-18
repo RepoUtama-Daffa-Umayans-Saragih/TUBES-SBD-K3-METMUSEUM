@@ -111,7 +111,7 @@ class ArtController extends Controller
      */
     public function show($id)
     {
-        $artwork = ArtWork::with(['department', 'objectType', 'location', 'images'])
+        $artwork = ArtWork::with(['department', 'objectType', 'location', 'images', 'references', 'exhibitionHistories', 'artWorkSims'])
             ->where('art_work_id', $id)
             ->firstOrFail();
 

@@ -42,6 +42,7 @@ class MetMuseumDataPipelineSeeder extends Seeder
             ExhibitionHistorySeeder::class,  // art_work_exhibition_histories
             ReferenceSeeder::class,          // art_work_references
             SimSeeder::class,                // art_work_sims
+            ArtWorkImageSeeder::class,       // art_work_images (curated_2000 JSON)
         ]);
 
         $this->command->info('');

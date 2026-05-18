@@ -13,27 +13,6 @@
         <p class="page-subtitle">Point-of-sale interface for onsite ticket purchases</p>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="quick-stats-grid">
-        @forelse($ticketTypes ?? [] as $index => $type)
-            @include('admin.ticket-analytics.components.stat-card', [
-                'title' => $type->ticket_type_name . ' Tickets',
-                'value' => '$' . number_format($type->base_price, 2),
-                'icon' => '🎫',
-                'trend' => 'From Database',
-                'color' => ['primary', 'success', 'info', 'warning'][$index % 4] ?? 'primary'
-            ])
-        @empty
-            @include('admin.ticket-analytics.components.stat-card', [
-                'title' => 'No Ticket Types',
-                'value' => '0',
-                'icon' => '❌',
-                'trend' => 'Add ticket types',
-                'color' => 'danger'
-            ])
-        @endforelse
-    </div>
-
     <!-- Available Dates Section - Calendar Picker -->
     <section class="tickets-dates-section">
         <h2 class="section-title">Select Visit Date</h2>
@@ -156,73 +135,6 @@
     font-weight: 600;
     margin-bottom: 1.5rem;
     color: #333;
-}
-
-.quick-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.dates-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.date-card {
-    padding: 1rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.date-card:hover {
-    border-color: #2196F3;
-    background-color: #f5f9ff;
-}
-
-.date-card.selected {
-    border-color: #2196F3;
-    background-color: #e3f2fd;
-}
-
-.date-card__day {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 0.25rem;
-}
-
-.date-card__date {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.date-card__available {
-    font-size: 0.8rem;
-    color: #2196F3;
-    margin-bottom: 0.75rem;
-}
-
-.date-card__btn {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
-}
-
-.date-card__btn:hover {
-    background-color: #1976D2;
 }
 
 .purchase-form {

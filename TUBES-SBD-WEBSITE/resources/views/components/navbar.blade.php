@@ -1,11 +1,11 @@
 <nav class="the-met-red text-white w-full h-[135px] flex items-center px-8" style="background-color: #e4002b;">
     <div class="w-full max-w-[1440px] mx-auto flex justify-between items-center h-full pt-4">
-        
+
         <div class="flex items-end gap-10 h-full pb-6">
             <div class="mb-[-4px]">
                 <a href="{{ route('home') }}">
-                    <img src="https://www.metmuseum.org/assets/img/met-logo.svg" 
-                         alt="The Met" 
+                    <img src="https://www.metmuseum.org/assets/img/met-logo.svg"
+                         alt="The Met"
                          class="h-[82px] brightness-0 invert">
                 </a>
             </div>
@@ -36,7 +36,7 @@
                     <i class="fa-solid fa-shopping-cart"></i> Cart
                 </a>
 
-                @if(Auth::check() || session()->has('guest_id'))
+                @if(Auth::check() || session()->has('guest_user') || session()->has('guest_id'))
                     @auth
                         <a href="{{ route('order.show') }}" class="border-[1.5px] border-white px-[22px] py-[9px] rounded-[4px] text-[15px] font-bold hover:bg-white hover:text-[#e4002b] transition-all">
                             Orders

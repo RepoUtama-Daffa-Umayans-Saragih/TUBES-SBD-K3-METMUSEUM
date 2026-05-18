@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -45,14 +44,14 @@ class AuthController extends Controller
     public function handleLogin(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('account.index'))->with('success', 'Logged in successfully!');
+            return redirect()->route('home')->with('success', 'Logged in successfully!');
         }
 
         return back()->withErrors([

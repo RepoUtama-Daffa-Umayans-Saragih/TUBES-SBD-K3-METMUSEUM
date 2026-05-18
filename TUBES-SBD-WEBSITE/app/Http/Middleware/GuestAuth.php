@@ -13,7 +13,7 @@ class GuestAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! session()->has('guest_id') && ! Auth::check()) {
+        if (! ($request->session()->has('guest_user') || $request->session()->has('guest_id')) && ! Auth::check()) {
             return redirect('/account/login');
         }
 

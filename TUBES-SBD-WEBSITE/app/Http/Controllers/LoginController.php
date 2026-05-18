@@ -60,7 +60,7 @@ class LoginController extends Controller
 
         app(MembershipService::class)->expireMembershipsForUser($user);
 
-        return redirect()->intended(route('account.index'))
+        return redirect()->route('home')
             ->with('success', 'Welcome back! You have logged in successfully.');
     }
 }

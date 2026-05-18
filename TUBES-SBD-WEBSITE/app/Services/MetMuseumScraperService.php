@@ -235,4 +235,112 @@ class MetMuseumScraperService
         Log::info("[SCRAPE] Description Length: {$len}");
         Log::info("[SCRAPE] Preview: {$preview}...");
     }
+
+    /**
+     * Get artwork images (primary + gallery) from a specific URL.
+     *
+     * @param string $url
+     * @return array
+     */
+    public function getImagesFromUrl($url)
+    {
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL) || strpos($url, 'metmuseum.org') === false) {
+            return [];
+        }
+
+        // Force HTTPS
+        $url = str_replace('http://', 'https://', $url);
+
+        Log::info("[SCRAPE_IMAGE] DEBUG START: {$url}");
+
+        try {
+            // Request using shell_exec with curl.exe
+            $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+            $cmd = "curl.exe -k -s -L -A \"{$ua}\" --compressed \"{$url}\"";
+            $html = shell_exec($cmd);
+
+            if (empty($html)) {
+                Log::error("[SCRAPE_IMAGE] FAILED URL: {$url}. Shell_exec returned empty result.");
+                return [];
+            }
+
+            $status = (strpos($html, 'verify your browser') !== false || strpos($html, 'Security Checkpoint') !== false) ? 429 : 200;
+            
+            if ($status === 429) {
+                Log::error("[SCRAPE_IMAGE] FAILED URL: {$url}. Status: 429. Blocked by security checkpoint.");
+                return [];
+            }
+
+            $images = [];
+
+            // Primary Regex: Check for OpenGraph (og:image) meta tag (most reliable on modern frontends)
+            if (preg_match('/<meta[^>]*property="og:image"[^>]*content="([^"]+)"[^>]*>/i', $html, $matches) || 
+                preg_match('/<meta[^>]*content="([^"]+)"[^>]*property="og:image"[^>]*>/i', $html, $matches)) {
+                if (!empty($matches[1])) {
+                    $images[] = $matches[1];
+                }
+            }
+
+            // Secondary Regex: Check for preload link image (NextJS specific)
+            if (preg_match('/<link[^>]*rel="preload"[^>]*as="image"[^>]*href="([^"]+)"[^>]*>/i', $html, $matches) ||
+                preg_match('/<link[^>]*href="([^"]+)"[^>]*rel="preload"[^>]*as="image"[^>]*>/i', $html, $matches)) {
+                if (!empty($matches[1])) {
+                    $images[] = $matches[1];
+                }
+            }
+
+            // PRIORITY 1 (UPDATED): Explicit Gallery Thumbnails Shelf Regex
+            // Matches: <img class="thumbnail" src="..."> or <img src="..." class="thumbnail">
+            if (preg_match_all('/<img[^>]*class="[^"]*thumbnail[^"]*"[^>]*src="([^"]+)"/i', $html, $matches) || 
+                preg_match_all('/<img[^>]*src="([^"]+)"[^>]*class="[^"]*thumbnail[^"]*"/i', $html, $matches)) {
+                if (!empty($matches[1])) {
+                    foreach ($matches[1] as $imgUrl) {
+                        if (strpos($imgUrl, 'collectionapi.metmuseum.org/api/collection/v1/iiif/') !== false) {
+                            $images[] = $imgUrl;
+                        }
+                    }
+                }
+            }
+
+            // Fallback Regex: NextJS JSON hydration to capture ALL gallery images
+            if (preg_match_all('/https:\/\/collectionapi\.metmuseum\.org\/api\/collection\/v1\/iiif\/[^\/]+\/[^\/]+\/(?:main-image|restricted|[^"\']+)/i', $html, $matches)) {
+                if (!empty($matches[0])) {
+                    $images = array_merge($images, $matches[0]);
+                }
+            }
+            
+            // Filter out exact thumbnails from web images to prevent duplicate small resolutions 
+            // Optional cleanup step to clean up tracking parameters or quotes if matched
+            $images = array_map(function($img) {
+                return explode('"', explode('\'', $img)[0])[0];
+            }, $images);
+
+            // Deduplicate
+            $images = array_values(array_unique($images));
+            
+            // STRICT FILTERING: Prevent cross-contamination from "Recommended Artworks"
+            // The object ID is the last segment of the original URL
+            preg_match('/\/search\/(\d+)/', $url, $idMatch);
+            $objectId = $idMatch[1] ?? null;
+
+            if ($objectId) {
+                $images = array_filter($images, function($img) use ($objectId) {
+                    return strpos($img, "/iiif/{$objectId}/") !== false;
+                });
+                $images = array_values($images); // Re-index array
+            }
+
+            if (!empty($images)) {
+                Log::info("[SCRAPE_IMAGE] SUCCESS! Found " . count($images) . " images for URL: {$url}");
+                return $images;
+            }
+
+            Log::warning("[SCRAPE_IMAGE] No featured or gallery images found for URL: {$url}");
+            return [];
+
+        } catch (\Exception $e) {
+            Log::error("[SCRAPE_IMAGE] ERROR for URL: {$url}. Message: " . $e->getMessage());
+            return null;
+        }
+    }
 }

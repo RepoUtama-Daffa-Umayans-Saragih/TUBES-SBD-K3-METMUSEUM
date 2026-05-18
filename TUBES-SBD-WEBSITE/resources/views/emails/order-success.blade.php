@@ -35,7 +35,7 @@
         @foreach($order->tickets as $ticket)
             <div style="border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:8px;">
                 <div style="text-align: center; margin-bottom: 10px;">
-                    {!! QrCode::size(100)->generate($ticket->qr_code) !!}
+                    {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(100)->generate($ticket->qr_code) !!}
                 </div>
                 <p><strong>QR Code:</strong> {{ $ticket->qr_code }}</p>
                 <p><strong>Status:</strong> 

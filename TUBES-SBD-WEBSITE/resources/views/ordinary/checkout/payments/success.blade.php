@@ -75,7 +75,7 @@
                         <div class="booking-card-meta">Status: <span class="status-badge {{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
                         <div class="qr-box">
                             <div style="margin-bottom: 15px; display: flex; justify-content: center;">
-                                {!! QrCode::size(140)->generate($ticket->qr_code) !!}
+                                {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(140)->generate($ticket->qr_code) !!}
                             </div>
                             {{ $ticket->qr_code }}
                         </div>

@@ -147,7 +147,7 @@
                                     <div class="item-meta" style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Status: <span class="status-badge status-{{ strtolower($ticket->status) }}">{{ ucfirst($ticket->status) }}</span></div>
                                     <div class="qr-code-text">
                                         <div style="margin-bottom: 10px; display: flex; justify-content: center;">
-                                            {!! QrCode::size(120)->generate($ticket->qr_code) !!}
+                                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(120)->generate($ticket->qr_code) !!}
                                         </div>
                                         {{ $ticket->qr_code }}
                                     </div>

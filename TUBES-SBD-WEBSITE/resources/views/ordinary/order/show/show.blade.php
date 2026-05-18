@@ -192,7 +192,7 @@
                                 <div class="ticket-qr">
                                     <div class="qr-placeholder">
                                         <div style="margin-bottom: 10px; display: flex; justify-content: center;">
-                                            {!! QrCode::size(140)->generate($ticket->qr_code) !!}
+                                            {!! \SimpleSoftwareIO\QrCode\Facades\QrCode::size(140)->generate($ticket->qr_code) !!}
                                         </div>
                                         {{ $ticket->qr_code }}
                                     </div>

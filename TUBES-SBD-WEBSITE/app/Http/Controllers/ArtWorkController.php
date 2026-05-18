@@ -21,13 +21,13 @@ class ArtWorkController extends Controller
                 ->with([
                     'department',
                     'creditLine',
-                    'images' => function($q) {
+                    'images' => function ($q) {
                         $q->where('is_primary', true);
                     },
                     'constituents',
-                    'mediums'
+                    'mediums',
                 ])
-                ->whereHas('images', function($q) {
+                ->whereHas('images', function ($q) {
                     $q->where('is_primary', true);
                 })
                 ->when($request->filled('department_id'), function ($q) use ($request) {
@@ -60,17 +60,17 @@ class ArtWorkController extends Controller
             ];
         };
 
-        $data = app()->environment('testing') 
-            ? $fetchData() 
+        $data = app()->environment('testing')
+            ? $fetchData()
             : Cache::remember($cacheKey, $this->cacheTTL, $fetchData);
 
-        $departments = app()->environment('testing') 
-            ? Department::all() 
-            : Cache::remember('departments_all', $this->cacheTTL, function () { return Department::all(); });
+        $departments = app()->environment('testing')
+            ? Department::all()
+            : Cache::remember('departments_all', $this->cacheTTL, function () {return Department::all();});
 
-        $types = app()->environment('testing') 
-            ? ObjectType::all() 
-            : Cache::remember('types_all', $this->cacheTTL, function () { return ObjectType::all(); });
+        $types = app()->environment('testing')
+            ? ObjectType::all()
+            : Cache::remember('types_all', $this->cacheTTL, function () {return ObjectType::all();});
 
         $activeFilters = [
             'department_id'     => $request->input('department_id'),
@@ -101,13 +101,44 @@ class ArtWorkController extends Controller
                         'department', 'objectType', 'classification', 'creditLine', 'location', 'repository',
                         'images', 'measurements', 'references', 'exhibitionHistories',
                         'materials', 'mediums', 'tags', 'cultures', 'periods', 'dynasties', 'reigns', 'portfolios',
-                        'constituents', 'geographies.country', 'geographies.city', 'geographies.geographyType',
-                        'artWorkSims'
+                        'constituents.nationalities', 'geographies.country', 'geographies.city', 'geographies.geographyType',
+                        'artWorkSims',
                     ])
                     ->firstOrFail();
             });
 
-            return view('ordinary.art.detail.detail', compact('artwork'));
+            $relatedArtworks = ArtWork::query()
+                ->where('art_work_id', '!=', $artwork->art_work_id)
+                ->with([
+                    'department',
+                    'classification',
+                    'cultures',
+                    'images' => function ($query) {
+                        $query->where('is_primary', true);
+                    },
+                    'constituents.nationalities',
+                ])
+                ->where(function ($query) use ($artwork) {
+                    if ($artwork->department_id) {
+                        $query->orWhere('department_id', $artwork->department_id);
+                    }
+
+                    if ($artwork->classification_id) {
+                        $query->orWhere('classification_id', $artwork->classification_id);
+                    }
+
+                    $cultureIds = $artwork->cultures->pluck('culture_id')->filter()->values();
+                    if ($cultureIds->isNotEmpty()) {
+                        $query->orWhereHas('cultures', function ($cultureQuery) use ($cultureIds) {
+                            $cultureQuery->whereIn('cultures.culture_id', $cultureIds->all());
+                        });
+                    }
+                })
+                ->inRandomOrder()
+                ->limit(8)
+                ->get();
+
+            return view('ordinary.art.detail.detail', compact('artwork', 'relatedArtworks'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             abort(404, 'Artwork not found');
         }

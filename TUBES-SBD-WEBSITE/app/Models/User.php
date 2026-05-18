@@ -30,10 +30,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
-            'is_admin' => 'boolean',
+            'password'           => 'hashed',
+            'is_admin'           => 'boolean',
             'premium_started_at' => 'datetime',
-            'premium_ended_at' => 'datetime',
+            'premium_ended_at'   => 'datetime',
         ];
     }
 
@@ -50,6 +50,11 @@ class User extends Authenticatable
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class, 'user_id', 'user_id');
+    }
+
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class, 'user_id', 'user_id');
     }
 
     public function getRememberTokenName()

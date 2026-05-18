@@ -9,7 +9,7 @@
   <!-- BREADCRUMB -->
   <div class="w-full border-b border-[#e5e5e5] bg-white">
     <div class="max-w-[1600px] mx-auto px-16 h-[84px] flex items-center gap-4">
-
+      
       <!-- HOME ICON -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -65,7 +65,7 @@
 
     <!-- SEARCH -->
     <form action="{{ route('art.search') }}" method="GET" class="flex items-center w-full border border-[#cfcfcf]  bg-white h-[58px] rounded-md">
-
+      
       <input
         type="text"
         name="q"
@@ -98,7 +98,7 @@
 
     <!-- QUICK LINKS -->
     <div class="flex items-center gap-3 mt-7 flex-wrap">
-
+      
       <a
         href="{{ route('art.search') }}"
         class="flex items-center gap-2 text-[16px] text-[#111] font-medium hover:underline"
@@ -134,7 +134,290 @@
     </h3>
 
     <!-- GRID -->
-    <x-department-navigation-grid :items="$departmentNavigationItems ?? []" />
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 mb-20">
+
+      <a href="{{ route('art.search', ['department[]' => 'African Art in The Michael C. Rockefeller Wing']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/african-wings.jpg') }}"
+            alt="African Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          African Art in The Michael C. Rockefeller Wing
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'The American Wing']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/american-wing.jpg') }}"
+            alt="The American Wing"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          The American Wing
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Ancient American Art in The Michael C. Rockefeller Wing']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/ancient-american.jpg') }}"
+            alt="Ancient American Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Ancient American Art in The Michael C. Rockefeller Wing
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Ancient West Asian Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/ancient-westAsian.jpg') }}"
+            alt="Ancient West Asian Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Ancient West Asian Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Arms and Armor']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/arms-and-armor.jpg') }}"
+            alt="Arms and Armor"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Arms and Armor
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Asian Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/asian-art.jpg') }}"
+            alt="Asian Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Asian Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'The Costume Institute']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/costume-institute.jpg') }}"
+            alt="The Costume Institute"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          The Costume Institute
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Drawings and Prints']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/drawing-and-prints.jpg') }}"
+            alt="Drawings and Prints"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+         Drawings and Prints
+        </h4>
+      </a>
+
+      <!-- SECOND ROW -->
+
+      <a href="{{ route('art.search', ['department[]' => 'Egyptian Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/egyptian-art.jpg') }}"
+            alt="Egyptian Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Egyptian Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'European Paintings']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/europhean-painting.jpg') }}"
+            alt="European Paintings"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          European Paintings
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'European Sculpture and Decorative Arts']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/european-sculpture.jpg') }}"
+            alt="European Sculpture and Decorative Arts"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          European Sculpture and Decorative Arts
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Greek and Roman Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/greek-and-roman.jpg') }}"
+            alt="Greek and Roman Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Greek and Roman Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Islamic Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/islamic-art.jpg') }}"
+            alt="Islamic Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Islamic Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'The Robert Lehman Collection']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/robert-lehman.jpg') }}"
+            alt="The Robert Lehman Collection"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          The Robert Lehman Collection
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Thomas J. Watson Library']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/thomas-j-watson.jpg') }}"
+            alt="Thomas J. Watson Library"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Thomas J. Watson Library
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Medieval Art and The Cloisters']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/medieval-art.jpg') }}"
+            alt="Medieval Art and The Cloisters"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+          Medieval Art and The Cloisters
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Modern and Contemporary Art']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/modern-contemporary.jpg') }}"
+            alt="Modern and Contemporary Art"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+         Modern and Contemporary Art
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Musical Instruments']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/musical-instrument.jpg') }}"
+            alt="Musical Instruments"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Musical Instruments
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Oceanic Art in The Michael C. Rockefeller Wing']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/oceanic-art.jpg') }}"
+            alt="Oceanic Art in The Michael C. Rockefeller Wing"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Oceanic Art in The Michael C. Rockefeller Wing
+        </h4>
+      </a>
+
+      <a href="{{ route('art.search', ['department[]' => 'Photographs']) }}" class="group cursor-pointer block text-black hover:text-black hover:no-underline">
+        <div class="overflow-hidden">
+          <img
+            src="{{ asset('images/photographs.jpg') }}"
+            alt="Photographs"
+            class="w-full h-[200px] object-cover transition duration-500"
+          />
+        </div>
+
+        <h4 class="text-[18px] leading-[1.25] text-[#111] mt-5 font-semibold">
+       Photographs
+        </h4>
+      </a>
+
+    </div>
 
   </div>
 

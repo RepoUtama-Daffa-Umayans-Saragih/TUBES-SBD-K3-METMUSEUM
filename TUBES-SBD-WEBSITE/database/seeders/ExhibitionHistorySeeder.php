@@ -42,13 +42,18 @@ class ExhibitionHistorySeeder extends Seeder
         $this->consoleInfo('│  ExhibitionHistorySeeder  →  art_work_exhibition_histories   │');
         $this->consoleInfo('└──────────────────────────────────────────────────────────────┘');
 
-        [$handle, $headers, $delimiter, $meta] = $this->readCsvRows(
-            'metmuseum_exhibition_history_final.csv',
-            ','
-        );
+        $jsonPath = database_path('data/metmuseum_exhibition_history_final.json');
+        if (!file_exists($jsonPath)) {
+            $this->consoleWarn('[ExhibitionHistorySeeder] JSON not found: ' . $jsonPath);
+            return;
+        }
 
-        if (!empty($meta['file_missing'])) {
-            $this->consoleWarn('[ExhibitionHistorySeeder] CSV not found: ' . $meta['path']);
+        $jsonContent = file_get_contents($jsonPath);
+        $jsonContent = str_replace(': NaN', ': null', $jsonContent);
+        $rows = json_decode($jsonContent, true);
+
+        if ($rows === null) {
+            $this->consoleWarn('[ExhibitionHistorySeeder] Failed to parse JSON.');
             return;
         }
 
@@ -61,8 +66,7 @@ class ExhibitionHistorySeeder extends Seeder
             'skipped_missing_artwork' => 0,
         ];
 
-        while (($row = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
-            $data = $this->mapCsvRow($headers, $row, $delimiter);
+        foreach ($rows as $data) {
 
             // The BOM-stripped header is 'met_object_id'; fallback supports 'object_id'.
             $metObjectId = $data['met_object_id'] ?? $data['object_id'] ?? null;
@@ -138,8 +142,6 @@ class ExhibitionHistorySeeder extends Seeder
             $record->save();
             $counts['imported']++;
         }
-
-        fclose($handle);
 
         $this->consoleInfo('');
         $this->consoleInfo('[ExhibitionHistorySeeder] ✔ Done');

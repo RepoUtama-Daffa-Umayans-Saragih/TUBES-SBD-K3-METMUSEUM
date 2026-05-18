@@ -173,10 +173,9 @@
 
 /* Renewal Card */
 .mem-card--renewal {
-    background: var(--met-red-light);
-    border-color: #f5c5cb;
+    background: linear-gradient(180deg, #fffaf7 0%, #ffffff 100%);
+    border-color: #eadfda;
     border-left: 3px solid var(--met-red);
-    padding: 0;
     overflow: hidden;
 }
 
@@ -184,14 +183,10 @@
     box-shadow: var(--shadow-hover);
 }
 
-.mem-card__accent-bar {
-    display: none; /* border-left handles accent */
-}
-
-.mem-card--renewal .mem-card__inner {
-    display: flex;
-    gap: 20px;
-    padding: 28px 32px;
+.mem-renewal-card {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 18px;
     align-items: flex-start;
 }
 
@@ -206,35 +201,100 @@
     justify-content: center;
     color: var(--white);
     margin-top: 2px;
+    box-shadow: 0 10px 20px rgba(227, 26, 47, 0.18);
 }
 
-.mem-renewal-body {
-    flex: 1;
-    min-width: 0;
+.mem-renewal-content {
+    display: grid;
+    gap: 18px;
 }
 
-.mem-renewal-body .mem-card__title {
-    font-size: 18px;
+.mem-renewal-copy {
+    display: grid;
+    gap: 8px;
+}
+
+.mem-renewal-subtitle {
+    margin: 0;
+    color: var(--ink-900);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.mem-renewal-description {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-700);
+}
+
+.mem-renewal-options {
+    display: grid;
+    gap: 8px;
+}
+
+.mem-radio-label--compact {
+    padding: 12px 14px;
+    background: #fff;
+    border-color: var(--border);
+}
+
+.mem-radio-label--compact:hover {
+    background: #fff;
+    border-color: #d1d1d1;
+}
+
+.mem-price-summary {
+    border: 1px solid #eadfda;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 16px 18px;
+}
+
+.mem-price-summary__header {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-500);
     margin-bottom: 14px;
 }
 
-.mem-highlight {
+.mem-price-summary__rows {
+    display: grid;
+    gap: 10px;
+}
+
+.mem-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--ink-700);
+}
+
+.mem-price-row strong {
+    font-size: 15px;
+    color: var(--ink-900);
+}
+
+.mem-price-row--discount strong,
+.mem-price-row--savings strong {
     color: var(--met-red);
+}
+
+.mem-price-row--total {
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+    font-size: 15px;
     font-weight: 700;
 }
 
-.mem-renewal-desc {
-    font-size: 13px;
-    line-height: 1.65;
-    color: var(--ink-700);
-    margin-bottom: 20px;
-}
-
-.mem-renewal-desc p {
-    margin: 0 0 10px;
-}
-.mem-renewal-desc p:last-child {
-    margin-bottom: 0;
+.mem-card--renewal-active .mem-price-summary {
+    border-color: rgba(227, 26, 47, 0.22);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
 }
 
 /* ---------- Radio Buttons ---------- */
@@ -532,11 +592,13 @@
         padding: 18px 16px;
     }
 
-    .mem-card--renewal .mem-card__inner {
-        padding: 18px 16px;
+    .mem-renewal-card {
+        grid-template-columns: 1fr;
     }
 
-    .mem-btn-checkout {
+    .mem-renewal-icon {
+        margin-top: 0;
+    }
         width: 100%;
         justify-content: center;
         padding: 16px 24px;

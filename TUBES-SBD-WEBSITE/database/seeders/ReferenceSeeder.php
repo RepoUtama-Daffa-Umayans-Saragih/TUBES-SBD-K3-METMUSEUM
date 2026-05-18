@@ -47,12 +47,18 @@ class ReferenceSeeder extends Seeder
         $this->consoleInfo('│  ReferenceSeeder  →  art_work_references             │');
         $this->consoleInfo('└──────────────────────────────────────────────────────┘');
 
-        [$handle, $headers, $delimiter, $meta] = $this->readCsvRows(
-            'metmuseum_reference_final.csv'
-        );
+        $jsonPath = database_path('data/metmuseum_reference_recon_v2_json.json');
+        if (!file_exists($jsonPath)) {
+            $this->consoleWarn('[ReferenceSeeder] JSON not found: ' . $jsonPath);
+            return;
+        }
 
-        if (!empty($meta['file_missing'])) {
-            $this->consoleWarn('[ReferenceSeeder] CSV not found: ' . $meta['path']);
+        $jsonContent = file_get_contents($jsonPath);
+        $jsonContent = str_replace(': NaN', ': null', $jsonContent);
+        $rows = json_decode($jsonContent, true);
+
+        if ($rows === null) {
+            $this->consoleWarn('[ReferenceSeeder] Failed to parse JSON.');
             return;
         }
 
@@ -68,9 +74,7 @@ class ReferenceSeeder extends Seeder
         // Track per-artwork insertion order so display_order is sequential.
         $displayOrderMap = [];
 
-        while (($row = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
-            $data = $this->mapCsvRow($headers, $row, $delimiter);
-
+        foreach ($rows as $data) {
             // Accept both column name variants.
             $metObjectId   = $data['met_object_id'] ?? $data['object_id'] ?? null;
             // The CSV column is named 'provenance' but contains reference chain text.
@@ -142,8 +146,6 @@ class ReferenceSeeder extends Seeder
             $record->save();
             $counts['imported']++;
         }
-
-        fclose($handle);
 
         $this->consoleInfo('');
         $this->consoleInfo('[ReferenceSeeder] ✔ Done');

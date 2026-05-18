@@ -44,13 +44,18 @@ class SimSeeder extends Seeder
         $this->consoleInfo('│  SimSeeder  →  art_work_sims                         │');
         $this->consoleInfo('└──────────────────────────────────────────────────────┘');
 
-        [$handle, $headers, $delimiter, $meta] = $this->readCsvRows(
-            'metmuseum_sim_final.csv',
-            ','
-        );
+        $jsonPath = database_path('data/metmuseum_sim_final.json');
+        if (!file_exists($jsonPath)) {
+            $this->consoleWarn('[SimSeeder] JSON not found: ' . $jsonPath);
+            return;
+        }
 
-        if (!empty($meta['file_missing'])) {
-            $this->consoleWarn('[SimSeeder] CSV not found: ' . $meta['path']);
+        $jsonContent = file_get_contents($jsonPath);
+        $jsonContent = str_replace(': NaN', ': null', $jsonContent);
+        $rows = json_decode($jsonContent, true);
+
+        if ($rows === null) {
+            $this->consoleWarn('[SimSeeder] Failed to parse JSON.');
             return;
         }
 
@@ -63,8 +68,7 @@ class SimSeeder extends Seeder
             'skipped_missing_artwork' => 0,
         ];
 
-        while (($row = fgetcsv($handle, 0, $delimiter, '"', '\\')) !== false) {
-            $data = $this->mapCsvRow($headers, $row, $delimiter);
+        foreach ($rows as $data) {
 
             $metObjectId = $data['met_object_id'] ?? $data['object_id'] ?? null;
             $simType     = $this->normalizeText($data['sim_type'] ?? '');
@@ -128,8 +132,6 @@ class SimSeeder extends Seeder
             $record->save();
             $counts['imported']++;
         }
-
-        fclose($handle);
 
         $this->consoleInfo('');
         $this->consoleInfo('[SimSeeder] ✔ Done');

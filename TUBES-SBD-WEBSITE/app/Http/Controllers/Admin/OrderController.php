@@ -205,4 +205,155 @@ class OrderController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Show the form for creating a new order
+     */
+    public function create()
+    {
+        return view('admin.orders.form', [
+            'title' => 'Create Order',
+            'subtitle' => 'Add a new order',
+            'activeNav' => 'orders',
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'href' => route('admin.dashboard')],
+                ['label' => 'Orders', 'href' => route('admin.orders.index')],
+                ['label' => 'Create', 'isCurrent' => true],
+            ],
+            'order' => null,
+            'isEdit' => false,
+            'users' => \App\Models\User::orderBy('email')->get(),
+            'guests' => \App\Models\Guest::orderBy('email')->get(),
+            'order_types' => ['ticket' => 'Ticket', 'membership' => 'Membership'],
+        ]);
+    }
+
+    /**
+     * Store a newly created order
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'order_code' => 'required|string|unique:orders,order_code',
+            'user_id' => 'nullable|exists:users,user_id',
+            'guest_id' => 'nullable|exists:guests,guest_id',
+            'order_date' => 'required|date',
+            'expired_at' => 'nullable|date|after_or_equal:order_date',
+            'total_amount' => 'required|numeric|min:0',
+            'order_type' => 'required|in:ticket,membership',
+        ]);
+
+        // Ensure either user_id or guest_id is provided
+        if (!$validated['user_id'] && !$validated['guest_id']) {
+            return back()->withInput()->withErrors(['user_id' => 'Either a user or guest must be selected']);
+        }
+
+        try {
+            $order = Order::create($validated);
+            
+            return redirect()->route('admin.orders.show', $order->order_id)
+                ->with('success', 'Order created successfully');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Error creating order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the specified order
+     */
+    public function show(Order $order)
+    {
+        $order->load(['user.profile', 'guest', 'tickets.ticketAvailability.ticketType', 'payments', 'membership']);
+        
+        return view('admin.orders.show', [
+            'title' => 'Order Details',
+            'subtitle' => 'View order information',
+            'activeNav' => 'orders',
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'href' => route('admin.dashboard')],
+                ['label' => 'Orders', 'href' => route('admin.orders.index')],
+                ['label' => $order->order_code, 'isCurrent' => true],
+            ],
+            'order' => $order,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified order
+     */
+    public function edit(Order $order)
+    {
+        $order->load(['user', 'guest']);
+        
+        return view('admin.orders.form', [
+            'title' => 'Edit Order',
+            'subtitle' => 'Modify order details',
+            'activeNav' => 'orders',
+            'breadcrumbs' => [
+                ['label' => 'Dashboard', 'href' => route('admin.dashboard')],
+                ['label' => 'Orders', 'href' => route('admin.orders.index')],
+                ['label' => 'Edit', 'isCurrent' => true],
+            ],
+            'order' => $order,
+            'isEdit' => true,
+            'users' => \App\Models\User::orderBy('email')->get(),
+            'guests' => \App\Models\Guest::orderBy('email')->get(),
+            'order_types' => ['ticket' => 'Ticket', 'membership' => 'Membership'],
+        ]);
+    }
+
+    /**
+     * Update the specified order
+     */
+    public function update(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'order_code' => 'required|string|unique:orders,order_code,' . $order->order_id . ',order_id',
+            'user_id' => 'nullable|exists:users,user_id',
+            'guest_id' => 'nullable|exists:guests,guest_id',
+            'order_date' => 'required|date',
+            'expired_at' => 'nullable|date|after_or_equal:order_date',
+            'total_amount' => 'required|numeric|min:0',
+            'order_type' => 'required|in:ticket,membership',
+        ]);
+
+        // Ensure either user_id or guest_id is provided
+        if (!$validated['user_id'] && !$validated['guest_id']) {
+            return back()->withInput()->withErrors(['user_id' => 'Either a user or guest must be selected']);
+        }
+
+        try {
+            $order->update($validated);
+            
+            return redirect()->route('admin.orders.show', $order->order_id)
+                ->with('success', 'Order updated successfully');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Error updating order: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete the specified order
+     */
+    public function destroy(Order $order)
+    {
+        try {
+            // Delete related payments
+            $order->payments()->delete();
+            
+            // Delete related membership
+            if ($order->membership) {
+                $order->membership()->delete();
+            }
+            
+            // Delete the order (tickets will be cascade deleted)
+            $order->delete();
+
+            return redirect()->route('admin.orders.index')
+                ->with('success', 'Order deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.orders.index')
+                ->with('error', 'Error deleting order: ' . $e->getMessage());
+        }
+    }
 }

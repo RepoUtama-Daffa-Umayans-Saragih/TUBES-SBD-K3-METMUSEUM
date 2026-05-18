@@ -230,6 +230,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     // Artworks
     Route::resource('artworks', AdminArtworkController::class);
 
+    // Orders CRUD
+    Route::resource('orders', AdminOrderController::class);
+
     // Ticket Analytics Dashboard
     Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
         Route::get('/', [TicketAnalyticsController::class, 'index'])->name('index');

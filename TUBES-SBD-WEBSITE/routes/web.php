@@ -5,12 +5,25 @@
 // =========================
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Admin\ArtworkController as AdminArtworkController;
+use App\Http\Controllers\Admin\ClassificationController;
+use App\Http\Controllers\Admin\ConstituentController;
+use App\Http\Controllers\Admin\CultureController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\DynastyController;
 use App\Http\Controllers\Admin\ExhibitionController as AdminExhibitionController;
+use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\MediumController;
+use App\Http\Controllers\Admin\ObjectTypeController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
-use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\PeriodController;
+use App\Http\Controllers\Admin\PortfolioController;
+use App\Http\Controllers\Admin\ReignController;
+use App\Http\Controllers\Admin\RepositoryController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\TicketAnalyticsController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -169,7 +182,49 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/artworks', [AdminArtworkController::class, 'index'])->name('artworks.index');
     Route::get('/exhibitions', [AdminExhibitionController::class, 'index'])->name('exhibitions.index');
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
-    Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+
+    // ==== CRUD RESOURCE ROUTES FOR MASTER DATA ====
+    // Departments
+    Route::resource('departments', DepartmentController::class);
+
+    // Object Types
+    Route::resource('object-types', ObjectTypeController::class);
+
+    // Classifications
+    Route::resource('classifications', ClassificationController::class);
+
+    // Locations
+    Route::resource('locations', LocationController::class);
+
+    // Repositories
+    Route::resource('repositories', RepositoryController::class);
+
+    // Materials
+    Route::resource('materials', MaterialController::class);
+
+    // Mediums
+    Route::resource('mediums', MediumController::class);
+
+    // Tags
+    Route::resource('tags', TagController::class);
+
+    // Cultures
+    Route::resource('cultures', CultureController::class);
+
+    // Periods
+    Route::resource('periods', PeriodController::class);
+
+    // Dynasties
+    Route::resource('dynasties', DynastyController::class);
+
+    // Reigns
+    Route::resource('reigns', ReignController::class);
+
+    // Portfolios
+    Route::resource('portfolios', PortfolioController::class);
+
+    // Constituents (Artists)
+    Route::resource('constituents', ConstituentController::class);
 
     // Ticket Analytics Dashboard
     Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {

@@ -54,11 +54,6 @@
                     📉 Analytics
                 </a>
             </li>
-            <li class="admin-nav-item">
-                <a href="{{ route('admin.reports.index') }}" class="admin-nav-link @if(request()->routeIs('admin.reports.*')) active @endif">
-                    📋 Reports
-                </a>
-            </li>
 
             <!-- Collection Section -->
             <li class="admin-nav-section">

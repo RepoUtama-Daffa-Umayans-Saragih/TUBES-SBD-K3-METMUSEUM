@@ -51,10 +51,6 @@
 			</a>
 			<a class="admin-sidebar__link" href="#" tabindex="0">
 				<span class="icon-placeholder icon-placeholder--sm" aria-hidden="true"></span>
-				<span class="admin-sidebar__text">Reports</span>
-			</a>
-			<a class="admin-sidebar__link" href="#" tabindex="0">
-				<span class="icon-placeholder icon-placeholder--sm" aria-hidden="true"></span>
 				<span class="admin-sidebar__text">Settings</span>
 			</a>
 		</div>

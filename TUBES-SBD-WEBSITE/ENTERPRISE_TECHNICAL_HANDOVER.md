@@ -332,7 +332,6 @@ Modern admin pages
 - resources/views/admin/exhibitions/index.blade.php
 - resources/views/admin/orders/index.blade.php
 - resources/views/admin/payments/index.blade.php
-- resources/views/admin/reports/index.blade.php
 - resources/views/admin/settings/index.blade.php
 - resources/views/admin/tickets/index.blade.php
 - resources/views/admin/users/index.blade.php
@@ -459,7 +458,6 @@ Modern admin views
 - resources/views/admin/exhibitions/index.blade.php -> resources/css/admin/exhibitions/index.css
 - resources/views/admin/orders/index.blade.php -> resources/css/admin/orders/index.css
 - resources/views/admin/payments/index.blade.php -> resources/css/admin/payments/index.css
-- resources/views/admin/reports/index.blade.php -> resources/css/admin/reports/index.css
 - resources/views/admin/settings/index.blade.php -> resources/css/admin/settings/index.css
 - resources/views/admin/tickets/index.blade.php -> resources/css/admin/tickets/index.css
 - resources/views/admin/users/index.blade.php -> resources/css/admin/users/index.css
@@ -545,7 +543,6 @@ Modern admin controllers (view-only UI skeletons)
 - ExhibitionController: index() returns admin.exhibitions.index (status: scaffold UI)
 - OrderController: index() returns admin.orders.index (status: scaffold UI)
 - PaymentController: index() returns admin.payments.index (status: scaffold UI)
-- ReportController: index() returns admin.reports.index (status: scaffold UI)
 - SettingController: index() returns admin.settings.index (status: scaffold UI)
 - TicketController: index() returns admin.tickets.index (status: scaffold UI)
 - UserController: index() returns admin.users.index (status: scaffold UI)
@@ -580,7 +577,6 @@ Admin routes (modern admin skeleton)
 - GET /admin/artworks -> ArtworkController@index
 - GET /admin/exhibitions -> ExhibitionController@index
 - GET /admin/analytics -> AnalyticsController@index
-- GET /admin/reports -> ReportController@index
 - GET /admin/settings -> SettingController@index
 - GET /admin-preview -> returns admin.dashboard.index (preview only)
 
@@ -689,8 +685,6 @@ Scaffold and placeholder UI (no real data or logic)
 - resources/views/admin/exhibitions/index.blade.php
 - resources/views/admin/orders/index.blade.php
 - resources/views/admin/payments/index.blade.php
-- resources/views/admin/reports/index.blade.php
-- resources/views/admin/settings/index.blade.php
 - resources/views/admin/tickets/index.blade.php
 - resources/views/admin/users/index.blade.php
 - resources/views/admin/components/charts/\*

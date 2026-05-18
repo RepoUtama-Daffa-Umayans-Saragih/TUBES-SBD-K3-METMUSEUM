@@ -134,15 +134,7 @@
                 <div class="dashboard-card__arrow">→</div>
             </a>
 
-            <!-- Reports Card -->
-            <a href="{{ route('admin.reports.index') }}" class="dashboard-card">
-                <div class="dashboard-card__icon">📋</div>
-                <div class="dashboard-card__content">
-                    <h3 class="dashboard-card__title">Reports</h3>
-                    <p class="dashboard-card__description">Generate reports</p>
-                </div>
-                <div class="dashboard-card__arrow">→</div>
-            </a>
+
         </div>
     </section>
 </div>

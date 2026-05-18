@@ -53,42 +53,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @forelse($ticketTypes ?? [] as $type)
                     <tr>
-                        <td><strong>Adult</strong></td>
-                        <td>$10.00</td>
-                        <td>Standard admission</td>
+                        <td><strong>{{ $type->ticket_type_name }}</strong></td>
+                        <td>${{ number_format($type->base_price, 2) }}</td>
+                        <td>Museum admission</td>
                         <td><span class="status-badge status-active">Active</span></td>
                         <td class="actions">
                             <button class="action-btn">Edit</button>
                         </td>
                     </tr>
+                    @empty
                     <tr>
-                        <td><strong>Senior (65+)</strong></td>
-                        <td>$7.00</td>
-                        <td>For visitors 65 and older</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td class="actions">
-                            <button class="action-btn">Edit</button>
-                        </td>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">No ticket types available</td>
                     </tr>
-                    <tr>
-                        <td><strong>Student</strong></td>
-                        <td>$7.00</td>
-                        <td>Valid student ID required</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td class="actions">
-                            <button class="action-btn">Edit</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Disability</strong></td>
-                        <td>$5.00 + 1 Free</td>
-                        <td>+ 1 companion ticket free</td>
-                        <td><span class="status-badge status-active">Active</span></td>
-                        <td class="actions">
-                            <button class="action-btn">Edit</button>
-                        </td>
-                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -102,28 +81,30 @@
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Adult Stock</th>
-                        <th>Senior Stock</th>
-                        <th>Student Stock</th>
-                        <th>Disability Stock</th>
-                        <th>Total Available</th>
+                        @foreach($ticketTypes ?? [] as $type)
+                        <th>{{ $type->ticket_type_name }}</th>
+                        @endforeach
+                        <th>Total</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($dailyStocks ?? [] as $stock)
-                        <tr>
-                            <td><strong>{{ $stock['date'] ?? 'N/A' }}</strong></td>
-                            <td>{{ $stock['adult'] ?? 0 }}</td>
-                            <td>{{ $stock['senior'] ?? 0 }}</td>
-                            <td>{{ $stock['student'] ?? 0 }}</td>
-                            <td>{{ $stock['disability'] ?? 0 }}</td>
-                            <td><strong>{{ ($stock['adult'] ?? 0) + ($stock['senior'] ?? 0) + ($stock['student'] ?? 0) + ($stock['disability'] ?? 0) }}</strong></td>
-                            <td class="actions">
-                                <button class="action-btn">Update</button>
-                            </td>
-                        </tr>
-                    @endforeach
+                    @forelse($dailyStocks ?? [] as $dayStock)
+                    <tr>
+                        <td><strong>{{ $dayStock['date'] }}</strong></td>
+                        @foreach($dayStock['types'] ?? [] as $typeStock)
+                        <td>{{ $typeStock['availability'] ?? 0 }}</td>
+                        @endforeach
+                        <td><strong>{{ $dayStock['total'] ?? 0 }}</strong></td>
+                        <td class="actions">
+                            <button class="action-btn">Update</button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="99" style="text-align: center; padding: 2rem;">No daily stocks available</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -140,11 +121,13 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Ticket Type</label>
-                    <select class="form-input" required>
-                        <option>Adult</option>
-                        <option>Senior (65+)</option>
-                        <option>Student</option>
-                        <option>Disability</option>
+                    <select class="form-input" name="ticket_type_id" required>
+                        <option value="">-- Select Ticket Type --</option>
+                        @forelse($ticketTypes ?? [] as $type)
+                        <option value="{{ $type->ticket_type_id }}">{{ $type->ticket_type_name }} (${{ number_format($type->base_price, 2) }})</option>
+                        @empty
+                        <option disabled>No ticket types available</option>
+                        @endforelse
                     </select>
                 </div>
                 <div class="form-group">

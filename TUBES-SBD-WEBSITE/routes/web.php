@@ -176,6 +176,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/management', [AdminTicketController::class, 'management'])->name('tickets.management');
+    
+    // Tickets API endpoints for dynamic data
+    Route::get('/api/tickets/available-dates', [AdminTicketController::class, 'getAvailableDates'])->name('api.tickets.available-dates');
+    Route::get('/api/tickets/types-for-date/{visitScheduleId}', [AdminTicketController::class, 'getTicketTypesForDate'])->name('api.tickets.types-for-date');
+    
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/search-ticket', [AdminOrderController::class, 'searchTicket'])->name('orders.search-ticket');
     Route::post('/orders/validate-ticket', [AdminOrderController::class, 'validateTicket'])->name('orders.validate-ticket');

@@ -12,7 +12,7 @@ class TicketSystemSeeder extends Seeder
         // ========================
         // 1. LOCATIONS
         // ========================
-        DB::table('locations')->insert([
+        DB::table('locations')->insertOrIgnore([
             [
                 'location_name'  => 'The Met Fifth Avenue',
                 'address'        => '1000 5th Ave, New York, NY',
@@ -30,11 +30,12 @@ class TicketSystemSeeder extends Seeder
         // ========================
         // 2. TICKET TYPES
         // ========================
-        DB::table('ticket_types')->insert([
+        DB::table('ticket_types')->insertOrIgnore([
             ['ticket_type_name' => 'Adult', 'base_price' => 25],
             ['ticket_type_name' => 'Child', 'base_price' => 0],
             ['ticket_type_name' => 'Student', 'base_price' => 17],
             ['ticket_type_name' => 'Senior', 'base_price' => 20],
+            ['ticket_type_name' => 'Disability', 'base_price' => 0],
         ]);
 
         $ticketTypes = DB::table('ticket_types')->get();
@@ -49,11 +50,18 @@ class TicketSystemSeeder extends Seeder
 
         foreach ($locations as $location) {
             foreach ($dates as $date) {
-                DB::table('visit_schedules')->insert([
-                    'location_id'    => $location->location_id, // ✅ FIX
-                    'visit_date'     => $date,
-                    'capacity_limit' => $location->capacity_limit,
-                ]);
+                $exists = DB::table('visit_schedules')
+                    ->where('location_id', $location->location_id)
+                    ->where('visit_date', $date)
+                    ->exists();
+                
+                if (!$exists) {
+                    DB::table('visit_schedules')->insert([
+                        'location_id'    => $location->location_id,
+                        'visit_date'     => $date,
+                        'capacity_limit' => $location->capacity_limit,
+                    ]);
+                }
             }
         }
 
@@ -64,10 +72,17 @@ class TicketSystemSeeder extends Seeder
         // ========================
         foreach ($schedules as $schedule) {
             foreach ($ticketTypes as $ticket) {
-                DB::table('ticket_availability')->insert([
-                    'ticket_type_id'    => $ticket->ticket_type_id,
-                    'visit_schedule_id' => $schedule->visit_schedule_id,
-                ]);
+                $exists = DB::table('ticket_availability')
+                    ->where('ticket_type_id', $ticket->ticket_type_id)
+                    ->where('visit_schedule_id', $schedule->visit_schedule_id)
+                    ->exists();
+                
+                if (!$exists) {
+                    DB::table('ticket_availability')->insert([
+                        'ticket_type_id'    => $ticket->ticket_type_id,
+                        'visit_schedule_id' => $schedule->visit_schedule_id,
+                    ]);
+                }
             }
         }
     }

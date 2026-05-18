@@ -80,13 +80,13 @@
                 <div class="admin-nav-section-title">Management</div>
             </li>
             <li class="admin-nav-item">
-                <a href="{{ route('admin.users.index') }}" class="admin-nav-link @if(request()->routeIs('admin.users.*')) active @endif">
-                    👥 Users
+                <a href="{{ route('admin.tickets.management') }}" class="admin-nav-link @if(request()->routeIs('admin.tickets.management')) active @endif">
+                    🎫 Ticket Management
                 </a>
             </li>
             <li class="admin-nav-item">
-                <a href="{{ route('admin.settings.index') }}" class="admin-nav-link @if(request()->routeIs('admin.settings.*')) active @endif">
-                    ⚙️ Settings
+                <a href="{{ route('admin.users.index') }}" class="admin-nav-link @if(request()->routeIs('admin.users.*')) active @endif">
+                    👥 Users
                 </a>
             </li>
 

@@ -18,13 +18,49 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        // Get today's date
+        $today = now()->startOfDay();
+        $endToday = now()->endOfDay();
+
+        // Ticket Sales Today - JOIN with orders table to get created_at
+        $ticketsSoldToday = DB::table('order_details')
+            ->join('orders', 'order_details.order_id', '=', 'orders.order_id')
+            ->whereBetween('orders.created_at', [$today, $endToday])
+            ->sum('order_details.quantity');
+
+        // Revenue Today
+        $totalRevenueToday = DB::table('orders')
+            ->whereBetween('created_at', [$today, $endToday])
+            ->where('order_status', 'completed')
+            ->sum('total_amount');
+
+        // Pending Orders
+        $pendingOrders = Order::where('status', 'pending')->count();
+
+        // Pending Payments
+        $pendingPayments = DB::table('payments')
+            ->where('payment_status', 'pending')
+            ->count();
+
+        // Total Users
+        $totalUsers = User::count();
+
+        // Total Artworks
+        $totalArtworks = ArtWork::count();
+
         return view('admin.dashboard.index', [
-            'title'       => 'Dashboard',
-            'subtitle'    => 'Welcome to the admin dashboard',
-            'activeNav'   => 'dashboard',
-            'breadcrumbs' => [
+            'title'              => 'Dashboard',
+            'subtitle'           => 'Welcome to the admin dashboard',
+            'activeNav'          => 'dashboard',
+            'breadcrumbs'        => [
                 ['label' => 'Dashboard', 'isCurrent' => true],
             ],
+            'ticketsSoldToday'   => $ticketsSoldToday,
+            'totalRevenueToday'  => $totalRevenueToday,
+            'pendingOrders'      => $pendingOrders,
+            'pendingPayments'    => $pendingPayments,
+            'totalUsers'         => $totalUsers,
+            'totalArtworks'      => $totalArtworks,
         ]);
     }
 

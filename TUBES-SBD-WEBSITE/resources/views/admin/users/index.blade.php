@@ -1,117 +1,199 @@
 
 @extends('admin.layout.layout')
 
-@push('styles')
-@vite('resources/css/admin/users/index.css')
-@endpush
-
 @section('admin-title')
-    Users
+    User Management
 @endsection
 
 @section('admin-content')
-<section class="admin-section admin-section--users admin-page">
-	@include('admin.components.toolbar.page-toolbar', [
-		'title' => 'User Management',
-		'subtitle' => 'Manage guests, members, and administrators.',
-		'breadcrumbs' => [
-			['label' => 'Dashboard', 'href' => '#'],
-			['label' => 'Users', 'isCurrent' => true],
-		],
-		'status' => ['label' => 'Active', 'tone' => 'active'],
-		'badges' => [
-			['label' => 'Directory', 'tone' => 'neutral'],
-			['label' => 'Guests', 'tone' => 'info'],
-		],
-		'filters' => ['Members', 'Guests', 'Staff'],
-		'actions' => [
-			['label' => 'Invite User', 'variant' => 'secondary'],
-			['label' => 'Export Directory', 'variant' => 'primary'],
-		],
-	])
+<div class="admin-page-section">
+    <div class="page-header">
+        <h1>User Management</h1>
+        <p class="page-subtitle">Manage system users and permissions</p>
+    </div>
 
-	<div class="users-summary admin-grid admin-grid--cards">
-		@include('admin.components.cards.stat-card')
-		@include('admin.components.cards.stat-card')
-		@include('admin.components.cards.skeleton-card')
-	</div>
+    <!-- Quick Stats -->
+    <div class="quick-stats-grid">
+        @include('admin.ticket-analytics.components.stat-card', [
+            'title' => 'Total Users',
+            'value' => $totalUsers ?? 0,
+            'icon' => '👥',
+            'trend' => 'registered',
+            'color' => 'primary'
+        ])
+        
+        @include('admin.ticket-analytics.components.stat-card', [
+            'title' => 'Admins',
+            'value' => $adminCount ?? 0,
+            'icon' => '🔐',
+            'trend' => 'active',
+            'color' => 'warning'
+        ])
+        
+        @include('admin.ticket-analytics.components.stat-card', [
+            'title' => 'Active Today',
+            'value' => $activeToday ?? 0,
+            'icon' => '✓',
+            'trend' => 'online',
+            'color' => 'success'
+        ])
+    </div>
 
-	<div class="admin-section__body admin-stack">
-		@include('admin.components.filters.filter-bar')
+    <!-- Users Table -->
+    <section class="table-section">
+        <h2 class="section-title">Users Directory</h2>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($users ?? [] as $user)
+                        <tr>
+                            <td><strong>{{ $user['id'] ?? 'N/A' }}</strong></td>
+                            <td>{{ $user['name'] ?? 'N/A' }}</td>
+                            <td>{{ $user['email'] ?? 'N/A' }}</td>
+                            <td>{{ ucfirst($user['role'] ?? 'user') }}</td>
+                            <td>
+                                <span class="status-badge status-{{ $user['status'] ?? 'active' }}">
+                                    {{ ucfirst($user['status'] ?? 'active') }}
+                                </span>
+                            </td>
+                            <td>{{ $user['created_at'] ?? 'N/A' }}</td>
+                            <td class="actions">
+                                <button class="action-btn">Edit</button>
+                                <button class="action-btn action-danger">Delete</button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
 
-		<div class="users-layout admin-grid admin-grid--main">
-			<div class="admin-panel">
-				<div class="admin-panel__header">
-					<h3 class="admin-panel__title">Users Table</h3>
-					<span class="admin-panel__meta">Directory list</span>
-				</div>
-				@include('admin.components.tables.data-table')
-			</div>
-			<div class="users-side admin-stack">
-				<div class="admin-panel users-profile">
-					<div class="admin-panel__header">
-						<h3 class="admin-panel__title">Profile Preview</h3>
-						<span class="admin-panel__meta">Placeholder profile</span>
-					</div>
-					<div class="admin-panel__body">
-						<div class="admin-avatar-placeholder"></div>
-						<div class="admin-placeholder-block admin-placeholder-block--skeleton">
-							<div class="skeleton skeleton--title"></div>
-							<div class="skeleton skeleton--text"></div>
-							<div class="skeleton skeleton--text"></div>
-						</div>
-					</div>
-				</div>
-				<div class="admin-panel">
-					<div class="admin-panel__header">
-						<h3 class="admin-panel__title">Recent Activity</h3>
-						<span class="admin-panel__meta">Placeholder list</span>
-					</div>
-					<div class="admin-panel__body admin-list">
-						<div class="admin-list__item">Login placeholder</div>
-						<div class="admin-list__item">Ticket purchase placeholder</div>
-					</div>
-				</div>
-			</div>
-		</div>
+<style>
+.admin-page-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
 
-		<div class="users-segments admin-grid admin-grid--two">
-			<div class="admin-panel">
-				<div class="admin-panel__header">
-					<h3 class="admin-panel__title">Members</h3>
-					<span class="admin-panel__meta">Membership overview</span>
-				</div>
-				<div class="admin-panel__body">
-					<div class="admin-placeholder-block admin-placeholder-block--skeleton">
-						<div class="skeleton skeleton--title"></div>
-						<div class="skeleton skeleton--text"></div>
-					</div>
-				</div>
-			</div>
-			<div class="admin-panel">
-				<div class="admin-panel__header">
-					<h3 class="admin-panel__title">Guests</h3>
-					<span class="admin-panel__meta">Guest overview</span>
-				</div>
-				<div class="admin-panel__body">
-					<div class="admin-placeholder-block admin-placeholder-block--skeleton">
-						<div class="skeleton skeleton--title"></div>
-						<div class="skeleton skeleton--text"></div>
-					</div>
-				</div>
-			</div>
-		</div>
+.page-header {
+    margin-bottom: 2rem;
+}
 
-		<div class="admin-empty-state admin-empty-state--compact">
-			<div class="admin-empty-state__icon">
-				<span class="icon-placeholder icon-placeholder--sm" aria-hidden="true"></span>
-			</div>
-			<div class="admin-empty-state__content">
-				<h3 class="admin-empty-state__title">No user activity</h3>
-				<p class="admin-empty-state__text">User events will appear here.</p>
-			</div>
-			<button class="admin-button admin-button--ghost" type="button">Add User</button>
-		</div>
-	</div>
-</section>
+.page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.page-subtitle {
+    font-size: 0.95rem;
+    color: #666;
+    margin: 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.quick-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.table-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.table-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    background-color: #f5f5f5;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    border-color: #2196F3;
+    color: #2196F3;
+}
+
+.action-danger {
+    color: #f44336;
+}
+
+.action-danger:hover {
+    border-color: #f44336;
+}
+</style>
 @endsection

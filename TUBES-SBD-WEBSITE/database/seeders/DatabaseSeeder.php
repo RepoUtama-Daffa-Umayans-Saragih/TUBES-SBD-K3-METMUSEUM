@@ -66,8 +66,7 @@ class DatabaseSeeder extends Seeder
             SearchFieldSeeder::class,
             SortOptionSeeder::class,
             ShowOnlySeeder::class,
-            CuratedMetMuseumSeeder::class,   // Must run first — creates art_works rows
-            MetMuseumDataPipelineSeeder::class, // CSV enrichment — runs after artworks exist
+            CuratedMetMuseumSeeder::class,
         ]);
     }
 }

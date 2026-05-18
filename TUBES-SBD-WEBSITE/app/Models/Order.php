@@ -22,7 +22,6 @@ class Order extends Model
         'order_date',
         'expired_at',
         'total_amount',
-        'order_type',
     ];
 
     protected $casts = [
@@ -56,10 +55,5 @@ class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class, 'order_id')->latestOfMany('payment_id');
-    }
-
-    public function membership(): HasOne
-    {
-        return $this->hasOne(Membership::class, 'order_id');
     }
 }

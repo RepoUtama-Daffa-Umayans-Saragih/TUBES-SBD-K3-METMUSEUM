@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArtWork;
-use App\Models\Classification;
 use App\Models\Department;
 use App\Models\Location;
 use App\Models\Material;
@@ -12,6 +11,44 @@ use Illuminate\Http\Request;
 
 class ArtController extends Controller
 {
+    private function getDepartments()
+    {
+        return Department::orderBy('department_name')->get(['department_id', 'department_name']);
+    }
+
+    private function getDepartmentNavigationItems(): array
+    {
+        $items = [
+            ['name' => 'African Art in The Michael C. Rockefeller Wing', 'image' => asset('images/african-wings.jpg')],
+            ['name' => 'The American Wing', 'image' => asset('images/american-wing.jpg')],
+            ['name' => 'Ancient American Art in The Michael C. Rockefeller Wing', 'image' => asset('images/ancient-american.jpg')],
+            ['name' => 'Ancient West Asian Art', 'image' => asset('images/ancient-westAsian.jpg')],
+            ['name' => 'Arms and Armor', 'image' => asset('images/arms-and-armor.jpg')],
+            ['name' => 'Asian Art', 'image' => asset('images/asian-art.jpg')],
+            ['name' => 'The Costume Institute', 'image' => asset('images/costume-institute.jpg')],
+            ['name' => 'Drawings and Prints', 'image' => asset('images/drawing-and-prints.jpg')],
+            ['name' => 'Egyptian Art', 'image' => asset('images/egyptian-art.jpg')],
+            ['name' => 'European Paintings', 'image' => asset('images/europhean-painting.jpg')],
+            ['name' => 'European Sculpture and Decorative Arts', 'image' => asset('images/european-sculpture.jpg')],
+            ['name' => 'Greek and Roman Art', 'image' => asset('images/greek-and-roman.jpg')],
+            ['name' => 'Islamic Art', 'image' => asset('images/islamic-art.jpg')],
+            ['name' => 'The Robert Lehman Collection', 'image' => asset('images/robert-lehman.jpg')],
+            ['name' => 'Thomas j. Watson Library', 'image' => asset('images/thomas-j-watson.jpg')],
+            ['name' => 'Medieval Art and The Cloisters', 'image' => asset('images/medieval-art.jpg')],
+            ['name' => 'Modern and Contemporary Art', 'image' => asset('images/modern-contemporary.jpg')],
+            ['name' => 'Musical instruments', 'image' => asset('images/musical-instrument.jpg')],
+            ['name' => 'Oceanic Art in The Michael C. Rokcefeller Wing', 'image' => asset('images/oceanic-art.jpg')],
+            ['name' => 'Photographs', 'image' => asset('images/photographs.jpg')],
+        ];
+
+        return array_map(function (array $item) {
+            $item['href'] = route('art.search') . '?department%5B%5D=' . urlencode($item['name']);
+            $item['alt']  = $item['name'];
+
+            return $item;
+        }, $items);
+    }
+
     /**
      * Get filter dropdown data
      */
@@ -23,13 +60,6 @@ class ArtController extends Controller
                     'value' => $item->object_type_name,
                     'label' => $item->object_type_name,
                     'group' => 'Object type',
-                ];
-            }))
-            ->merge(Classification::orderBy('classification_name')->get(['classification_id', 'classification_name'])->map(function ($item) {
-                return [
-                    'value' => $item->classification_name,
-                    'label' => $item->classification_name,
-                    'group' => 'Classification',
                 ];
             }))
             ->merge(Material::orderBy('material_name')->get(['material_id', 'material_name'])->map(function ($item) {
@@ -50,9 +80,9 @@ class ArtController extends Controller
             ->values();
 
         return [
-            'departments' => Department::orderBy('department_name')->get(['department_id', 'department_name']),
-            'types'       => ObjectType::orderBy('object_type_name')->get(['type_id', 'object_type_name']),
-            'locations'   => Location::orderBy('location_name')->get(['location_id', 'location_name']),
+            'departments'   => $this->getDepartments(),
+            'types'         => ObjectType::orderBy('object_type_name')->get(['type_id', 'object_type_name']),
+            'locations'     => Location::orderBy('location_name')->get(['location_id', 'location_name']),
             'objectFilters' => $objectFilters,
         ];
     }
@@ -69,32 +99,25 @@ class ArtController extends Controller
         $filterData = $this->getFilterData();
 
         return view('ordinary.art.art', array_merge([
-            'artworks'     => $artworks,
-            'title'        => 'Art Collections',
-            'search_query' => '',
+            'artworks'                  => $artworks,
+            'title'                     => 'Art Collections',
+            'search_query'              => '',
+            'departmentNavigationItems' => $this->getDepartmentNavigationItems(),
         ], $filterData));
     }
 
     /**
-     * Display a specific artwork detail page.
-     * Eager-loads every relationship needed by the detail view.
+     * Display a specific artwork detail page
      */
     public function show($id)
     {
-        $artwork = ArtWork::with([
-            'department', 'objectType', 'location', 'classification', 'creditLine',
-            'images',
-            'constituents', 'cultures', 'mediums', 'measurements',
-            'exhibitionHistories',
-            'references',
-            'artWorkSims',
-        ])
+        $artwork = ArtWork::with(['department', 'objectType', 'location', 'images'])
             ->where('art_work_id', $id)
             ->firstOrFail();
 
         return view('ordinary.art.show.show', [
             'artwork' => $artwork,
-            'title'   => $artwork->title,
+            'title'   => 'Artwork Detail',
         ]);
     }
 
@@ -105,6 +128,8 @@ class ArtController extends Controller
     {
         $query = ArtWork::query()
             ->with(['department', 'objectType', 'location', 'images', 'constituents', 'cultures', 'creditLine', 'mediums']);
+        $departments          = $this->getDepartments();
+        $validDepartmentNames = $departments->pluck('department_name')->map(fn($value) => (string) $value);
 
         // Canonical Field Mapping
         $fieldMap = [
@@ -179,7 +204,7 @@ class ArtController extends Controller
 
         $selectedObjectTerms = collect($request->input('object_type', []))
             ->filter()
-            ->map(fn ($value) => trim((string) $value))
+            ->map(fn($value) => trim((string) $value))
             ->unique()
             ->values();
 
@@ -193,17 +218,14 @@ class ArtController extends Controller
                     })
                     ->orWhereHas('mediums', function ($relation) use ($selectedObjectTerms) {
                         $relation->whereIn('medium_name', $selectedObjectTerms->all());
-                    })
-                    ->orWhereHas('classification', function ($relation) use ($selectedObjectTerms) {
-                        $relation->whereIn('classification_name', $selectedObjectTerms->all());
                     });
             });
         }
 
         $selectedMediumIds = collect($request->input('medium', []))
             ->filter()
-            ->map(fn ($value) => (int) $value)
-            ->filter(fn ($value) => $value > 0)
+            ->map(fn($value) => (int) $value)
+            ->filter(fn($value) => $value > 0)
             ->unique()
             ->values();
 
@@ -215,9 +237,13 @@ class ArtController extends Controller
 
         $selectedDepartments = collect($request->input('department', []))
             ->filter()
-            ->map(fn ($value) => trim((string) $value))
+            ->map(fn($value) => trim((string) $value))
             ->unique()
             ->values();
+
+        $selectedDepartments = $selectedDepartments->filter(function ($departmentName) use ($validDepartmentNames) {
+            return $validDepartmentNames->contains($departmentName);
+        })->values();
 
         if ($selectedDepartments->isNotEmpty()) {
             $query->whereHas('department', function ($relation) use ($selectedDepartments) {
@@ -227,7 +253,7 @@ class ArtController extends Controller
 
         $selectedLocations = collect($request->input('location', []))
             ->filter()
-            ->map(fn ($value) => trim((string) $value))
+            ->map(fn($value) => trim((string) $value))
             ->unique()
             ->values();
 
@@ -288,16 +314,16 @@ class ArtController extends Controller
         $filterData = $this->getFilterData();
 
         return view('ordinary.art.search.search', array_merge([
-            'artworks'            => $artworks,
-            'totalResults'        => $artworks->total(),
-            'title'               => 'Search Results',
-            'search_query'        => $keyword ?? '',
-            'currentField'        => $currentField,
-            'currentFieldLabel'   => $currentFieldLabel,
-            'currentSort'         => $request->input('sort', 'relevance'),
-            'selected_department' => $departmentId,
-            'selected_type'       => $typeId,
-            'selected_mediums'    => $selectedMediumIds->all(),
+            'artworks'             => $artworks,
+            'totalResults'         => $artworks->total(),
+            'title'                => 'Search Results',
+            'search_query'         => $keyword ?? '',
+            'currentField'         => $currentField,
+            'currentFieldLabel'    => $currentFieldLabel,
+            'currentSort'          => $request->input('sort', 'relevance'),
+            'selected_departments' => $selectedDepartments->all(),
+            'selected_type'        => $typeId,
+            'selected_mediums'     => $selectedMediumIds->all(),
         ], $filterData));
     }
 
@@ -306,6 +332,8 @@ class ArtController extends Controller
      */
     public function curatorialAreas()
     {
-        return view('ordinary.art.curatorial-areas');
+        return view('ordinary.art.curatorial-areas', [
+            'departmentNavigationItems' => $this->getDepartmentNavigationItems(),
+        ]);
     }
 }

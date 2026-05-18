@@ -24,10 +24,6 @@
     <!-- Footer -->
     @include('components.footer-sub')
 
-    <!-- Alpine.js — loaded before page scripts so x-data works everywhere -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
     @stack('scripts')
 </body>
 </html>
-

@@ -29,9 +29,4 @@ class ArtWorkImage extends Model
     {
         return $this->belongsTo(ArtWork::class, 'art_work_id');
     }
-
-    public function getUrlAttribute(): ?string
-    {
-        return $this->image_url;
-    }
 }

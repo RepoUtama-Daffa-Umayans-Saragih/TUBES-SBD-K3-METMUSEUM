@@ -2,493 +2,269 @@
 
 @push('styles')
 @vite('resources/css/app.css')
-@vite('resources/css/ordinary/art/show/show.css')
+@vite('resources/css/ordinary/art/detail/detail.css')
 @endpush
+
+@section('title', $artwork->title . ' - MET Museum')
 
 @section('content')
-
-@php
-    /* ── Images ─────────────────────────────────────────── */
-    $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
-    $allImages    = $artwork->images ?? collect();
-
-    /* ── Resolve image URL ── */
-    $resolveUrl = function($img) {
-        if (!$img) return null;
-        $url = $img->image_url ?? $img->url ?? '';
-        if (str_starts_with($url, 'http')) return $url;
-        return asset('storage/' . ltrim($url, '/'));
-    };
-
-    /* ── Constituents ─────────────────────────────────── */
-    $allConstituents = $artwork->constituents ?? collect();
-    $makers          = $allConstituents->filter(fn($c) => strtolower($c->role ?? '') === 'maker');
-    $artists         = $allConstituents->filter(fn($c) => strtolower($c->role ?? '') === 'artist');
-    $displayArtists  = $artists->isNotEmpty() ? $artists : ($makers->isNotEmpty() ? $makers : $allConstituents);
-
-    /* ── Date ─────────────────────────────────────────── */
-    $dateStr = $artwork->object_date_display ?? '';
-    if (!$dateStr) {
-        $ys = $artwork->object_begin_date;
-        $ye = $artwork->object_end_date;
-        if ($ys && $ye && $ys !== $ye) $dateStr = $ys . '–' . $ye;
-        elseif ($ys) $dateStr = (string)$ys;
-        elseif ($ye) $dateStr = (string)$ye;
-    }
-
-    /* ── Gallery text ─────────────────────────────────── */
-    $galleryText = '';
-    if (!empty($artwork->location)) {
-        $galleryText = is_object($artwork->location) ? ($artwork->location->location_name ?? '') : (string)$artwork->location;
-        if (!empty($artwork->gallery_number)) $galleryText .= ', Gallery ' . $artwork->gallery_number;
-    }
-
-    /* ── Taxonomy ────────────────────────────────────── */
-    $cultures        = ($artwork->cultures  ?? collect())->pluck('culture_name')->filter()->join(', ');
-    $mediums         = ($artwork->mediums   ?? collect())->pluck('medium_name')->filter()->join(', ');
-    $classificationN = $artwork->classification?->classification_name ?? '';
-    $departmentName  = $artwork->department?->department_name ?? '';
-    $creditLine      = $artwork->creditLine?->credit_line_text ?? '';
-    $objectNumber    = $artwork->accession_number ?? '';
-
-    /* ── Dimensions ─────────────────────────────────── */
-    $dimensions = '';
-    if (!empty($artwork->dimensions_display)) {
-        $dimensions = $artwork->dimensions_display;
-    } else {
-        $meas = $artwork->measurements ?? collect();
-        if ($meas->isNotEmpty()) {
-            $dimensions = $meas->map(fn($m) =>
-                trim(($m->element_name ? $m->element_name . ': ' : '') . ($m->element_description ?? ''))
-            )->filter()->join('; ');
-        }
-    }
-
-    /* ── SIMs ────────────────────────────────────────── */
-    $sims         = $artwork->artWorkSims ?? collect();
-    $signatures   = $sims->where('sim_type', 'Signature');
-    $inscriptions = $sims->where('sim_type', 'Inscription');
-    $markings     = $sims->where('sim_type', 'Marking');
-    $hasSims      = $sims->isNotEmpty();
-
-    /* ── Exhibition histories ─────────────────────────── */
-    $exhibitions = ($artwork->exhibitionHistories ?? collect())->sortBy('display_order')->values();
-
-    /* ── References ──────────────────────────────────── */
-    $references = ($artwork->references ?? collect())
-        ->sortBy('display_order')
-        ->filter(fn($r) => trim($r->reference_text ?? '') !== '')
-        ->values();
-
-    /* ── Provenance ──────────────────────────────────── */
-    $provenance = trim($artwork->provenance ?? '');
-
-    /* ── Visibility flags ────────────────────────────── */
-    $showSims       = $hasSims;
-    $showProvenance = $provenance !== '';
-    $showExhibition = $exhibitions->isNotEmpty();
-    $showReferences = $references->isNotEmpty();
-
-    /* ── Related artworks ────────────────────────────── */
-    $related = collect();
-    try {
-        $related = \App\Models\ArtWork::where('art_work_id', '!=', $artwork->art_work_id)
-            ->where(function($q) use ($artwork) {
-                if ($artwork->department_id)     $q->orWhere('department_id', $artwork->department_id);
-                if ($artwork->classification_id) $q->orWhere('classification_id', $artwork->classification_id);
-            })
-            ->with(['images', 'department'])
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
-    } catch(\Exception $e) {}
-@endphp
-
-<div class="met-page">
-
-    {{-- ══ BREADCRUMB ══ --}}
-    <div class="met-breadcrumb-bar">
-        <div class="met-wrap">
-            <nav class="met-breadcrumb" aria-label="breadcrumb">
-                <a href="{{ route('art.index') }}">Collection</a>
-                <span>/</span>
-                <span>{{ Str::limit($artwork->title, 80) }}</span>
-            </nav>
-        </div>
+<div class="detail-container">
+    <div class="breadcrumb">
+        <a href="{{ route('art.index') }}">Collection</a> / <span>{{ $artwork->title }}</span>
     </div>
 
-    {{-- ══ HERO ══ --}}
-    <section class="met-hero">
-        <div class="met-wrap met-hero__grid">
+    <div class="detail-grid">
+        <div class="detail-image-section">
+            @php
+                $primaryImage = $artwork->images->firstWhere('is_primary', true) ?? $artwork->images->first();
+                $allImages = $artwork->images;
+            @endphp
 
-            {{-- LEFT: Info --}}
-            <div class="met-hero__info">
+            @if($primaryImage)
+                <img src="{{ asset('storage/' . $primaryImage->image_url) }}" alt="{{ $artwork->title }}" class="main-image" id="mainImage">
+            @else
+                <div class="main-image" style="background-color: #e8e8e8;"></div>
+            @endif
 
-                <h1 class="met-title">{{ $artwork->title }}</h1>
-
-                <div class="met-artist-block">
-                    @forelse($displayArtists as $c)
-                        <div class="met-artist-line">
-                            @if(!empty($c->role) && !in_array(strtolower($c->role), ['artist', '']))
-                                <span class="met-role">{{ $c->role }}:</span>
-                            @endif
-                            <span class="met-artist-name">{{ $c->display_name }}</span>
-                            @if(!empty($c->display_bio))
-                                <span class="met-artist-nat">({{ Str::limit($c->display_bio, 60) }})</span>
-                            @endif
-                        </div>
-                    @empty
-                        <div class="met-artist-line"><span class="met-artist-name">Unknown Artist</span></div>
-                    @endforelse
-                </div>
-
-                <div class="met-quickmeta">
-                    @foreach(['Date' => $dateStr, 'Culture' => $cultures, 'Medium' => $mediums, 'Department' => $departmentName] as $qLabel => $qVal)
-                        @if($qVal)
-                            <div class="met-qm-row">
-                                <span class="met-qm-label">{{ $qLabel }}</span>
-                                <span class="met-qm-val">
-                                    @if($qLabel === 'Department')
-                                        <a href="{{ route('art.search', ['department[]' => $qVal]) }}" style="color: var(--met-black); text-decoration: underline; text-decoration-color: #bbb; text-underline-offset: 3px; cursor: pointer; transition: text-decoration-color 0.15s;" onmouseover="this.style.textDecorationColor='var(--met-black)';" onmouseout="this.style.textDecorationColor='#bbb';">{{ $qVal }}</a>
-                                    @else
-                                        {{ $qVal }}
-                                    @endif
-                                </span>
-                            </div>
-                        @endif
+            @if($allImages->count() > 1)
+                <div class="image-gallery">
+                    @foreach($allImages as $image)
+                        <img
+                            src="{{ asset('storage/' . $image->image_url) }}"
+                            alt="{{ $artwork->title }}"
+                            class="gallery-thumbnail {{ $image->is_primary ? 'active' : '' }}"
+                            data-src="{{ asset('storage/' . $image->image_url) }}"
+                            onclick="document.getElementById('mainImage').src = this.dataset.src; document.querySelectorAll('.gallery-thumbnail').forEach(el => el.classList.remove('active')); this.classList.add('active');"
+                        >
                     @endforeach
-                    @if($galleryText)
-                        <div class="met-qm-row">
-                            <span class="met-qm-icon">●</span>
-                            <span class="met-qm-val met-qm-val--gallery">On view at <strong>{{ $galleryText }}</strong></span>
-                        </div>
-                    @endif
                 </div>
+            @endif
+        </div>
 
-                @if(!empty($artwork->description))
-                    <div class="met-desc" id="met-desc">
-                        <div class="met-desc__body" id="met-desc-body">
-                            {!! nl2br(e($artwork->description)) !!}
-                        </div>
-                        <button class="met-desc__toggle" id="met-desc-toggle" onclick="
-                            var b=document.getElementById('met-desc-body');
-                            var t=document.getElementById('met-desc-toggle');
-                            b.classList.toggle('met-desc__body--open');
-                            t.textContent=b.classList.contains('met-desc__body--open')?'View less ↑':'View more ↓';
-                        ">View more ↓</button>
+        <div class="detail-info">
+            <h1 class="detail-title">{{ $artwork->title }}</h1>
+
+            <div class="detail-meta">
+                @if($artwork->constituents->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Attribution</span>
+                        <span class="meta-value">
+                            @foreach($artwork->constituents as $constituent)
+                                <div class="constituent-line">
+                                    @if($constituent->pivot->role) <span class="role">{{ $constituent->pivot->role->name }}:</span> @endif
+                                    @if($constituent->pivot->prefix) <span class="prefix">{{ $constituent->pivot->prefix->name }}</span> @endif
+                                    <span class="name">{{ $constituent->display_name }}</span>
+                                    @if($constituent->pivot->suffix) <span class="suffix">{{ $constituent->pivot->suffix->name }}</span> @endif
+                                </div>
+                            @endforeach
+                        </span>
                     </div>
                 @endif
 
-                <div class="met-hero-actions">
-                    <button class="met-btn" onclick="navigator.share?navigator.share({title:'{{ addslashes($artwork->title) }}',url:window.location.href}):(navigator.clipboard.writeText(window.location.href),alert('Link copied!'))">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        Share
-                    </button>
-                    <a href="{{ route('art.index') }}" class="met-btn met-btn--ghost">← Back to Collection</a>
-                </div>
+                @if($artwork->object_date_display)
+                    <div class="meta-item">
+                        <span class="meta-label">Date</span>
+                        <span class="meta-value">{{ $artwork->object_date_display }}</span>
+                    </div>
+                @elseif($artwork->object_begin_date || $artwork->object_end_date)
+                    <div class="meta-item">
+                        <span class="meta-label">Date</span>
+                        <span class="meta-value">
+                            @if($artwork->object_begin_date && $artwork->object_end_date)
+                                {{ $artwork->object_begin_date }} - {{ $artwork->object_end_date }}
+                            @elseif($artwork->object_begin_date)
+                                {{ $artwork->object_begin_date }}
+                            @else
+                                {{ $artwork->object_end_date }}
+                            @endif
+                        </span>
+                    </div>
+                @endif
 
+                @if($artwork->mediums->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Medium</span>
+                            @php
+                                $formatNaturalList = function ($values) {
+                                    $values = collect($values)->map(function ($value) {
+                                        if (is_object($value)) {
+                                            return $value->medium_name ?? $value->name ?? '';
+                                        }
+
+                                        return (string) $value;
+                                    })->filter()->values()->all();
+
+                                    $count = count($values);
+
+                                    if ($count === 0) {
+                                        return '';
+                                    }
+
+                                    if ($count === 1) {
+                                        return $values[0];
+                                    }
+
+                                    if ($count === 2) {
+                                        return $values[0] . ' and ' . $values[1];
+                                    }
+
+                                    $lastValue = array_pop($values);
+
+                                    return implode(', ', $values) . ' and ' . $lastValue;
+                                };
+                            @endphp
+                            <span class="meta-value">{{ $formatNaturalList($artwork->mediums->pluck('medium_name')) }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->geographies->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Geography</span>
+                        <span class="meta-value">
+                            @foreach($artwork->geographies as $geo)
+                                <div class="geography-line">
+                                    <strong>{{ optional($geo->geographyType)->name ?? 'Geography' }}:</strong> 
+                                    {{ implode(', ', array_filter([optional($geo->city)->name, optional($geo->state)->name, optional($geo->country)->name])) }}
+                                </div>
+                            @endforeach
+                        </span>
+                    </div>
+                @endif
+                
+                @if($artwork->creditLine)
+                    <div class="meta-item">
+                        <span class="meta-label">Credit Line</span>
+                        <span class="meta-value">{{ $artwork->creditLine->credit_line_text }}</span>
+                    </div>
+                @endif
+                
+                @if($artwork->dimensions_display)
+                    <div class="meta-item">
+                        <span class="meta-label">Dimensions</span>
+                        <span class="meta-value">{{ $artwork->dimensions_display }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->met_object_id)
+                    <div class="meta-item">
+                        <span class="meta-label">Met Object ID</span>
+                        <span class="meta-value">{{ $artwork->met_object_id }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->object_number)
+                    <div class="meta-item">
+                        <span class="meta-label">Object Number</span>
+                        <span class="meta-value">{{ $artwork->object_number }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->accession_year)
+                    <div class="meta-item">
+                        <span class="meta-label">Accession Year</span>
+                        <span class="meta-value">{{ $artwork->accession_year }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->department)
+                    <div class="meta-item">
+                        <span class="meta-label">Department</span>
+                        <span class="meta-value">{{ $artwork->department->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->objectType)
+                    <div class="meta-item">
+                        <span class="meta-label">Type</span>
+                        <span class="meta-value">{{ $artwork->objectType->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->location)
+                    <div class="meta-item">
+                        <span class="meta-label">Gallery</span>
+                        <span class="meta-value">{{ $artwork->location->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->repository)
+                    <div class="meta-item">
+                        <span class="meta-label">Repository</span>
+                        <span class="meta-value">{{ $artwork->repository->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->classification)
+                    <div class="meta-item">
+                        <span class="meta-label">Classification</span>
+                        <span class="meta-value">{{ $artwork->classification->name }}</span>
+                    </div>
+                @endif
+
+                @if($artwork->materials->isNotEmpty())
+                    <div class="meta-item">
+                        <span class="meta-label">Materials</span>
+                        <span class="meta-value">{{ $artwork->materials->pluck('name')->join(', ') }}</span>
+                    </div>
+                @endif
             </div>
 
-            {{-- RIGHT: Gallery --}}
-            <div class="met-hero__gallery" id="met-gallery">
-
-                <div class="met-imgframe" id="met-imgframe" onclick="metLightboxOpen()">
-                    @if($primaryImage)
-                        <img id="met-mainimg" src="{{ $resolveUrl($primaryImage) }}" alt="{{ $artwork->title }}" class="met-mainimg">
-                        <span class="met-imgframe__zoom">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-                        </span>
-                    @else
-                        <div class="met-no-img">No image available</div>
-                    @endif
-                </div>
-
-                <div class="met-imgbar">
-                    <div>
-                        @if($artwork->is_public_domain)
-                            <span class="met-pd">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path fill="white" d="M9 12l2 2 4-4"/></svg>
-                                Public Domain
-                            </span>
-                        @endif
-                    </div>
-                    <div class="met-imgbar__actions">
-                        <button class="met-icon-btn" title="Download" onclick="metDownload()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                        </button>
-                        <button class="met-icon-btn" title="Fullscreen" onclick="metLightboxOpen()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-                        </button>
+            @if($artwork->description)
+                <div class="detail-description">
+                    <h3 class="description-label">Description</h3>
+                    <div class="description-text">
+                        {!! nl2br(e($artwork->description)) !!}
                     </div>
                 </div>
+            @endif
+            
+            @if($artwork->provenance)
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Provenance</h3>
+                    <div class="description-text">
+                        {!! nl2br(e($artwork->provenance)) !!}
+                    </div>
+                </div>
+            @endif
 
-                @if($allImages->count() > 1)
-                    <div class="met-thumbs">
-                        @foreach($allImages as $img)
-                            @php $u = $resolveUrl($img); @endphp
-                            <button class="met-thumb" onclick="metSetImg('{{ $u }}')" type="button" data-url="{{ $u }}">
-                                <img src="{{ $u }}" alt="">
-                            </button>
+            @if($artwork->artWorkSims && $artwork->artWorkSims->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Signatures, Inscriptions, and Markings</h3>
+                    <div class="description-text">
+                        @foreach($artwork->artWorkSims as $sim)
+                            <div style="margin-bottom: 0.5rem;">
+                                <strong>{{ $sim->sim_type }}:</strong> 
+                                {{ $sim->sim_text }}
+                            </div>
                         @endforeach
                     </div>
-                @endif
-
-                <div class="met-lightbox" id="met-lightbox" style="display:none" onclick="metLightboxClose()">
-                    <button class="met-lightbox__close" onclick="metLightboxClose()">✕</button>
-                    <img id="met-lightbox-img" src="{{ $resolveUrl($primaryImage) }}" class="met-lightbox__img" onclick="event.stopPropagation()">
                 </div>
-
-            </div>
-
-        </div>
-    </section>
-
-    {{-- ══ ARTWORK DETAILS ══ --}}
-    <section class="met-details">
-        <div class="met-wrap">
-            <h2 class="met-section-title">Artwork Details</h2>
-            <div class="met-details__layout">
-
-                {{-- Sidenav --}}
-                <nav class="met-sidenav" id="met-sidenav" aria-label="Artwork sections">
-                    <button class="met-sidenav__btn met-sidenav__btn--active" data-tab="overview"   onclick="metTab('overview')">Overview</button>
-                    @if($showSims)
-                        <button class="met-sidenav__btn" data-tab="sims"       onclick="metTab('sims')">Signatures, Inscriptions &amp; Markings</button>
-                    @endif
-                    @if($showProvenance)
-                        <button class="met-sidenav__btn" data-tab="provenance" onclick="metTab('provenance')">Provenance</button>
-                    @endif
-                    @if($showExhibition)
-                        <button class="met-sidenav__btn" data-tab="exhibition" onclick="metTab('exhibition')">Exhibition History</button>
-                    @endif
-                    @if($showReferences)
-                        <button class="met-sidenav__btn" data-tab="references" onclick="metTab('references')">References</button>
-                    @endif
-                </nav>
-
-                {{-- Panels --}}
-                <div class="met-panel">
-
-                    {{-- OVERVIEW --}}
-                    <div class="met-tab-panel" id="tab-overview">
-                        <dl class="met-dl">
-                            @php
-                                $rows = [
-                                    'Title'                 => $artwork->title,
-                                    'Artist / Maker'        => $allConstituents->isNotEmpty()
-                                        ? $allConstituents->map(fn($c) => $c->display_name . ($c->display_bio ? ' (' . Str::limit($c->display_bio, 60) . ')' : ''))->join("\n")
-                                        : null,
-                                    'Date'                  => $dateStr ?: null,
-                                    'Culture'               => $cultures ?: null,
-                                    'Medium'                => $mediums ?: null,
-                                    'Dimensions'            => $dimensions ?: null,
-                                    'Classification'        => $classificationN ?: null,
-                                    'Credit Line'           => $creditLine ?: null,
-                                    'Object Number'         => $objectNumber ?: null,
-                                    'Curatorial Department' => $departmentName ?: null,
-                                    'Gallery'               => $galleryText ?: null,
-                                ];
-                            @endphp
-                            @foreach($rows as $rowLabel => $rowValue)
-                                @if($rowValue)
-                                    <div class="met-dl__row">
-                                        <dt class="met-dl__dt">{{ $rowLabel }}</dt>
-                                        <dd class="met-dl__dd">
-                                            @if($rowLabel === 'Curatorial Department')
-                                                <a href="{{ route('art.search', ['department[]' => $rowValue]) }}" style="color: var(--met-black); text-decoration: underline; text-decoration-color: #bbb; text-underline-offset: 3px; cursor: pointer; transition: text-decoration-color 0.15s;" onmouseover="this.style.textDecorationColor='var(--met-black)';" onmouseout="this.style.textDecorationColor='#bbb';">{{ $rowValue }}</a>
-                                            @elseif($rowLabel === 'Classification')
-                                                <a href="{{ route('art.search', ['object_type[]' => $rowValue]) }}" style="color: var(--met-black); text-decoration: underline; text-decoration-color: #bbb; text-underline-offset: 3px; cursor: pointer; transition: text-decoration-color 0.15s;" onmouseover="this.style.textDecorationColor='var(--met-black)';" onmouseout="this.style.textDecorationColor='#bbb';">{{ $rowValue }}</a>
-                                            @else
-                                                @foreach(explode("\n", $rowValue) as $ln)
-                                                    {{ $ln }}<br>
-                                                @endforeach
-                                            @endif
-                                        </dd>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </dl>
-                    </div>
-
-                    {{-- SIM --}}
-                    @if($showSims)
-                    <div class="met-tab-panel" id="tab-sims" style="display:none">
-                        <div class="met-sim-section">
-                            @foreach(['Signature' => $signatures, 'Inscription' => $inscriptions, 'Marking' => $markings] as $simLabel => $simGroup)
-                                @if($simGroup->isNotEmpty())
-                                    <div class="met-sim-group">
-                                        <h3 class="met-sim-group__heading">{{ Str::plural($simLabel) }}</h3>
-                                        @foreach($simGroup as $sim)
-                                            <div class="met-sim-entry">
-                                                <span class="met-sim-badge met-sim-badge--{{ strtolower($simLabel) }}">{{ $simLabel }}</span>
-                                                <div class="met-sim-text">{!! nl2br(e($sim->sim_text)) !!}</div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- PROVENANCE --}}
-                    @if($showProvenance)
-                    <div class="met-tab-panel" id="tab-provenance" style="display:none">
-                        <div class="met-provenance-wrap">
-                            <p class="met-provenance-note">
-                                The following is the ownership history of this work from the time of its creation or earliest recorded existence to its acquisition by the Metropolitan Museum of Art.
-                            </p>
-                            <div class="met-provenance-body" id="met-prov-body">
-                                <pre class="met-provenance-pre">{{ $provenance }}</pre>
-                            </div>
-                            <button class="met-provenance-toggle" id="met-prov-toggle" onclick="
-                                var b=document.getElementById('met-prov-body');
-                                var t=document.getElementById('met-prov-toggle');
-                                b.classList.toggle('met-provenance-body--open');
-                                t.textContent=b.classList.contains('met-provenance-body--open')?'↑ Show less':'↓ Show full provenance';
-                            ">↓ Show full provenance</button>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- EXHIBITION HISTORY --}}
-                    @if($showExhibition)
-                    <div class="met-tab-panel" id="tab-exhibition" style="display:none">
-                        <p class="met-section-subtitle">{{ $exhibitions->count() }} exhibition{{ $exhibitions->count() !== 1 ? 's' : '' }} on record</p>
-                        <ol class="met-timeline">
-                            @foreach($exhibitions as $ex)
-                                <li class="met-timeline__item">
-                                    <div class="met-timeline__dot"></div>
-                                    <div class="met-timeline__body">
-                                        <strong class="met-timeline__title">{{ $ex->exhibition_title ?? '—' }}</strong>
-                                        @if(!empty($ex->venue_name) || !empty($ex->city_name))
-                                            <span class="met-timeline__venue">{{ implode(', ', array_filter([$ex->venue_name ?? '', $ex->city_name ?? ''])) }}</span>
-                                        @endif
-                                        @if(!empty($ex->exhibition_date_display))
-                                            <span class="met-timeline__date">{{ $ex->exhibition_date_display }}</span>
-                                        @elseif(!empty($ex->start_date) || !empty($ex->end_date))
-                                            <span class="met-timeline__date">
-                                                {{ $ex->start_date ? \Carbon\Carbon::parse($ex->start_date)->format('M j, Y') : '' }}
-                                                @if($ex->start_date && $ex->end_date) – @endif
-                                                {{ $ex->end_date ? \Carbon\Carbon::parse($ex->end_date)->format('M j, Y') : '' }}
-                                            </span>
-                                        @endif
-                                        @if(!empty($ex->catalogue_reference))
-                                            <span class="met-timeline__cat">Cat. {{ $ex->catalogue_reference }}</span>
-                                        @endif
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ol>
-                    </div>
-                    @endif
-
-                    {{-- REFERENCES --}}
-                    @if($showReferences)
-                    <div class="met-tab-panel" id="tab-references" style="display:none">
-                        <p class="met-section-subtitle">{{ $references->count() }} reference{{ $references->count() !== 1 ? 's' : '' }} on record</p>
-                        <ol class="met-biblist">
-                            @foreach($references as $ref)
-                                <li class="met-biblist__item">
-                                    <div class="met-biblist__text">{!! nl2br(e($ref->reference_text)) !!}</div>
-                                </li>
-                            @endforeach
-                        </ol>
-                    </div>
-                    @endif
-
-                </div>{{-- /panel --}}
-            </div>
-        </div>
-    </section>
-
-    {{-- ══ MORE ARTWORK ══ --}}
-    @if($related->isNotEmpty())
-        <section class="met-more">
-            <div class="met-wrap">
-                <h2 class="met-section-title">More from the Collection</h2>
-                <div class="met-more-grid">
-                    @foreach($related as $rel)
-                        @php $ri = $rel->images->firstWhere('is_primary', true) ?? $rel->images->first(); @endphp
-                        <a href="{{ route('art.show', $rel->art_work_id) }}" class="met-card">
-                            <div class="met-card__img">
-                                @if($ri)
-                                    <img src="{{ $resolveUrl($ri) }}" alt="{{ $rel->title }}" loading="lazy">
-                                @else
-                                    <div class="met-card__noimg">No image</div>
-                                @endif
-                            </div>
-                            <div class="met-card__body">
-                                <p class="met-card__title">{{ $rel->title }}</p>
-                                @if($rel->department)
-                                    <p class="met-card__dept">{{ $rel->department->department_name }}</p>
-                                @endif
-                            </div>
-                        </a>
-                    @endforeach
+            @endif
+            
+            @if($artwork->exhibitionHistories->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">Exhibition History</h3>
+                    <ul class="description-text" style="list-style-type: disc; padding-left: 20px;">
+                        @foreach($artwork->exhibitionHistories as $exhibition)
+                            <li>{{ $exhibition->exhibition_text }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-            </div>
-        </section>
-    @endif
+            @endif
+            
+            @if($artwork->references->isNotEmpty())
+                <div class="detail-description" style="margin-top: 1.5rem;">
+                    <h3 class="description-label">References</h3>
+                    <ul class="description-text" style="list-style-type: disc; padding-left: 20px;">
+                        @foreach($artwork->references as $reference)
+                            <li>{{ $reference->reference_text }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
+            <a href="{{ route('art.index') }}" class="back-link">Back to Collection</a>
+        </div>
+    </div>
 </div>
-
-@push('scripts')
-<script>
-/* ── Vanilla Tab System ── */
-function metTab(id) {
-    // Deactivate all panels
-    document.querySelectorAll('.met-tab-panel').forEach(function(p) {
-        p.style.display = 'none';
-    });
-    // Deactivate all nav buttons
-    document.querySelectorAll('.met-sidenav__btn').forEach(function(b) {
-        b.classList.remove('met-sidenav__btn--active');
-    });
-    // Activate target panel
-    var panel = document.getElementById('tab-' + id);
-    if (panel) panel.style.display = 'block';
-    // Activate target button
-    var btn = document.querySelector('[data-tab="' + id + '"]');
-    if (btn) btn.classList.add('met-sidenav__btn--active');
-}
-
-/* ── Gallery ── */
-var _metCurrentImg = document.getElementById('met-mainimg') ? document.getElementById('met-mainimg').src : '';
-
-function metSetImg(url) {
-    _metCurrentImg = url;
-    var img = document.getElementById('met-mainimg');
-    if (img) img.src = url;
-    var lbImg = document.getElementById('met-lightbox-img');
-    if (lbImg) lbImg.src = url;
-    // Update thumb active state
-    document.querySelectorAll('.met-thumb').forEach(function(t) {
-        t.classList.toggle('met-thumb--on', t.dataset.url === url);
-    });
-}
-
-function metLightboxOpen() {
-    var lb = document.getElementById('met-lightbox');
-    if (lb) lb.style.display = 'flex';
-}
-
-function metLightboxClose() {
-    var lb = document.getElementById('met-lightbox');
-    if (lb) lb.style.display = 'none';
-}
-
-function metDownload() {
-    var img = document.getElementById('met-mainimg');
-    if (!img) return;
-    var a = document.createElement('a');
-    a.href = img.src; a.download = ''; a.target = '_blank'; a.click();
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') metLightboxClose();
-});
-</script>
-@endpush
-
 @endsection

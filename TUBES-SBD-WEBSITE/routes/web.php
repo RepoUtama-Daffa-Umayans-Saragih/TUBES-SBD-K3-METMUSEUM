@@ -86,6 +86,10 @@ Route::prefix('account')->group(function () {
         Route::get('/', [AuthController::class, 'account'])->name('account.index');
     });
 });
+// Register routes (supports both GET and POST)
+Route::get('/register', [AuthController::class, 'register'])
+    ->middleware('guest')
+    ->name('register');
 Route::post('/register', [RegisterController::class, 'store'])
     ->middleware('guest')
     ->name('register.store');
@@ -141,12 +145,6 @@ Route::prefix('member')->group(function () {
     Route::post('/add-member', [MembershipController::class, 'purchase'])
         ->middleware('user.or.guest')
         ->name('member.add-member.submit');
-
-    Route::get('/activate/{token}', [MembershipController::class, 'activate'])
-        ->name('member.activate');
-
-    Route::get('/gift/claim/{token}', [MembershipController::class, 'claimGift'])
-        ->name('member.gift.claim');
 });
 
 // =========================
@@ -164,6 +162,7 @@ Route::get('/order/show/{order}', [OrderController::class, 'show'])->name('order
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/management', [AdminTicketController::class, 'management'])->name('tickets.management');
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
@@ -171,7 +170,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/exhibitions', [AdminExhibitionController::class, 'index'])->name('exhibitions.index');
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
-    Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
 
     // Ticket Analytics Dashboard
     Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {

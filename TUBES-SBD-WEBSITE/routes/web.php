@@ -177,9 +177,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/tickets', [AdminTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/management', [AdminTicketController::class, 'management'])->name('tickets.management');
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/search-ticket', [AdminOrderController::class, 'searchTicket'])->name('orders.search-ticket');
+    Route::post('/orders/validate-ticket', [AdminOrderController::class, 'validateTicket'])->name('orders.validate-ticket');
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/artworks', [AdminArtworkController::class, 'index'])->name('artworks.index');
     Route::get('/exhibitions', [AdminExhibitionController::class, 'index'])->name('exhibitions.index');
     Route::get('/analytics', [AdminAnalyticsController::class, 'index'])->name('analytics.index');
 
@@ -225,6 +226,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     // Constituents (Artists)
     Route::resource('constituents', ConstituentController::class);
+
+    // Artworks
+    Route::resource('artworks', AdminArtworkController::class);
 
     // Ticket Analytics Dashboard
     Route::prefix('ticket-analytics')->name('ticket-analytics.')->group(function () {
